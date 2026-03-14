@@ -1,0 +1,21 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "oozoofrog-plugins",
+  "description": "oozoofrog의 개인 Claude Code 플러그인 마켓플레이스 — macOS 릴리스 자동화 등",
+  "owner": {
+    "name": "oozoofrog",
+    "email": "oozoofrog@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "macos-release",
+      "description": "macOS 앱/CLI 릴리스 자동화: 버전 범프, 빌드, DMG/ZIP 패키징, GitHub Release, Homebrew Cask/Formula, release workflow 구축",
+      "version": "1.0.0",
+      "author": {
+        "name": "oozoofrog"
+      },
+      "source": "./plugins/macos-release",
+      "category": "development"
+    }
+  ]
+}
