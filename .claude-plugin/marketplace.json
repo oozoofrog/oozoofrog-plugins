@@ -16,6 +16,16 @@
       },
       "source": "./plugins/macos-release",
       "category": "development"
+    },
+    {
+      "name": "context-architect",
+      "description": "대규모 프로젝트를 위한 계층적 컨텍스트 아키텍처 자동화: CLAUDE.md/CONTEXT.md/AGENTS.md 스캐폴딩, 3단계 검증, 토큰 효율성 감사",
+      "version": "1.0.0",
+      "author": {
+        "name": "oozoofrog"
+      },
+      "source": "./plugins/context-architect",
+      "category": "development"
     }
   ]
 }

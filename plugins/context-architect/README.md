@@ -1,0 +1,82 @@
+# context-architect
+
+대규모 프로젝트를 위한 계층적 컨텍스트 아키텍처 자동화 플러그인.
+
+CLAUDE.md, CONTEXT.md, AGENTS.md로 구성되는 3계층 컨텍스트 구조를 스캐폴딩하고, 검증하고, 토큰 효율성을 감사합니다.
+
+## 핵심 개념
+
+- **주의력 예산(Attention Budget)**: LLM의 토큰 제한 내에서 최적의 정보만 노출
+- **국소성(Locality)**: 정보를 해당 코드와 물리적으로 인접하게 배치
+- **점진적 노출(Progressive Disclosure)**: 필요한 시점에만 컨텍스트 로드
+
+## 설치
+
+```bash
+/plugin install context-architect@oozoofrog-plugins
+```
+
+## 컴포넌트
+
+### Commands
+
+| 명령 | 설명 |
+|------|------|
+| `/context-architect:init` | 프로젝트 분석 → 계층적 컨텍스트 스캐폴딩 |
+| `/context-architect:verify` | 3단계 검증 (참조 무결성, 코드 참조, 내용 정확성) |
+| `/context-architect:audit` | 토큰 효율성 감사 (라인 수, 계층 깊이, 중복, 커버리지) |
+
+### Skill
+
+`context-architecture` — 계층적 컨텍스트 설계 원칙 및 실무 가이드. "컨텍스트 아키텍처", "CONTEXT.md 설계", "토큰 효율성" 등의 질문 시 자동 활성화.
+
+### Agent
+
+`context-validator` — 코드 변경 후 컨텍스트 문서와 코드의 정합성을 자율 검증하고, "Fix the Rules" 원칙에 따라 업데이트를 제안.
+
+### Hook
+
+`SessionStart` — CLAUDE.md가 200라인을 초과하면 세션 시작 시 경고 표시.
+
+## 사용 예시
+
+```bash
+# 새 프로젝트에 컨텍스트 아키텍처 초기화
+/context-architect:init
+
+# 주기적 검증 (전체)
+/context-architect:verify
+
+# 특정 단계만 검증
+/context-architect:verify 1    # 참조 무결성만
+/context-architect:verify 2    # 코드 참조만
+
+# 토큰 효율성 감사
+/context-architect:audit
+```
+
+## 파일 구조
+
+```
+context-architect/
+├── .claude-plugin/
+│   └── plugin.json
+├── skills/
+│   └── context-architecture/
+│       ├── SKILL.md
+│       └── references/
+│           ├── file-standards.md
+│           ├── token-optimization.md
+│           └── verification-guide.md
+├── commands/
+│   ├── init.md
+│   ├── verify.md
+│   └── audit.md
+├── agents/
+│   └── context-validator.md
+├── hooks/
+│   ├── hooks.json
+│   └── scripts/
+│       └── check-claude-md.sh
+└── README.md
+```

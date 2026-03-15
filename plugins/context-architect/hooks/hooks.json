@@ -1,0 +1,17 @@
+{
+  "description": "컨텍스트 아키텍처 건전성 체크 — 세션 시작 시 CLAUDE.md 라인 수 초과 경고",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $CLAUDE_PLUGIN_ROOT/hooks/scripts/check-claude-md.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
