@@ -14,6 +14,7 @@ oozoofrog의 개인 Claude Code 플러그인 마켓플레이스입니다.
 |---------|------|------|
 | [macos-release](plugins/macos-release/) | macOS 앱 릴리스 자동화 (버전 범프, DMG, GitHub Release, Homebrew) | `/plugin install macos-release@oozoofrog-plugins` |
 | [context-architect](plugins/context-architect/) | 계층적 컨텍스트 아키텍처 자동화 (스캐폴딩, 검증, 토큰 효율성 감사) | `/plugin install context-architect@oozoofrog-plugins` |
+| [gpt-research](plugins/gpt-research/) | GPT-PRO 리서치 위임용 구조화된 프롬프트 생성 (module/arch/issue/custom) | `/plugin install gpt-research@oozoofrog-plugins` |
 
 ## 플러그인 구조
 
@@ -46,6 +47,18 @@ oozoofrog-plugins/
 │       ├── hooks/
 │       │   ├── hooks.json
 │       │   └── scripts/
+│       └── README.md
+│   └── gpt-research/
+│       ├── .claude-plugin/
+│       │   └── plugin.json
+│       ├── skills/
+│       │   └── gpt-research/
+│       │       ├── SKILL.md
+│       │       └── references/
+│       │           ├── output-templates.md
+│       │           ├── context-extraction-guide.md
+│       │           ├── prompting-best-practices.md
+│       │           └── size-limits-and-chunking.md
 │       └── README.md
 └── README.md
 ```
