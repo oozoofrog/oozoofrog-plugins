@@ -8,7 +8,7 @@ REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO_ROOT"
 
 # Get modified plugin directories from unstaged + staged changes
-MODIFIED_PLUGINS=$(git diff --name-only HEAD 2>/dev/null | grep '^plugins/' | cut -d'/' -f2 | sort -u)
+MODIFIED_PLUGINS=$(git diff --name-only HEAD 2>/dev/null | grep '^plugins/' | cut -d'/' -f2 | sort -u || true)
 
 if [ -z "$MODIFIED_PLUGINS" ]; then
   exit 0
