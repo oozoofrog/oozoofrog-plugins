@@ -38,13 +38,13 @@
       "category": "development"
     },
     {
-      "name": "codex-delegate",
+      "name": "hey-codex",
       "description": "Codex CLI에 작업을 위임하여 코드 생성, 분석, 리팩토링 등을 수행",
       "version": "0.1.0",
       "author": {
         "name": "oozoofrog"
       },
-      "source": "./plugins/codex-delegate",
+      "source": "./plugins/hey-codex",
       "category": "development"
     }
   ]

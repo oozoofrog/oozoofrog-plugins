@@ -1,5 +1,5 @@
 #!/bin/bash
-# codex-delegate output processor
+# hey-codex output processor
 # Usage: process-output.sh [raw_output_file]
 # - Strips ANSI escape codes (CSI sequences)
 # - Counts lines

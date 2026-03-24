@@ -1,5 +1,5 @@
 {
-  "name": "codex-delegate",
+  "name": "hey-codex",
   "description": "Codex CLI에 작업을 위임하여 코드 생성, 분석, 리팩토링 등을 수행",
   "author": { "name": "oozoofrog" },
   "version": "0.1.0"

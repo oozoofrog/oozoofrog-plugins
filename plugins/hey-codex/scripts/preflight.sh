@@ -1,5 +1,5 @@
 #!/bin/bash
-# codex-delegate preflight check
+# hey-codex preflight check
 # Usage: preflight.sh
 # Exit codes: 0=OK, 1=codex not installed, 2=API key missing
 # stdout: "ok" on success, error message on failure
