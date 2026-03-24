@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "oozoofrog-plugins",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "oozoofrog의 개인 Claude Code 플러그인 마켓플레이스 — macOS 릴리스 자동화, 컨텍스트 아키텍처, GPT 리서치, Codex CLI 위임",
   "owner": {
     "name": "oozoofrog",
@@ -41,7 +41,7 @@
     {
       "name": "hey-codex",
       "description": "Codex CLI에 작업을 위임하여 코드 생성, 분석, 리팩토링 등을 수행",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "author": {
         "name": "oozoofrog"
       },

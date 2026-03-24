@@ -2,7 +2,7 @@
 
 ## 판별 우선순위
 
-write > suggest > read (기본값)
+write > suggest > review > read (기본값)
 
 프롬프트에서 아래 키워드를 순서대로 매칭합니다. 먼저 매칭되는 모드가 선택됩니다.
 
@@ -27,22 +27,30 @@ write > suggest > read (기본값)
 | 제안, 개선점, 추천, 대안 | suggest, recommend, alternative |
 | 방법, 어떻게, 알려줘 | how to, approach, advice |
 
+## review 키워드 (코드 리뷰 전용 — `codex review` 사용)
+
+| 한국어 | 영어 |
+|--------|------|
+| 리뷰, 코드 리뷰, 코드리뷰 | review, code review |
+
+**review vs read 구분:** "리뷰"가 명시적으로 코드 리뷰를 지칭하면 review 모드, 그 외는 read.
+
 ## read 키워드 (기본값)
 
-write/suggest 어디에도 매칭되지 않으면 read 모드입니다.
+write/suggest/review 어디에도 매칭되지 않으면 read 모드입니다.
 
 참고 키워드 (확인용):
 
 | 한국어 | 영어 |
 |--------|------|
-| 분석, 리뷰, 설명 | analyze, review, explain |
+| 분석, 설명 | analyze, explain |
 | 검색, 찾아, 보여줘, 확인 | search, find, show, check |
 
 ## 모호한 경우 예시
 
 | 프롬프트 | 모드 | 이유 |
 |----------|------|------|
-| "이 코드 리뷰해줘" | read | 리뷰 = 읽기 |
+| "이 코드 리뷰해줘" | review | 코드 리뷰 → `codex review` |
 | "버그 찾아줘" | read | 찾아 = 읽기 |
 | "리팩토링 방법 알려줘" | suggest | 방법 + 알려줘 |
 | "개선점 추천해줘" | suggest | 추천 |

@@ -54,19 +54,19 @@ bash "${CLAUDE_PLUGIN_ROOT}/scripts/preflight.sh"
 
 슬래시 커맨드(`/hey-codex`)인 경우 인자를 그대로 사용합니다.
 
-**작업 디렉토리 정보 주입:**
-Codex 프롬프트 앞에 현재 작업 디렉토리 정보를 주입합니다:
-`"Working directory: $(pwd)\n\n" + 사용자 프롬프트`
+**작업 디렉토리 지정:**
+Codex CLI의 `--cd` 플래그로 작업 디렉토리를 지정합니다. 프롬프트에 텍스트로 주입하지 않습니다.
 
 ### 3. 모드 판별
 
 프롬프트를 분석하여 실행 모드를 결정합니다.
 
-| 모드 | Codex 플래그 | 설명 |
-|------|-------------|------|
-| **read** | `-q` | 분석, 리뷰, 설명 (읽기 전용) |
-| **suggest** | `-q` | 제안/조언 요청 (Claude Code가 적용) |
-| **write** | `-q --full-auto` | 파일 생성/수정/삭제 (Codex가 직접 수정) |
+| 모드 | Codex 명령어 | 설명 |
+|------|------------|------|
+| **read** | `codex exec` | 분석, 리뷰, 설명 (읽기 전용) |
+| **review** | `codex review` | 코드 리뷰 전용 (리뷰 키워드 감지 시) |
+| **suggest** | `codex exec` | 제안/조언 요청 (Claude Code가 적용) |
+| **write** | `codex exec --full-auto` | 파일 생성/수정/삭제 (Codex가 직접 수정) |
 
 **판별 우선순위:** write > suggest > read (기본값)
 
@@ -91,7 +91,14 @@ Codex 프롬프트 앞에 현재 작업 디렉토리 정보를 주입합니다:
 
 **read/suggest 모드:**
 ```bash
-codex -q "프롬프트" 2>&1 > /tmp/codex-raw-output.txt
+codex exec --cd "$(pwd)" "프롬프트" 2>&1 > /tmp/codex-raw-output.txt
+bash "${CLAUDE_PLUGIN_ROOT}/scripts/process-output.sh" /tmp/codex-raw-output.txt
+```
+Bash tool timeout: 120000 (120초)
+
+**review 모드 (리뷰 키워드 감지 시):**
+```bash
+codex review --cd "$(pwd)" 2>&1 > /tmp/codex-raw-output.txt
 bash "${CLAUDE_PLUGIN_ROOT}/scripts/process-output.sh" /tmp/codex-raw-output.txt
 ```
 Bash tool timeout: 120000 (120초)
@@ -99,7 +106,7 @@ Bash tool timeout: 120000 (120초)
 **write 모드 (git 저장소):**
 ```bash
 git status --short
-codex -q --full-auto "프롬프트" 2>&1 > /tmp/codex-raw-output.txt
+codex exec --full-auto --cd "$(pwd)" "프롬프트" 2>&1 > /tmp/codex-raw-output.txt
 bash "${CLAUDE_PLUGIN_ROOT}/scripts/process-output.sh" /tmp/codex-raw-output.txt
 ```
 Bash tool timeout: 600000 (600초)
@@ -107,7 +114,7 @@ Bash tool timeout: 600000 (600초)
 **write 모드 (non-git):**
 ```bash
 bash "${CLAUDE_PLUGIN_ROOT}/scripts/snapshot-diff.sh" pre .
-codex -q --full-auto "프롬프트" 2>&1 > /tmp/codex-raw-output.txt
+codex exec --full-auto --skip-git-repo-check --cd "$(pwd)" "프롬프트" 2>&1 > /tmp/codex-raw-output.txt
 bash "${CLAUDE_PLUGIN_ROOT}/scripts/process-output.sh" /tmp/codex-raw-output.txt
 ```
 Bash tool timeout: 600000 (600초)
@@ -160,7 +167,7 @@ Bash tool timeout: 600000 (600초)
 
 - **한국어 응답**: 사용자에게 보여주는 메시지는 한국어로, 코드와 기술 용어는 원문 유지
 - **Codex 프롬프트는 원문 유지**: 사용자가 입력한 프롬프트 언어 그대로 Codex에 전달
-- **quiet 모드 전용**: 인터랙티브 모드 사용 불가 (Bash 도구 제약)
+- **exec 모드 전용**: `codex exec` 서브커맨드만 사용 (인터랙티브 모드는 Bash 도구에서 사용 불가)
 
 ## References
 
