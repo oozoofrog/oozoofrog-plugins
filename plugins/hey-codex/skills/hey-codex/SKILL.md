@@ -39,13 +39,12 @@ OpenAI Codex CLI에 작업을 위임하고 결과를 처리합니다.
 
 ### 1. 사전 검증
 
-헬퍼 스크립트로 codex 설치 및 API 키를 한 번에 확인합니다:
+헬퍼 스크립트로 codex CLI 설치 여부를 확인합니다:
 ```bash
 bash "${CLAUDE_PLUGIN_ROOT}/scripts/preflight.sh"
 ```
 - exit 0: 통과, 다음 단계 진행
 - exit 1: codex 미설치 → 스크립트 출력 메시지를 사용자에게 표시 후 종료
-- exit 2: API 키 미설정 → 스크립트 출력 메시지를 사용자에게 표시 후 종료
 
 ### 2. 프롬프트 준비
 
@@ -151,7 +150,6 @@ Bash tool timeout: 600000 (600초)
 | 상황 | 처리 |
 |------|------|
 | Codex 미설치 | `npm install -g @openai/codex` 안내 |
-| API 키 미설정 | `OPENAI_API_KEY` 설정 안내 |
 | API 인증 실패 (stderr에 auth/key 에러) | "API 키를 확인해주세요" 안내 |
 | 타임아웃 | "Codex 실행이 시간 초과되었습니다" 안내 |
 | 비정상 종료 (exit code ≠ 0) | stderr 표시 + 재시도 여부 확인 |
@@ -171,6 +169,6 @@ Bash tool timeout: 600000 (600초)
 
 ## Scripts
 
-- `${CLAUDE_PLUGIN_ROOT}/scripts/preflight.sh` — codex 설치 + API 키 검증
+- `${CLAUDE_PLUGIN_ROOT}/scripts/preflight.sh` — codex CLI 설치 확인
 - `${CLAUDE_PLUGIN_ROOT}/scripts/process-output.sh` — ANSI 스트립 + 줄 수 측정 + 대용량 저장
 - `${CLAUDE_PLUGIN_ROOT}/scripts/snapshot-diff.sh` — non-git 디렉토리 스냅샷 생성/비교
