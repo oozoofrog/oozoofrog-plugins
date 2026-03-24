@@ -4,9 +4,9 @@
 
 **Goal:** Claude Code 안에서 Codex CLI를 호출하여 작업을 위임하고 결과를 처리하는 플러그인 구현
 
-**Architecture:** 단일 스킬(SKILL.md) + 2개 reference 파일로 구성된 Claude Code 플러그인. 프롬프트 분석 → 모드 판별 → Codex 실행 → 결과 처리의 선형 흐름.
+**Architecture:** 단일 스킬(SKILL.md) + 2개 reference 파일 + 3개 헬퍼 스크립트로 구성된 Claude Code 플러그인. 모드 판별은 LLM이 담당하고, 결정적(deterministic) 작업은 셸 스크립트로 분리. 프롬프트 분석 → 모드 판별(LLM) → Codex 실행 → 결과 처리(스크립트)의 흐름.
 
-**Tech Stack:** Claude Code plugin (SKILL.md markdown), Bash (codex CLI 호출), Git (안전장치/diff)
+**Tech Stack:** Claude Code plugin (SKILL.md markdown), Bash (codex CLI 호출, 헬퍼 스크립트), Git (안전장치/diff)
 
 **Spec:** `docs/superpowers/specs/2026-03-25-codex-delegate-design.md`
 
@@ -20,6 +20,9 @@
 | Create | `plugins/codex-delegate/skills/codex-delegate/SKILL.md` | 핵심 스킬 로직 |
 | Create | `plugins/codex-delegate/skills/codex-delegate/references/mode-detection.md` | 모드 판별 키워드 테이블 |
 | Create | `plugins/codex-delegate/skills/codex-delegate/references/output-handling.md` | 결과 처리 전략 |
+| Create | `plugins/codex-delegate/scripts/preflight.sh` | codex 설치 + API 키 검증 |
+| Create | `plugins/codex-delegate/scripts/process-output.sh` | ANSI 스트립 + 줄 수 측정 + 대용량 저장 |
+| Create | `plugins/codex-delegate/scripts/snapshot-diff.sh` | non-git 디렉토리 스냅샷 생성/비교 |
 | Create | `plugins/codex-delegate/README.md` | 플러그인 설명 |
 | Modify | `README.md` | 마켓플레이스 목록에 추가 |
 
@@ -36,6 +39,7 @@
 ```bash
 mkdir -p plugins/codex-delegate/.claude-plugin
 mkdir -p plugins/codex-delegate/skills/codex-delegate/references
+mkdir -p plugins/codex-delegate/scripts
 ```
 
 - [ ] **Step 2: plugin.json 작성**
@@ -244,7 +248,144 @@ git commit -m "add output handling reference for codex-delegate"
 
 ---
 
-### Task 4: SKILL.md 핵심 스킬 작성
+### Task 4: 헬퍼 스크립트 작성
+
+**Files:**
+- Create: `plugins/codex-delegate/scripts/preflight.sh`
+- Create: `plugins/codex-delegate/scripts/process-output.sh`
+- Create: `plugins/codex-delegate/scripts/snapshot-diff.sh`
+
+- [ ] **Step 1: preflight.sh 작성**
+
+Create `plugins/codex-delegate/scripts/preflight.sh`:
+```bash
+#!/bin/bash
+# codex-delegate preflight check
+# Usage: preflight.sh
+# Exit codes: 0=OK, 1=codex not installed, 2=API key missing
+# stdout: "ok" on success, error message on failure
+
+if ! command -v codex &>/dev/null; then
+    echo "codex CLI가 설치되어 있지 않습니다. npm install -g @openai/codex 로 설치해주세요."
+    exit 1
+fi
+
+if [ -z "$OPENAI_API_KEY" ]; then
+    echo "OPENAI_API_KEY 환경변수가 설정되어 있지 않습니다."
+    exit 2
+fi
+
+echo "ok"
+exit 0
+```
+
+- [ ] **Step 2: process-output.sh 작성**
+
+Create `plugins/codex-delegate/scripts/process-output.sh`:
+```bash
+#!/bin/bash
+# codex-delegate output processor
+# Usage: process-output.sh [raw_output_file]
+# - Strips ANSI escape codes
+# - Counts lines
+# - If >200 lines, saves to /tmp and outputs path
+# stdout format:
+#   Line 1: line_count
+#   Line 2: "inline" | "/tmp/codex-output-XXXX.txt"
+#   Line 3+: cleaned output (if inline)
+
+INPUT="${1:--}"
+CLEANED=$(cat "$INPUT" | sed 's/\x1b\[[0-9;]*[a-zA-Z]//g' | sed 's/\x1b\([0-9;]*[a-zA-Z]//g')
+LINE_COUNT=$(echo "$CLEANED" | wc -l | tr -d ' ')
+
+echo "$LINE_COUNT"
+
+if [ "$LINE_COUNT" -gt 200 ]; then
+    OUTFILE="/tmp/codex-output-$(date +%s).txt"
+    echo "$CLEANED" > "$OUTFILE"
+    echo "$OUTFILE"
+else
+    echo "inline"
+    echo "$CLEANED"
+fi
+```
+
+- [ ] **Step 3: snapshot-diff.sh 작성**
+
+Create `plugins/codex-delegate/scripts/snapshot-diff.sh`:
+```bash
+#!/bin/bash
+# codex-delegate snapshot diff for non-git directories
+# Usage:
+#   snapshot-diff.sh pre [directory]   — take pre-execution snapshot
+#   snapshot-diff.sh post [directory]  — take post-execution snapshot and diff
+# stdout: diff output showing added/removed/modified files
+
+DIR="${2:-.}"
+PRE_SNAP="/tmp/codex-snapshot-pre.txt"
+POST_SNAP="/tmp/codex-snapshot-post.txt"
+
+take_snapshot() {
+    find "$DIR" -type f -not -path '*/\.*' -exec stat -f '%m %N' {} \; 2>/dev/null | sort
+}
+
+case "$1" in
+    pre)
+        take_snapshot > "$PRE_SNAP"
+        echo "스냅샷 저장: $(wc -l < "$PRE_SNAP" | tr -d ' ')개 파일"
+        ;;
+    post)
+        take_snapshot > "$POST_SNAP"
+        if [ ! -f "$PRE_SNAP" ]; then
+            echo "ERROR: pre 스냅샷이 없습니다. 먼저 'snapshot-diff.sh pre'를 실행하세요."
+            exit 1
+        fi
+        # Extract just filenames for add/delete detection
+        PRE_FILES=$(awk '{print $2}' "$PRE_SNAP" | sort)
+        POST_FILES=$(awk '{print $2}' "$POST_SNAP" | sort)
+
+        ADDED=$(comm -13 <(echo "$PRE_FILES") <(echo "$POST_FILES"))
+        DELETED=$(comm -23 <(echo "$PRE_FILES") <(echo "$POST_FILES"))
+        # Modified: same file, different mtime
+        MODIFIED=$(comm -12 <(echo "$PRE_FILES") <(echo "$POST_FILES") | while read f; do
+            pre_mtime=$(grep " ${f}$" "$PRE_SNAP" | awk '{print $1}')
+            post_mtime=$(grep " ${f}$" "$POST_SNAP" | awk '{print $1}')
+            if [ "$pre_mtime" != "$post_mtime" ]; then
+                echo "$f"
+            fi
+        done)
+
+        [ -n "$ADDED" ] && echo "추가된 파일:" && echo "$ADDED" | sed 's/^/  + /'
+        [ -n "$DELETED" ] && echo "삭제된 파일:" && echo "$DELETED" | sed 's/^/  - /'
+        [ -n "$MODIFIED" ] && echo "수정된 파일:" && echo "$MODIFIED" | sed 's/^/  ~ /'
+        [ -z "$ADDED" ] && [ -z "$DELETED" ] && [ -z "$MODIFIED" ] && echo "변경 없음"
+
+        # Cleanup
+        rm -f "$PRE_SNAP" "$POST_SNAP"
+        ;;
+    *)
+        echo "Usage: snapshot-diff.sh [pre|post] [directory]"
+        exit 1
+        ;;
+esac
+```
+
+- [ ] **Step 4: 실행 권한 부여**
+
+```bash
+chmod +x plugins/codex-delegate/scripts/*.sh
+```
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add plugins/codex-delegate/scripts/
+git commit -m "add helper scripts for codex-delegate: preflight, output processing, snapshot diff"
+```
+
+---
+
+### Task 5: SKILL.md 핵심 스킬 작성
 
 **Files:**
 - Create: `plugins/codex-delegate/skills/codex-delegate/SKILL.md`
@@ -295,19 +436,13 @@ OpenAI Codex CLI에 작업을 위임하고 결과를 처리합니다.
 
 ### 1. 사전 검증
 
-다음을 순서대로 확인합니다. 하나라도 실패하면 안내 메시지를 출력하고 종료합니다.
-
-**Codex CLI 설치 확인:**
+헬퍼 스크립트로 codex 설치 및 API 키를 한 번에 확인합니다:
 ```bash
-which codex
+bash "${CLAUDE_PLUGIN_ROOT}/scripts/preflight.sh"
 ```
-미설치 시: "`npm install -g @openai/codex`로 Codex CLI를 설치해주세요." 안내 후 종료.
-
-**API 키 확인:**
-```bash
-echo "${OPENAI_API_KEY:+set}"
-```
-미설정 시: "`OPENAI_API_KEY` 환경변수를 설정해주세요." 안내 후 종료.
+- exit 0: 통과, 다음 단계 진행
+- exit 1: codex 미설치 → 스크립트 출력 메시지를 사용자에게 표시 후 종료
+- exit 2: API 키 미설정 → 스크립트 출력 메시지를 사용자에게 표시 후 종료
 
 ### 2. 프롬프트 준비
 
@@ -354,25 +489,24 @@ Codex 프롬프트 앞에 현재 작업 디렉토리 정보를 주입합니다:
 
 **read/suggest 모드:**
 ```bash
-codex -q "프롬프트" 2>&1 | sed 's/\x1b\[[0-9;]*m//g'
+codex -q "프롬프트" 2>&1 > /tmp/codex-raw-output.txt
+bash "${CLAUDE_PLUGIN_ROOT}/scripts/process-output.sh" /tmp/codex-raw-output.txt
 ```
 Bash tool timeout: 120000 (120초)
 
 **write 모드 (git 저장소):**
 ```bash
-# 실행 전 상태 기록
 git status --short
-# Codex 실행
-codex -q --full-auto "프롬프트" 2>&1 | sed 's/\x1b\[[0-9;]*m//g'
+codex -q --full-auto "프롬프트" 2>&1 > /tmp/codex-raw-output.txt
+bash "${CLAUDE_PLUGIN_ROOT}/scripts/process-output.sh" /tmp/codex-raw-output.txt
 ```
 Bash tool timeout: 600000 (600초)
 
 **write 모드 (non-git):**
 ```bash
-# 실행 전 스냅샷 (경로 + 수정시간으로 변경 감지)
-find . -type f -exec stat -f '%m %N' {} \; | sort > /tmp/codex-pre-snapshot.txt
-# Codex 실행
-codex -q --full-auto "프롬프트" 2>&1 | sed 's/\x1b\[[0-9;]*m//g'
+bash "${CLAUDE_PLUGIN_ROOT}/scripts/snapshot-diff.sh" pre .
+codex -q --full-auto "프롬프트" 2>&1 > /tmp/codex-raw-output.txt
+bash "${CLAUDE_PLUGIN_ROOT}/scripts/process-output.sh" /tmp/codex-raw-output.txt
 ```
 Bash tool timeout: 600000 (600초)
 
@@ -394,8 +528,11 @@ Bash tool timeout: 600000 (600초)
 3. 문제 발견 시 `git checkout .` 롤백 옵션 제공
 
 **write 모드 (non-git):**
-1. 실행 후 `find . -type f -exec stat -f '%m %N' {} \; | sort > /tmp/codex-post-snapshot.txt`
-2. `diff /tmp/codex-pre-snapshot.txt /tmp/codex-post-snapshot.txt`로 변경/생성/삭제/수정 파일 보고
+1. 실행 후 스냅샷 비교:
+   ```bash
+   bash "${CLAUDE_PLUGIN_ROOT}/scripts/snapshot-diff.sh" post .
+   ```
+2. 스크립트가 추가/삭제/수정 파일을 분류하여 출력
 3. 롤백 불가 안내
 
 ### 7. 출력 표시
@@ -426,8 +563,14 @@ Bash tool timeout: 600000 (600초)
 
 ## References
 
-- `references/mode-detection.md` — 모드 판별 키워드 테이블
+- `references/mode-detection.md` — 모드 판별 키워드 테이블 (LLM이 참조)
 - `references/output-handling.md` — 결과 처리 전략
+
+## Scripts
+
+- `${CLAUDE_PLUGIN_ROOT}/scripts/preflight.sh` — codex 설치 + API 키 검증
+- `${CLAUDE_PLUGIN_ROOT}/scripts/process-output.sh` — ANSI 스트립 + 줄 수 측정 + 대용량 저장
+- `${CLAUDE_PLUGIN_ROOT}/scripts/snapshot-diff.sh` — non-git 디렉토리 스냅샷 생성/비교
 ````
 
 - [ ] **Step 2: Commit**
@@ -439,7 +582,7 @@ git commit -m "add core SKILL.md for codex-delegate plugin"
 
 ---
 
-### Task 5: 마켓플레이스 README 업데이트
+### Task 6: 마켓플레이스 README 업데이트
 
 **Files:**
 - Modify: `README.md` (프로젝트 루트)
@@ -465,6 +608,10 @@ Insert:
 │   └── codex-delegate/
 │       ├── .claude-plugin/
 │       │   └── plugin.json
+│       ├── scripts/
+│       │   ├── preflight.sh
+│       │   ├── process-output.sh
+│       │   └── snapshot-diff.sh
 │       ├── skills/
 │       │   └── codex-delegate/
 │       │       ├── SKILL.md
@@ -483,7 +630,7 @@ git commit -m "add codex-delegate to marketplace README"
 
 ---
 
-### Task 6: 통합 검증
+### Task 7: 통합 검증
 
 - [ ] **Step 1: 파일 구조 검증**
 
@@ -495,6 +642,9 @@ Expected output:
 ```
 plugins/codex-delegate/.claude-plugin/plugin.json
 plugins/codex-delegate/README.md
+plugins/codex-delegate/scripts/preflight.sh
+plugins/codex-delegate/scripts/process-output.sh
+plugins/codex-delegate/scripts/snapshot-diff.sh
 plugins/codex-delegate/skills/codex-delegate/SKILL.md
 plugins/codex-delegate/skills/codex-delegate/references/mode-detection.md
 plugins/codex-delegate/skills/codex-delegate/references/output-handling.md
