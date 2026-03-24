@@ -4,7 +4,7 @@
 
 Codex CLI 출력에서 ANSI escape 시퀀스를 제거합니다:
 
-    codex -q "프롬프트" 2>&1 | sed 's/\x1b\[[0-9;]*m//g'
+    codex -q "프롬프트" 2>&1 | sed 's/\x1b\[[0-9;]*[a-zA-Z]//g'
 
 ## 출력 크기별 표시 전략
 

@@ -1,5 +1,6 @@
 #!/bin/bash
 # codex-delegate snapshot diff for non-git directories
+# NOTE: macOS only — uses `stat -f` (BSD stat). Not compatible with GNU/Linux `stat -c`.
 # Usage:
 #   snapshot-diff.sh pre [directory]   — take pre-execution snapshot
 #   snapshot-diff.sh post [directory]  — take post-execution snapshot and diff
