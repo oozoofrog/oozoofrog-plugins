@@ -80,6 +80,7 @@ Write/Edit 도구로 코드 파일을 작성합니다.
 
 Xcode MCP가 연결되지 않은 경우:
 - 코드의 문법적 정확성을 참조 문서 기반으로 최대한 검증
+- features.json status를 **"built_unverified"**로 설정 ("built" 대신)
 - "Xcode에서 빌드하여 확인해주세요"라고 안내
 
 ### Step 6: 기능 완료 처리
@@ -87,8 +88,9 @@ Xcode MCP가 연결되지 않은 경우:
 1. `features.json`에서 해당 기능의 status를 **"built"**로 업데이트
 2. Git 커밋 (설명적 메시지):
    ```bash
-   git add -A && git commit -m "feat(F001): <기능 설명>"
+   git add <수정한 파일들> features.json && git commit -m "feat(F001): <기능 설명>"
    ```
+   **주의: `git add -A`나 `git add .`를 사용하지 마세요.** 수정한 파일만 구체적으로 staging하세요.
 3. 다음 pending 기능이 있으면 Step 2로 복귀
 4. 모든 기능이 built이면 종료
 
@@ -103,6 +105,6 @@ Xcode MCP가 연결되지 않은 경우:
 
 - **한 번에 한 기능만** — 여러 기능을 동시에 구현하지 마세요
 - features.json의 기능을 **삭제하거나 기준을 변경하지 마세요** — status만 업데이트
-- 참조 문서에 없는 API는 사용하기 전에 `DocumentationSearch`로 확인하세요
+- 참조 문서에 없는 API가 필요하면, 빌드 요약에 해당 API를 기록하고 Evaluator가 검증하도록 플래그하세요
 - Evaluator의 피드백이 있으면 해당 피드백의 **구체적 수정 지침**을 먼저 반영하세요
 - 한국어로 커밋 메시지와 주석을 작성하되, 코드/API명은 원문 유지

@@ -37,7 +37,7 @@ tools:
    ```
    a. CLAUDE.md 확인 (프로젝트 규칙, 코딩 컨벤션, 금지 사항)
    b. Xcode MCP 서버 연결 여부 확인 (mcp__xcode__ 도구 사용 가능 여부)
-      → 연결 시: BuildProject, RenderPreview, RunTests를 검증 기준에 포함
+      → 연결 시: BuildProject, RenderPreview, RunAllTests/RunSomeTests를 검증 기준에 포함
       → 미연결 시: 코드 검토 기반 검증으로 대체
    c. 프로젝트 구조 파악 (Glob/Grep으로 Swift 파일, .xcodeproj/.xcworkspace, Package.swift)
    d. git 상태 확인 (git status, git log --oneline -5)
@@ -47,6 +47,7 @@ tools:
    Read: ${CLAUDE_PLUGIN_ROOT}/skills/apple-craft/SKILL.md
    ```
    Document Routing Table에서 사용자 요구사항과 관련된 참조 문서를 식별합니다.
+   **만약 SKILL.md를 읽을 수 없으면 STOP** — 사용자에게 "apple-craft 참조 문서에 접근할 수 없습니다. 플러그인이 올바르게 설치되었는지 확인해주세요."라고 보고하고 진행하지 마세요.
 3. 관련 참조 문서 1-3개를 Read하여 사용 가능한 API를 파악합니다.
 
 ### Step 2: 제품 스펙 작성
@@ -74,7 +75,7 @@ tools:
 
 ## 환경
 - Xcode MCP: <연결됨/미연결>
-- 검증 도구: <BuildProject, RenderPreview, RunTests 사용 가능 여부>
+- 검증 도구: <BuildProject, RenderPreview, RunAllTests/RunSomeTests 사용 가능 여부>
 - 프로젝트 규칙: <CLAUDE.md에서 발견된 핵심 규칙>
 - Git 상태: <clean/dirty, 현재 브랜치>
 
@@ -103,7 +104,7 @@ tools:
 **기능 목록 작성 규칙:**
 - 각 기능은 독립적으로 구현 가능해야 함
 - priority 순서대로 구현 (기초 → 의존 기능 순)
-- verification은 Xcode MCP 도구로 검증 가능한 기준 (BuildProject, RenderPreview, RunTests)
+- verification은 Xcode MCP 도구로 검증 가능한 기준 (BuildProject, RenderPreview, RunAllTests/RunSomeTests)
 - status는 반드시 "pending"으로 시작
 - **기능을 제거하거나 편집하는 것은 절대 금지** — 추가만 허용
 

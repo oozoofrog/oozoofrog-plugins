@@ -284,7 +284,7 @@ struct ThemeSectionView: View {
                     // @Namespace으로 morphing 전환 (참조: liquid-glass-swiftui.md)
                     .glassEffect(
                         in: .rect(cornerRadius: 12),
-                        isActive: selectedTheme == id
+                        isEnabled: selectedTheme == id
                     )
                     .glassEffectID(id, in: themeNamespace)
                 }
@@ -311,18 +311,18 @@ struct ThemeSectionView: View {
 | F002 | glassEffect + Container | **PASS** | RenderPreview에서 유리 효과 확인, GlassEffectContainer 올바르게 래핑 |
 | F003 | 프로필 섹션 | **PASS** | .buttonStyle(.glass) 정상 적용, 프리뷰 확인 |
 | F004 | 알림 설정 | **PASS** | Toggle 정상 동작, 빌드 성공 |
-| F005 | 테마 선택 | **PARTIAL** | morphing 구현되었으나 `isActive` 파라미터 사용법이 참조 문서와 다름. `liquid-glass-swiftui.md`에 따르면 `GlassEffect`의 `isActive`가 아닌 별도 조건부 `glassEffect` 적용이 권장됨 |
+| F005 | 테마 선택 | **PARTIAL** | morphing 구현되었으나 `GlassEffectContainer`에 `spacing` 파라미터 누락. `liquid-glass-swiftui.md`의 Best Practices에 따르면 spacing 값을 명시적으로 지정해야 함 |
 
-**총점**: 4/5 PASS + 1 PARTIAL = 90% (임계값 80% 충족)
+**총점**: 4/5 PASS + 1 PARTIAL = 80% (PASS+PARTIAL 기준 100%, 임계값 80% 충족)
 
 ### 판정: **PASS** ✅
 
 PARTIAL 항목(F005)에 대한 개선 권고:
 
-> **F005 개선 사항**: `ThemeSectionView.swift`에서 `glassEffect(isActive:)` 대신
-> 선택된 테마에만 `glassEffect()`를 적용하고 비선택 항목은 `glassEffect` 없이
-> 렌더링하세요. 이렇게 하면 선택 시 morphing 전환이 더 자연스럽습니다.
-> 참조: `references/liquid-glass-swiftui.md` — "Customizing Liquid Glass Effects" 섹션
+> **F005 개선 사항**: `SettingsView.swift`의 `GlassEffectContainer`에 `spacing` 파라미터를
+> 추가하세요: `GlassEffectContainer(spacing: 16) { ... }`.
+> 참조: `references/liquid-glass-swiftui.md` — "Container Usage" 섹션의 Best Practices.
+> spacing 값은 내부 VStack의 spacing과 일치시키는 것이 권장됩니다.
 
 ---
 
@@ -355,5 +355,5 @@ Git 히스토리:
 1. **Planner가 범위를 설정** — 5개 기능으로 분해, 각각 검증 가능한 기준 포함
 2. **Builder가 한 번에 한 기능씩** — 참조 문서 기반, 빌드 검증, 기능별 커밋
 3. **Evaluator가 회의적으로 검증** — F005에서 PARTIAL 부여, 구체적 수정 방향 제시
-4. **1라운드에 90%** — Opus 4.6 수준에서는 대부분 1-2라운드에서 완료
+4. **1라운드에 통과** — 잘 정의된 스펙과 참조 문서가 있으면 대부분 1-2라운드에서 완료
 5. **참조 문서가 핵심** — `liquid-glass-swiftui.md`의 GlassEffectContainer, .buttonStyle(.glass), @Namespace 패턴이 코드에 직접 반영

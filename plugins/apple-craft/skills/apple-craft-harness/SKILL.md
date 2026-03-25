@@ -88,13 +88,17 @@ Agent 도구 호출:
     ${CLAUDE_PLUGIN_ROOT}/skills/apple-craft/SKILL.md
 ```
 
-**Phase 1 완료 조건:**
-- `harness-spec.md` 파일 생성됨
-- `features.json` 파일 생성됨 (status=pending)
-- 사용자가 스펙을 확인함
+**Phase 1 완료 검증 (필수):**
+Planner 에이전트 완료 후, 다음을 검증합니다:
+1. `harness-spec.md` 파일이 존재하는지 Read로 확인
+2. `features.json` 파일이 존재하고 유효한 JSON인지 Read로 확인
+3. 모든 기능의 status가 "pending"인지 확인
+**검증 실패 시**: 사용자에게 "Planner가 파일을 올바르게 생성하지 못했습니다"라고 보고하고 Phase 2로 진행하지 않음.
 
 **사용자 확인**: Planner 결과를 사용자에게 보여주고 "이 스펙으로 진행할까요?"라고 확인.
 사용자가 수정 요청 시 → Planner를 다시 호출하여 수정.
+
+**Agent 실패 처리**: Planner 에이전트가 오류로 종료되면, 에러 내용을 사용자에게 보고하고 재시도 여부를 확인합니다.
 
 ### Phase 2: BUILD
 
@@ -114,10 +118,13 @@ Agent 도구 호출:
     각 기능 완료 시 git 커밋하세요.
 ```
 
-**Phase 2 완료 조건:**
-- 모든 pending/failed 기능이 status=built로 업데이트됨
-- 각 기능별 git 커밋 완료
-- 빌드 성공 (또는 최선의 상태)
+**Phase 2 완료 검증 (필수):**
+Builder 에이전트 완료 후:
+1. `features.json`을 Read하여 status 변경 확인
+2. pending/failed가 남아있으면 Builder가 일부만 완료한 것 → 사용자에게 보고
+3. `built_unverified` 상태가 있으면 Xcode MCP 미연결 경고 표시
+
+**Agent 실패 처리**: Builder가 중간에 실패하면, features.json의 현재 상태를 확인하여 완료된 기능과 미완료 기능을 사용자에게 보고합니다.
 
 ### Phase 3: EVALUATE
 
@@ -152,7 +159,10 @@ Agent 도구 호출:
 
 라운드 3: BUILD (FAIL 피드백 반영) → EVALUATE
   PASS → 완료
-  NEED_REVISION → 사용자에게 상황 보고 + 계속/중단 선택
+  NEED_REVISION → 사용자에게 상황 보고 + 선택:
+    a) 계속 → 라운드 4 (최종, 추가 1회만 허용)
+    b) 중단 → 현재 상태로 종료, features.json과 커밋 히스토리 보고
+    c) 수동 수정 → 사용자가 직접 수정 후 Evaluate만 재실행
 ```
 
 ## features.json Schema
@@ -164,7 +174,7 @@ Agent 도구 호출:
     "category": "ui|data|logic|test|config",
     "description": "기능 설명",
     "verification": "Xcode MCP 도구로 검증 가능한 기준",
-    "status": "pending|built|verified|failed",
+    "status": "pending|built|built_unverified|verified|partial|failed",
     "reference": "references/<doc>.md",
     "priority": 1
   }
@@ -173,10 +183,14 @@ Agent 도구 호출:
 
 **상태 전이:**
 ```
-pending → built (Builder 완료)
+pending → built (Builder 완료, Xcode MCP 연결)
+pending → built_unverified (Builder 완료, Xcode MCP 미연결)
 built → verified (Evaluator PASS)
-built → failed (Evaluator FAIL)
-failed → built (Builder 재수정)
+built → partial (Evaluator PARTIAL — 소폭 수정 필요)
+built → failed (Evaluator FAIL — 재구현 필요)
+built_unverified → verified/partial/failed (Evaluator 검증)
+partial → built (Builder 소폭 수정)
+failed → built (Builder 재구현)
 ```
 
 **불변 규칙:**
@@ -189,7 +203,7 @@ failed → built (Builder 재수정)
 - Builder가 각 기능 완료 시 **설명적 커밋 메시지**로 커밋
 - 커밋 형식: `feat(F001): <기능 설명>`
 - Evaluator 피드백 후 수정 시: `fix(F001): <수정 내용>`
-- 하네스 실패 시 사용자에게 `git reset --hard` 옵션 안내
+- 하네스 실패 시 사용자에게 롤백 옵션 안내: "하네스 시작 전 커밋으로 되돌리려면 `git log`에서 시작 커밋을 확인하고 `git reset --hard <commit>`을 실행하세요. **주의: 이 명령은 모든 변경을 삭제합니다.**"
 
 ## Context Management
 
@@ -247,7 +261,7 @@ Phase 1: PLAN 시작 — Planner 에이전트가 스펙을 작성합니다...
 
 ## Limitations
 
-1. **Xcode MCP 필수**: Builder의 빌드 검증과 Evaluator의 품질 검증에 Xcode MCP 도구가 필요합니다. 연결되지 않으면 코드 작성만 수행하고 검증은 사용자에게 위임합니다.
+1. **Xcode MCP 권장**: Builder의 빌드 검증과 Evaluator의 품질 검증에 Xcode MCP 도구가 필요합니다. 미연결 시 코드는 `built_unverified` 상태로 마킹되며, 검증 신뢰도가 낮아집니다. 가능하면 Xcode MCP 서버를 연결하세요.
 
 2. **비용**: 3 라운드 × 3 에이전트 = 최대 9개 에이전트 호출. 간단한 작업은 기존 `apple-craft` implement 모드가 효율적입니다.
 
