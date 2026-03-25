@@ -16,6 +16,7 @@ oozoofrog의 개인 Claude Code 플러그인 마켓플레이스입니다.
 | [context-architect](plugins/context-architect/) | 계층적 컨텍스트 아키텍처 자동화 (스캐폴딩, 검증, 토큰 효율성 감사) | `/plugin install context-architect@oozoofrog-plugins` |
 | [gpt-research](plugins/gpt-research/) | GPT-PRO 리서치 위임용 구조화된 프롬프트 생성 (module/arch/issue/custom) | `/plugin install gpt-research@oozoofrog-plugins` |
 | [hey-codex](plugins/hey-codex/) | Codex CLI에 작업 위임 (코드 생성, 분석, 리팩토링) | `/plugin install hey-codex@oozoofrog-plugins` |
+| [apple-craft](plugins/apple-craft/) | Apple 최신 API 통합 개발 가이드 (Xcode 26, 20개 주제) | `/plugin install apple-craft@oozoofrog-plugins` |
 
 ## 플러그인 구조
 
@@ -61,19 +62,30 @@ oozoofrog-plugins/
 │       │           ├── prompting-best-practices.md
 │       │           └── size-limits-and-chunking.md
 │       └── README.md
-│   └── hey-codex/
+│   ├── hey-codex/
+│   │   ├── .claude-plugin/
+│   │   │   └── plugin.json
+│   │   ├── scripts/
+│   │   │   ├── preflight.sh
+│   │   │   ├── process-output.sh
+│   │   │   └── snapshot-diff.sh
+│   │   ├── skills/
+│   │   │   └── hey-codex/
+│   │   │       ├── SKILL.md
+│   │   │       └── references/
+│   │   │           ├── mode-detection.md
+│   │   │           └── output-handling.md
+│   │   └── README.md
+│   └── apple-craft/
 │       ├── .claude-plugin/
 │       │   └── plugin.json
 │       ├── scripts/
-│       │   ├── preflight.sh
-│       │   ├── process-output.sh
-│       │   └── snapshot-diff.sh
+│       │   ├── sync-docs.sh
+│       │   └── preflight.sh
 │       ├── skills/
-│       │   └── hey-codex/
+│       │   └── apple-craft/
 │       │       ├── SKILL.md
-│       │       └── references/
-│       │           ├── mode-detection.md
-│       │           └── output-handling.md
+│       │       └── references/ (20 docs)
 │       └── README.md
 └── README.md
 ```
