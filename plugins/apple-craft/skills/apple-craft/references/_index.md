@@ -32,3 +32,4 @@ Xcode 26.4 (build 24909) AdditionalDocumentation sync 결과.
 | liquid-glass-uikit.md | UIKit-Implementing-Liquid-Glass-Design.md | 281 | f57afa408d4fd245d399b5c3c1f9eef4e28022a1608b17a5e5faea6bf8115995 |
 | liquid-glass-widgetkit.md | WidgetKit-Implementing-Liquid-Glass-Design.md | 234 | a2c7e5e849002a34023ed536c690dc42759aef545e625fd393482848435d0444 |
 | visionos-widgets.md | Widgets-for-visionOS.md | 247 | a1710b92f027d27c31c1b7d1db2fce64f26b7a4261b69555f6c1eb4991600203 |
+

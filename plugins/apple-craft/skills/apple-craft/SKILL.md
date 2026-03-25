@@ -516,4 +516,4 @@ zsh "${CLAUDE_PLUGIN_ROOT}/scripts/preflight.sh"
 | 17 | Toolbar Features | `references/swiftui-toolbar.md` | 201 |
 | 18 | Styled Text Editing | `references/styled-text.md` | 406 |
 | 19 | Assistive Access | `references/assistive-access.md` | 225 |
-| 20 | visionOS Widgets | `references/visionos-widgets.md` | 248 |
+| 20 | visionOS Widgets | `references/visionos-widgets.md` | 247 |

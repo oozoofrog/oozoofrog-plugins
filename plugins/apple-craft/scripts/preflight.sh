@@ -1,7 +1,25 @@
 #!/bin/zsh
+set -euo pipefail
+
 # apple-craft: 참조 문서 존재 확인
+
+if [[ -z "${CLAUDE_PLUGIN_ROOT:-}" ]]; then
+  echo "apple-craft preflight: CLAUDE_PLUGIN_ROOT 환경 변수가 설정되지 않았습니다." >&2
+  exit 1
+fi
+
 REF_DIR="${CLAUDE_PLUGIN_ROOT}/skills/apple-craft/references"
-count=$(find "$REF_DIR" -name "*.md" ! -name "_index.md" 2>/dev/null | wc -l | tr -d ' ')
+
+if [[ ! -d "$REF_DIR" ]]; then
+  echo "apple-craft: 참조 디렉토리가 존재하지 않습니다: $REF_DIR" >&2
+  echo "  scripts/sync-docs.sh를 먼저 실행하세요." >&2
+  exit 1
+fi
+
+local md_files=("$REF_DIR"/*.md(N))
+md_files=("${(@)md_files:#*/_index.md}")
+count=${#md_files[@]}
+
 if [[ "$count" -lt 1 ]]; then
   echo "apple-craft: 참조 문서가 없습니다. scripts/sync-docs.sh를 먼저 실행하세요." >&2
   exit 1
