@@ -1,6 +1,6 @@
 ---
 name: apple-craft
-description: Xcode 26 최신 API 개발 가이드 (20개 주제). Liquid Glass, FoundationModels, Swift 6.2, SwiftData, AlarmKit, Visual Intelligence, WebKit, StoreKit, 3D Charts, MapKit, AppIntents, Toolbar, Styled Text, Assistive Access, visionOS Widget. Apple 플랫폼 코딩, 빌드, 문서 탐색, Xcode MCP 연동.
+description: Xcode 26 최신 API 개발 가이드 (20개 주제). Liquid Glass/리퀴드 글라스/유리 효과, FoundationModels/온디바이스 LLM/Apple Intelligence, Swift 6.2 동시성/Concurrency/async await, SwiftData 상속/클래스 상속, AlarmKit/알람, Visual Intelligence/비주얼 인텔리전스, WebKit/웹뷰/WebView, StoreKit/인앱 결제/구독, 3D Charts/3D 차트, MapKit/GeoToolbox/지도, AppIntents/앱 인텐트/단축어/Shortcuts, Toolbar/툴바, Styled Text/스타일 텍스트, AttributedString/속성 문자열, Assistive Access/접근성/보조 접근, visionOS Widget/위젯. Apple 플랫폼 코딩, iOS 26, macOS 26, watchOS, visionOS, WWDC, 최신 API, 새 프레임워크, Xcode MCP 연동.
 argument-hint: "[topic or question]"
 allowed-tools:
   - Bash
