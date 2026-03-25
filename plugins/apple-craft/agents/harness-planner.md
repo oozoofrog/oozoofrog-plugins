@@ -33,7 +33,15 @@ tools:
 
 ### Step 1: 컨텍스트 수집
 
-1. 대상 프로젝트가 있으면 구조 파악 (Glob/Grep으로 Swift 파일, 프로젝트 구조 확인)
+1. **환경 스캔** — 현재 세션에서 사용 가능한 도구와 컨텍스트를 파악합니다:
+   ```
+   a. CLAUDE.md 확인 (프로젝트 규칙, 코딩 컨벤션, 금지 사항)
+   b. Xcode MCP 서버 연결 여부 확인 (mcp__xcode__ 도구 사용 가능 여부)
+      → 연결 시: BuildProject, RenderPreview, RunTests를 검증 기준에 포함
+      → 미연결 시: 코드 검토 기반 검증으로 대체
+   c. 프로젝트 구조 파악 (Glob/Grep으로 Swift 파일, .xcodeproj/.xcworkspace, Package.swift)
+   d. git 상태 확인 (git status, git log --oneline -5)
+   ```
 2. apple-craft 참조 문서 라우팅 테이블 읽기:
    ```
    Read: ${CLAUDE_PLUGIN_ROOT}/skills/apple-craft/SKILL.md
@@ -63,6 +71,12 @@ tools:
 - UI: SwiftUI / UIKit / AppKit
 - 프레임워크: <관련 Apple 프레임워크>
 - 참조 문서: <사용할 apple-craft 참조 목록>
+
+## 환경
+- Xcode MCP: <연결됨/미연결>
+- 검증 도구: <BuildProject, RenderPreview, RunTests 사용 가능 여부>
+- 프로젝트 규칙: <CLAUDE.md에서 발견된 핵심 규칙>
+- Git 상태: <clean/dirty, 현재 브랜치>
 
 ## 범위 외
 - <명시적으로 이 스펙에 포함하지 않는 것>

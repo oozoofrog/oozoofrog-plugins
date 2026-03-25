@@ -281,3 +281,17 @@ apple-craft-harness 실행 흐름
 │   └─ 80% 통과 → 완료 / 미달 → BUILD 재실행
 └─ 최대 3 라운드, 3회 실패 → 사용자 확인
 ```
+
+## Walkthrough Example
+
+실제 하네스 실행의 전체 과정을 보려면 참조 문서를 읽으세요:
+
+```
+Read: ${CLAUDE_PLUGIN_ROOT}/skills/apple-craft-harness/references/walkthrough-liquid-glass-settings.md
+```
+
+이 워크스루는 "Liquid Glass 설정 화면 구현"의 Phase 1→2→3 전체 과정을 보여줍니다:
+- harness-spec.md와 features.json 예시
+- 5개 기능의 순차 구현 코드
+- Evaluator의 다차원 검증 결과 (PASS 4개 + PARTIAL 1개)
+- 1라운드에서 90% 통과한 실제 흐름
