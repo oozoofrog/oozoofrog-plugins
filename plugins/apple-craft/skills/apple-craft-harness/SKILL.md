@@ -10,6 +10,18 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
+  - mcp__xcode__DocumentationSearch
+  - mcp__xcode__BuildProject
+  - mcp__xcode__GetBuildLog
+  - mcp__xcode__XcodeRefreshCodeIssuesInFile
+  - mcp__xcode__XcodeListNavigatorIssues
+  - mcp__xcode__ExecuteSnippet
+  - mcp__xcode__RenderPreview
+  - mcp__xcode__XcodeRead
+  - mcp__xcode__XcodeWrite
+  - mcp__xcode__XcodeUpdate
+  - mcp__xcode__XcodeGrep
+  - mcp__xcode__XcodeGlob
 ---
 
 <example>
