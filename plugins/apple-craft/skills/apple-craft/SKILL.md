@@ -55,15 +55,16 @@ iOS, macOS, watchOS, tvOS, visionOS 전 플랫폼의 최신 API 코딩 가이드
 
 ## Mode Selection
 
-사용자 메시지를 분석하여 아래 3가지 모드 중 하나를 선택합니다.
+사용자 메시지를 분석하여 아래 모드 중 하나를 선택합니다.
 
 | 모드 | 키워드 | 설명 |
 |------|--------|------|
 | **implement** | 만들어, 작성, 적용, 구현, 추가, 코드, build, create, add, apply | 참조 문서 기반 코드 작성 + 빌드 검증 |
 | **explore** | 알려줘, 설명, 뭐가 바뀌었어, 차이, 어떻게, what, how, explain, diff | 참조 문서 기반 API 설명 + 코드 예시 |
 | **troubleshoot** | 에러, 오류, 안돼, 크래시, 빌드 실패, error, crash, fix, debug | 빌드 로그 분석 + 참조 문서로 수정 |
+| **harness** | 처음부터, 전체, 기능 개발, 대규모, 리팩토링, harness | → `apple-craft-harness` 스킬로 전환 |
 
-**자동 선택**: 키워드가 불명확하면 사용자 의도를 추론합니다. 코드 파일이 언급되면 implement, 질문형이면 explore, 에러 메시지가 포함되면 troubleshoot.
+**자동 선택**: 키워드가 불명확하면 사용자 의도를 추론합니다. 코드 파일이 언급되면 implement, 질문형이면 explore, 에러 메시지가 포함되면 troubleshoot. 대규모/전체 구현 요청은 `/apple-craft-harness` 스킬을 사용하세요.
 
 ---
 

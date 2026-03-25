@@ -317,6 +317,94 @@ fi
 
 part_summary
 
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Part 3b: Harness 구조 검증
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+section "Part 3b: Harness 구조 검증"
+
+AGENTS_DIR="$PLUGIN_ROOT/agents"
+HARNESS_SKILL="$PLUGIN_ROOT/skills/apple-craft-harness/SKILL.md"
+
+# Test 1: 에이전트 파일 존재 (3개)
+local expected_agents=("harness-planner.md" "harness-builder.md" "harness-evaluator.md")
+local agents_exist=true
+local missing_agents=""
+for ag in "${expected_agents[@]}"; do
+  if [[ ! -f "$AGENTS_DIR/$ag" ]]; then
+    agents_exist=false
+    missing_agents+="$ag "
+  fi
+done
+if $agents_exist; then
+  pass "1. 에이전트 파일 3개 존재"
+else
+  fail "1. 누락된 에이전트" "$missing_agents"
+fi
+
+# Test 2: 에이전트 frontmatter 필수 필드 검증
+local fm_ok=true
+local fm_errors=""
+for ag in "${expected_agents[@]}"; do
+  local ag_path="$AGENTS_DIR/$ag"
+  [[ ! -f "$ag_path" ]] && continue
+  for field in "name:" "description:" "model:" "color:" "whenToUse:" "tools:"; do
+    if ! grep -q "$field" "$ag_path"; then
+      fm_ok=false
+      fm_errors+="$ag:$field "
+    fi
+  done
+done
+if $fm_ok; then
+  pass "2. 에이전트 frontmatter 필수 필드 (name,description,model,color,whenToUse,tools)"
+else
+  fail "2. 누락된 frontmatter 필드" "$fm_errors"
+fi
+
+# Test 3: harness 스킬 SKILL.md 존재
+if [[ -f "$HARNESS_SKILL" ]]; then
+  pass "3. apple-craft-harness SKILL.md 존재"
+else
+  fail "3. apple-craft-harness SKILL.md 없음" "$HARNESS_SKILL"
+fi
+
+# Test 4: harness 스킬에 Agent가 allowed-tools에 포함
+if grep -q "Agent" "$HARNESS_SKILL" 2>/dev/null; then
+  pass "4. harness SKILL.md에 Agent 도구 포함"
+else
+  fail "4. harness SKILL.md에 Agent 도구 누락" ""
+fi
+
+# Test 5: harness 스킬에 features.json 스키마 언급
+if grep -q "features.json" "$HARNESS_SKILL" 2>/dev/null; then
+  pass "5. harness SKILL.md에 features.json 스키마 정의"
+else
+  fail "5. features.json 스키마 누락" ""
+fi
+
+# Test 6: 기존 SKILL.md에 harness 크로스레퍼런스
+if grep -q "apple-craft-harness" "$SKILL_MD"; then
+  pass "6. apple-craft SKILL.md에 harness 크로스레퍼런스"
+else
+  fail "6. harness 크로스레퍼런스 누락" ""
+fi
+
+# Test 7: 에이전트 whenToUse에 자동 호출 방지 문구
+local guard_ok=true
+for ag in "${expected_agents[@]}"; do
+  local ag_path="$AGENTS_DIR/$ag"
+  [[ ! -f "$ag_path" ]] && continue
+  if ! grep -q "직접 호출하지 마세요" "$ag_path"; then
+    guard_ok=false
+  fi
+done
+if $guard_ok; then
+  pass "7. 에이전트 whenToUse에 자동 호출 방지 문구"
+else
+  fail "7. 자동 호출 방지 문구 누락" ""
+fi
+
+part_summary
+
 fi  # !E2E_ONLY
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
