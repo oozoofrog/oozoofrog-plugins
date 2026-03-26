@@ -70,7 +70,7 @@ Anthropic의 [Harness Design](https://www.anthropic.com/engineering/harness-desi
     ▼
 ┌─────────────────────────────────┐
 │  Phase 1: PLAN                  │  harness-planner 에이전트
-│  제품 스펙 + features.json      │  AskUserQuestion으로 맥락 수집
+│  제품 스펙 + .claude/harness/features.json │  AskUserQuestion으로 맥락 수집
 │  사용자 확인 (마지막 확인점)     │
 └────────┬────────────────────────┘
          │
@@ -84,13 +84,13 @@ Anthropic의 [Harness Design](https://www.anthropic.com/engineering/harness-desi
 ┌─────────────────────────────────┐
 │  Phase 2: DESIGN (선택적)       │  harness-designer 에이전트
 │  기존 .pen 읽기 또는 새로 생성  │  Apple HIG + 스타일 가이드
-│  디자인 토큰 + design-spec.md   │  Pencil 미연결 시 자동 스킵
+│  디자인 토큰 + .claude/harness/design-spec.md │  Pencil 미연결 시 자동 스킵
 └────────┬────────────────────────┘
          │
          ▼
 ┌─────────────────────────────────┐
 │  Phase 3: BUILD                 │  harness-builder 에이전트
-│  기능별 코드 작성 + 빌드        │  design-spec.md 참조 (있으면)
+│  기능별 코드 작성 + 빌드        │  .claude/harness/design-spec.md 참조 (있으면)
 │  기능별 git 커밋                │  ◄── EVALUATE 피드백 (자동)
 └────────┬────────────────────────┘
          │
@@ -98,7 +98,7 @@ Anthropic의 [Harness Design](https://www.anthropic.com/engineering/harness-desi
 ┌─────────────────────────────────┐
 │  Phase 4: EVALUATE              │  harness-evaluator 에이전트
 │  Step 0: 도구 탐색              │  baepsae/axe + Pencil + Xcode MCP
-│  4축 다차원 검증 + 디자인 비교  │  evaluation-round-{N}.md 생성
+│  4축 다차원 검증 + 디자인 비교  │  .claude/harness/evaluation-round-{N}.md 생성
 │  80% 통과 → 완료                │
 │  미달 → BUILD 자동 재실행       │
 └────────┬────────────────────────┘
@@ -149,15 +149,15 @@ Agent 도구 호출:
     프로젝트 경로: {현재 작업 디렉토리}
     플랫폼: {감지된 플랫폼 또는 사용자 지정}
 
-    harness-spec.md와 features.json을 생성해주세요.
+    .claude/harness/harness-spec.md와 .claude/harness/features.json을 생성해주세요.
     apple-craft 참조 문서 라우팅 테이블을 참조하세요:
     ${CLAUDE_PLUGIN_ROOT}/skills/craft/SKILL.md
 ```
 
 **Phase 1 완료 검증 (필수):**
 Planner 에이전트 완료 후, 다음을 검증합니다:
-1. `harness-spec.md` 파일이 존재하는지 Read로 확인
-2. `features.json` 파일이 존재하고 유효한 JSON인지 Read로 확인
+1. `.claude/harness/harness-spec.md` 파일이 존재하는지 Read로 확인
+2. `.claude/harness/features.json` 파일이 존재하고 유효한 JSON인지 Read로 확인
 3. 모든 기능의 status가 "pending"인지 확인
 **검증 실패 시**: 사용자에게 "Planner가 파일을 올바르게 생성하지 못했습니다"라고 보고하고 Phase 2로 진행하지 않음.
 
@@ -178,8 +178,8 @@ Agent 도구 호출:
   subagent_type: "apple-craft:harness-evaluator"
   prompt: |
     모드: VERIFICATION_REVIEW
-    기능 목록: features.json
-    제품 스펙: harness-spec.md
+    기능 목록: .claude/harness/features.json
+    제품 스펙: .claude/harness/harness-spec.md
 
     각 기능의 verification 필드를 검토하고 보강하세요:
     1. 검증 가능성 — "이 기준으로 실제로 PASS/FAIL 판단 가능한가?"
@@ -189,7 +189,7 @@ Agent 도구 호출:
 ```
 
 **Phase 1.5 완료 처리:**
-- 수정된 features.json의 변경 사항만 간략히 보고
+- 수정된 .claude/harness/features.json의 변경 사항만 간략히 보고
 - 사용자 확인 없이 Phase 2로 자동 진행
 
 ### Phase 2: DESIGN (선택적)
@@ -206,17 +206,17 @@ Agent 도구 호출:
   description: "harness-designer: Apple HIG 디자인 생성"
   subagent_type: "apple-craft:harness-designer"
   prompt: |
-    제품 스펙: harness-spec.md
-    기능 목록: features.json
+    제품 스펙: .claude/harness/harness-spec.md
+    기능 목록: .claude/harness/features.json
 
     기존 .pen 파일이 있으면 읽어서 활용하고,
     없으면 Apple HIG 기반으로 새로 생성하세요.
-    design-spec.md를 작성하세요.
+    .claude/harness/design-spec.md를 작성하세요.
 ```
 
 **Phase 2 완료 처리:**
-- design-spec.md 존재 확인
-- features.json의 design 필드 업데이트 확인 (optional)
+- .claude/harness/design-spec.md 존재 확인
+- .claude/harness/features.json의 design 필드 업데이트 확인 (optional)
 - Phase 3(BUILD)로 자동 진행
 
 **Agent 실패 처리**: Designer 에이전트가 오류로 종료되면, "디자인 생성 실패, 코드 기반으로 진행합니다"라고 보고하고 Phase 3으로 진행합니다 (graceful degradation).
@@ -229,25 +229,25 @@ harness-builder 에이전트를 호출합니다:
 Agent 도구 호출:
   description: "harness-builder: 기능별 코드 작성 + 빌드"
   prompt: |
-    제품 스펙: harness-spec.md
-    기능 목록: features.json
+    제품 스펙: .claude/harness/harness-spec.md
+    기능 목록: .claude/harness/features.json
     라운드: {현재 라운드 번호}/3
     {Evaluator 피드백이 있으면 포함}
 
-    features.json에서 status=pending 또는 status=failed인 기능을
+    .claude/harness/features.json에서 status=pending 또는 status=failed인 기능을
     priority 순서대로 하나씩 구현해주세요.
     각 기능 완료 시 git 커밋하세요.
-    design-spec.md가 존재하면 디자인 명세를 참조하여 코드를 작성하세요.
+    .claude/harness/design-spec.md가 존재하면 디자인 명세를 참조하여 코드를 작성하세요.
     .pen 파일의 화면 구조와 디자인 토큰을 SwiftUI 코드에 반영하세요.
 ```
 
 **Phase 3 완료 검증 (필수):**
 Builder 에이전트 완료 후:
-1. `features.json`을 Read하여 status 변경 확인
+1. `.claude/harness/features.json`을 Read하여 status 변경 확인
 2. pending/failed가 남아있으면 Builder가 일부만 완료한 것 → 사용자에게 보고
 3. `built_unverified` 상태가 있으면 Xcode MCP 미연결 경고 표시
 
-**Agent 실패 처리**: Builder가 중간에 실패하면, features.json의 현재 상태를 확인하여 완료된 기능과 미완료 기능을 사용자에게 보고합니다.
+**Agent 실패 처리**: Builder가 중간에 실패하면, .claude/harness/features.json의 현재 상태를 확인하여 완료된 기능과 미완료 기능을 사용자에게 보고합니다.
 
 ### Phase 4: EVALUATE
 
@@ -257,20 +257,20 @@ harness-evaluator 에이전트를 호출합니다:
 Agent 도구 호출:
   description: "harness-evaluator: QA 검증"
   prompt: |
-    기능 목록: features.json
-    제품 스펙: harness-spec.md
+    기능 목록: .claude/harness/features.json
+    제품 스펙: .claude/harness/harness-spec.md
     라운드: {현재 라운드 번호}/3
 
     status=built인 기능을 회의적으로 검증하고,
     PASS/PARTIAL/FAIL 점수를 부여해주세요.
 
-    evaluation-round-{N}.md 파일을 프로젝트 루트에 작성하세요.
+    .claude/harness/evaluation-round-{N}.md 파일을 작성하세요.
     Step 0에서 baepsae/axe 도구를 최우선 탐지하세요.
     4축 다차원 점수를 부여하세요:
     - 기능완성(functionality), 코드품질(codeQuality),
       UI품질(designQuality), 인터랙션(interactionQuality)
     - 가중 평균(weightedAverage)으로 PASS/PARTIAL/FAIL 판정
-    design-spec.md와 .pen 파일이 존재하면:
+    .claude/harness/design-spec.md와 .pen 파일이 존재하면:
     - 디자인 구조와 코드 View 계층을 대조하세요
     - 디자인 토큰이 SwiftUI 코드에 올바르게 반영되었는지 검증하세요
 ```
@@ -286,20 +286,20 @@ Agent 도구 호출:
   PASS → 완료, 사용자에게 최종 보고
   NEED_REVISION → 자동으로 라운드 2 진행 (중간 보고만)
 
-라운드 2: BUILD (evaluation-round-1.md 참조) → EVALUATE
+라운드 2: BUILD (.claude/harness/evaluation-round-1.md 참조) → EVALUATE
   PASS → 완료
   NEED_REVISION → 자동으로 라운드 3 진행
 
-라운드 3: BUILD (evaluation-round-2.md 참조) → EVALUATE
+라운드 3: BUILD (.claude/harness/evaluation-round-2.md 참조) → EVALUATE
   PASS → 완료
   NEED_REVISION → 사용자에게 상황 보고 + 선택:
     a) 계속 → 라운드 4 (최종, 추가 1회만 허용)
-    b) 중단 → 현재 상태로 종료, features.json과 커밋 히스토리 보고
+    b) 중단 → 현재 상태로 종료, .claude/harness/features.json과 커밋 히스토리 보고
     c) 수동 수정 → 사용자가 직접 수정 후 Evaluate만 재실행
 ```
 
 Builder 재실행 시 프롬프트에 반드시 포함:
-- `evaluation-round-{N-1}.md를 참조하여 FAIL/PARTIAL 항목의 구체적 수정 지침을 확인하세요`
+- `.claude/harness/evaluation-round-{N-1}.md를 참조하여 FAIL/PARTIAL 항목의 구체적 수정 지침을 확인하세요`
 
 ## features.json Schema
 
@@ -365,7 +365,7 @@ failed → built (Builder 재구현)
 ## Context Management
 
 - 각 에이전트는 **독립 서브에이전트**로 실행 → 자연스러운 컨텍스트 격리
-- 에이전트 간 통신은 **파일 기반** (harness-spec.md, features.json)
+- 에이전트 간 통신은 **파일 기반** (.claude/harness/harness-spec.md, .claude/harness/features.json)
 - 대규모 프로젝트의 경우 Builder가 자동 컴팩션 활용
 
 ## Response Templates
@@ -393,7 +393,7 @@ Phase 1: PLAN 시작 — Planner 에이전트가 스펙을 작성합니다...
 **총점**: <PASS 수>/<전체> (임계값: 80%)
 **검증 도구**: <baepsae | axe | static>
 **판정**: PASS / NEED_REVISION
-**상세 로그**: evaluation-round-<N>.md
+**상세 로그**: .claude/harness/evaluation-round-<N>.md
 ```
 
 ### 완료 보고
@@ -437,8 +437,8 @@ apple-craft-harness 실행 흐름
 ├─ Phase 1: PLAN (harness-planner)
 │   ├─ 참조 문서 식별 + harness-design-principles.md 숙지
 │   ├─ AskUserQuestion으로 맥락 수집
-│   ├─ harness-spec.md 생성 (사용자 맥락 포함)
-│   ├─ features.json 생성
+│   ├─ .claude/harness/harness-spec.md 생성 (사용자 맥락 포함)
+│   ├─ .claude/harness/features.json 생성
 │   └─ 사용자 확인 (마지막 확인점)
 ├─ Phase 1.5: VERIFICATION REVIEW (harness-evaluator)
 │   ├─ verification 필드 검토/보강
@@ -449,21 +449,21 @@ apple-craft-harness 실행 흐름
 │   ├─ 기존 .pen 읽기 또는 새 디자인 생성
 │   ├─ 디자인 토큰 정의 (Apple HIG 기반)
 │   ├─ 화면별 .pen 디자인
-│   ├─ design-spec.md 생성 (토큰 매핑 + 화면 구조)
+│   ├─ .claude/harness/design-spec.md 생성 (토큰 매핑 + 화면 구조)
 │   └─ 자동 진행
 ├─ Phase 3: BUILD (harness-builder)
 │   ├─ Step 0: 환경 도구 탐색
-│   ├─ features.json에서 pending/failed 기능 선택
+│   ├─ .claude/harness/features.json에서 pending/failed 기능 선택
 │   ├─ 참조 문서 Read
-│   ├─ Swift 코드 작성 (design-spec.md 참조)
+│   ├─ Swift 코드 작성 (.claude/harness/design-spec.md 참조)
 │   ├─ 빌드 검증 (내부 3회 재시도)
-│   ├─ features.json status → built
+│   ├─ .claude/harness/features.json status → built
 │   └─ git commit
 ├─ Phase 4: EVALUATE (harness-evaluator)
 │   ├─ Step 0: baepsae/axe 최우선 탐지 + Pencil + 보조 도구 탐색
 │   ├─ 4축 다차원 검증 (기능완성/코드품질/UI품질/인터랙션)
-│   ├─ 디자인-코드 비교 (design-spec.md 존재 시)
-│   ├─ evaluation-round-{N}.md 상세 로그 생성
+│   ├─ 디자인-코드 비교 (.claude/harness/design-spec.md 존재 시)
+│   ├─ .claude/harness/evaluation-round-{N}.md 상세 로그 생성
 │   ├─ PASS/PARTIAL/FAIL 점수 + 가중 평균
 │   └─ 80% 통과 → 완료 / 미달 → BUILD 자동 재실행
 └─ 자율 루프 (최대 3 라운드), 3회 실패 시에만 사용자 확인
@@ -479,6 +479,6 @@ Read: ${CLAUDE_PLUGIN_ROOT}/skills/harness/references/walkthrough-liquid-glass-s
 
 이 워크스루는 "Liquid Glass 설정 화면 구현"의 Phase 1→1.5→3→4 전체 과정을 보여줍니다
 (Phase 2 DESIGN은 Pencil MCP 미연결으로 자동 스킵된 시나리오):
-- harness-spec.md와 features.json 예시 (10개 기능)
+- .claude/harness/harness-spec.md와 .claude/harness/features.json 예시 (10개 기능)
 - Evaluator의 4축 다차원 검증 결과
 - 1라운드에서 80% 통과한 실제 흐름
