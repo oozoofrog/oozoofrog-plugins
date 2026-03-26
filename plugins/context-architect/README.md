@@ -34,7 +34,7 @@ CLAUDE.md(루트 + 서브디렉토리), `.claude/rules/`, AGENTS.md로 구성되
 |------|------|
 | `/context-architect:init` | 프로젝트 분석 → 계층적 컨텍스트 스캐폴딩 |
 | `/context-architect:verify` | 3단계 검증 (참조 무결성, 코드 참조, 내용 정확성) |
-| `/context-architect:audit` | 토큰 효율성 감사 (라인 수, 계층 깊이, 중복, 커버리지) |
+| `/context-architect:audit` | 토큰 효율성 감사 (간결성, 계층 깊이, 중복, 커버리지) |
 
 ### Skill
 

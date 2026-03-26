@@ -9,7 +9,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Agent
 
 프로젝트의 계층적 컨텍스트 아키텍처를 초기화한다. 기존 파일이 있으면 보존하고 보강한다.
 
-> **Claude Code 컨텍스트 로딩 원칙**: Claude Code는 CLAUDE.md만 자동 로딩한다. 서브디렉토리 CLAUDE.md는 해당 디렉토리 파일 접근 시 on-demand 로딩되며, `.claude/rules/`는 glob 패턴 매칭 시 자동 적용된다. CONTEXT.md와 AGENTS.md는 자동 로딩되지 않는다.
+> **Claude Code 컨텍스트 로딩 원칙**: Claude Code는 CLAUDE.md와 `.claude/rules/`를 자동 로딩한다. 루트 CLAUDE.md는 세션 시작 시, 서브디렉토리 CLAUDE.md는 해당 디렉토리 파일 접근 시 on-demand 로딩되며, `.claude/rules/`는 glob 패턴 매칭 시 자동 적용된다. CONTEXT.md와 AGENTS.md는 자동 로딩되지 않는다.
 
 ## Execution Steps
 

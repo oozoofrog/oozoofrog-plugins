@@ -1,6 +1,6 @@
 ---
 name: context-validator
-description: "컨텍스트 아키텍처 검증 에이전트 — 코드 변경 후 CLAUDE.md, CONTEXT.md, AGENTS.md가 실제 코드와 정합하는지 자율 검증하고, 'Fix the Rules' 원칙에 따라 컨텍스트 문서 업데이트를 제안합니다."
+description: "컨텍스트 아키텍처 검증 에이전트 — 코드 변경 후 CLAUDE.md(루트 및 서브디렉토리), .claude/rules/, CONTEXT.md, AGENTS.md가 실제 코드와 정합하는지 자율 검증하고, 'Fix the Rules' 원칙에 따라 컨텍스트 문서 업데이트를 제안합니다."
 model: sonnet
 color: blue
 whenToUse: |

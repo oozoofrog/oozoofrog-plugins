@@ -15,8 +15,10 @@ allowed-tools: Read, Glob, Grep, Bash
 
 프로젝트 전체에서 다음 파일을 수집한다:
 - `CLAUDE.md` (프로젝트 루트)
-- `AGENTS.md` (프로젝트 루트)
-- `**/CONTEXT.md` (전체 디렉토리)
+- `**/CLAUDE.md` (서브디렉토리 — Claude Code on-demand 자동 로딩)
+- `.claude/rules/*.md` (경로별 규칙)
+- `AGENTS.md` (프로젝트 루트 — Claude Code 자동 로딩 안 됨)
+- `**/CONTEXT.md` (전체 디렉토리 — Claude Code 자동 로딩 안 됨)
 
 파일이 하나도 없으면 "컨텍스트 아키텍처가 아직 초기화되지 않았습니다. `/context-architect:init`을 먼저 실행하세요."를 출력하고 종료한다.
 
@@ -24,10 +26,10 @@ allowed-tools: Read, Glob, Grep, Bash
 
 ### Stage 1: 참조 무결성 (Reference Integrity)
 
-1. 모든 CONTEXT.md에서 마크다운 링크 `[텍스트](경로)` 추출
-2. 각 링크의 대상 파일 존재 여부 확인 (Glob 사용)
-3. 모든 CONTEXT.md가 최소 하나의 상위 파일에서 참조되는지 확인
-4. CLAUDE.md 존재 여부 확인
+1. 모든 컨텍스트 파일에서 마크다운 링크 `[텍스트](경로)` 및 `@path/to/file` import 추출
+2. 각 링크/import의 대상 파일 존재 여부 확인 (Glob 사용)
+3. 모든 컨텍스트 파일이 최소 하나의 상위 파일에서 참조되는지 확인
+4. 루트 CLAUDE.md 존재 여부 확인
 5. 결과를 마크다운 테이블로 출력:
 
 ```markdown
@@ -42,7 +44,7 @@ allowed-tools: Read, Glob, Grep, Bash
 
 ### Stage 2: 코드 참조 검증 (Code Reference Validation)
 
-1. CLAUDE.md와 모든 CONTEXT.md에서 코드 참조 추출:
+1. 모든 컨텍스트 파일(CLAUDE.md, 서브디렉토리 CLAUDE.md, .claude/rules/, CONTEXT.md)에서 코드 참조 추출:
    - 백틱 내 파일 경로: `` `src/handler.ts` ``
    - Key Files 리스트 항목
    - 코드 블록 내 import/require 구문
