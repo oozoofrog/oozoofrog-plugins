@@ -12,7 +12,7 @@ fi
 
 SCRIPT_DIR="${0:A:h}"
 PLUGIN_ROOT="${SCRIPT_DIR:h}"
-REF_DIR="$PLUGIN_ROOT/skills/apple-craft/references"
+REF_DIR="$PLUGIN_ROOT/skills/craft/references"
 
 # --- 부분 동기화 경고용 trap ---
 SYNC_COMPLETE=false
