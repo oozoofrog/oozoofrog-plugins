@@ -14,13 +14,13 @@ Claude Code 플러그인 종합 진단·수정·개선 도구.
 
 ```bash
 # 전체 마켓플레이스 점검
-/plugin-doctor:doctor
+/fixer
 
 # 특정 플러그인만 점검
-/plugin-doctor:doctor agent-context
+/fixer agent-context
 
 # 공식 스펙 최신화 후 점검
-/plugin-doctor:doctor --update-spec
+/fixer --update-spec
 ```
 
 ## 검증 항목 (8단계)
@@ -43,7 +43,7 @@ plugin-doctor/
 ├── .claude-plugin/
 │   └── plugin.json
 ├── skills/
-│   └── doctor/
+│   └── fixer/
 │       ├── SKILL.md
 │       └── references/
 │           └── official-spec.md

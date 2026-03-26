@@ -1,5 +1,5 @@
 ---
-name: doctor
+name: fixer
 description: 마켓플레이스 내 모든 플러그인을 Claude Code 공식 표준에 맞게 점검·수정·개선합니다. 자기 자신(plugin-doctor)도 점검 대상에 포함됩니다. "플러그인 점검", "plugin doctor", "플러그인 검증", "plugin validate", "플러그인 수정", "plugin fix", "마켓플레이스 검증", "플러그인 건강 검진" 등의 요청 시 사용하세요.
 argument-hint: "[플러그인 이름 (생략 시 전체 점검)] [--update-spec: 공식 문서 최신화]"
 allowed-tools:
