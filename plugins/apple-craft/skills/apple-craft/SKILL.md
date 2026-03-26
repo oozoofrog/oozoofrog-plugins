@@ -102,7 +102,7 @@ Xcode 26 참조 문서(20개 주제) 내장으로 최신 API도 정확하게 지
 1. Glob으로 프로젝트 구조 파악 (`*.xcodeproj`, `Package.swift`, `Podfile`, `*.swift`)
 2. 대상 플랫폼 및 최소 배포 타겟 확인
 3. 기존 코드 패턴/아키텍처 파악 (MVVM, TCA, Clean Architecture 등)
-4. CONTEXT.md가 있으면 프로젝트별 추가 규칙 확인
+4. 프로젝트 규칙 및 코딩 컨벤션 파악
 
 ### Xcode MCP 도구 활용 전략
 
