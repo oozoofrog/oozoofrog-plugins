@@ -5,6 +5,8 @@ firebase-debug.log
 .DS_Store
 
 # Claude Code
+.claude/plans/
+.claude/settings.local.json
 .claude/ralph-loop.local.md
 
 # Git Worktrees
