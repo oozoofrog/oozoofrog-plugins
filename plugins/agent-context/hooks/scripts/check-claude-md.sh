@@ -9,7 +9,7 @@ CLAUDE_MD="$PROJECT_DIR/CLAUDE.md"
 
 if [ ! -f "$CLAUDE_MD" ]; then
   cat <<EOF
-{"systemMessage": "ℹ️ CLAUDE.md가 없습니다. \`/context-architect:init\`으로 컨텍스트 아키텍처를 초기화할 수 있습니다."}
+{"systemMessage": "ℹ️ CLAUDE.md가 없습니다. \`/agent-context:init\`으로 컨텍스트 아키텍처를 초기화할 수 있습니다."}
 EOF
   exit 0
 fi
@@ -18,6 +18,6 @@ LINE_COUNT=$(wc -l < "$CLAUDE_MD" | tr -d ' ')
 
 if [ "$LINE_COUNT" -gt 200 ]; then
   cat <<EOF
-{"systemMessage": "⚠️ CLAUDE.md가 ${LINE_COUNT}라인으로 200라인 제한을 초과합니다. 컨텍스트 부패(Context Rot) 위험이 있습니다. \`/context-architect:audit\`을 실행하여 분리 대상을 확인하세요."}
+{"systemMessage": "⚠️ CLAUDE.md가 ${LINE_COUNT}라인으로 200라인 제한을 초과합니다. 컨텍스트 부패(Context Rot) 위험이 있습니다. \`/agent-context:audit\`을 실행하여 분리 대상을 확인하세요."}
 EOF
 fi

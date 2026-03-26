@@ -1,4 +1,4 @@
-# context-architect
+# agent-context
 
 대규모 프로젝트를 위한 계층적 컨텍스트 아키텍처 자동화 플러그인.
 
@@ -23,22 +23,19 @@ CLAUDE.md(루트 + 서브디렉토리), `.claude/rules/`, AGENTS.md로 구성되
 ## 설치
 
 ```bash
-/plugin install context-architect@oozoofrog-plugins
+/plugin install agent-context@oozoofrog-plugins
 ```
 
 ## 컴포넌트
 
-### Commands
+### Skills
 
-| 명령 | 설명 |
+| 스킬 | 설명 |
 |------|------|
-| `/context-architect:init` | 프로젝트 분석 → 계층적 컨텍스트 스캐폴딩 |
-| `/context-architect:verify` | 3단계 검증 (참조 무결성, 코드 참조, 내용 정확성) |
-| `/context-architect:audit` | 토큰 효율성 감사 (간결성, 계층 깊이, 중복, 커버리지) |
-
-### Skill
-
-`context-architecture` — 계층적 컨텍스트 설계 원칙 및 실무 가이드. "컨텍스트 아키텍처", "CONTEXT.md 설계", "토큰 효율성" 등의 질문 시 자동 활성화.
+| `/agent-context:guide` | 계층적 컨텍스트 설계 원칙 및 실무 가이드 |
+| `/agent-context:init` | 프로젝트 분석 → 계층적 컨텍스트 스캐폴딩 |
+| `/agent-context:verify` | 3단계 검증 (참조 무결성, 코드 참조, 내용 정확성) |
+| `/agent-context:audit` | 토큰 효율성 감사 (간결성, 계층 깊이, 중복, 커버리지) |
 
 ### Agent
 
@@ -52,36 +49,38 @@ CLAUDE.md(루트 + 서브디렉토리), `.claude/rules/`, AGENTS.md로 구성되
 
 ```bash
 # 새 프로젝트에 컨텍스트 아키텍처 초기화
-/context-architect:init
+/agent-context:init
 
 # 주기적 검증 (전체)
-/context-architect:verify
+/agent-context:verify
 
 # 특정 단계만 검증
-/context-architect:verify 1    # 참조 무결성만
-/context-architect:verify 2    # 코드 참조만
+/agent-context:verify 1    # 참조 무결성만
+/agent-context:verify 2    # 코드 참조만
 
 # 토큰 효율성 감사
-/context-architect:audit
+/agent-context:audit
 ```
 
 ## 파일 구조
 
 ```
-context-architect/
+agent-context/
 ├── .claude-plugin/
 │   └── plugin.json
 ├── skills/
-│   └── context-architecture/
-│       ├── SKILL.md
-│       └── references/
-│           ├── file-standards.md
-│           ├── token-optimization.md
-│           └── verification-guide.md
-├── commands/
-│   ├── init.md
-│   ├── verify.md
-│   └── audit.md
+│   ├── guide/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       ├── file-standards.md
+│   │       ├── token-optimization.md
+│   │       └── verification-guide.md
+│   ├── init/
+│   │   └── SKILL.md
+│   ├── verify/
+│   │   └── SKILL.md
+│   └── audit/
+│       └── SKILL.md
 ├── agents/
 │   └── context-validator.md
 ├── hooks/

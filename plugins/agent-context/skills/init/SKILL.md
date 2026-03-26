@@ -2,7 +2,14 @@
 name: init
 description: 프로젝트를 분석하여 CLAUDE.md, 서브디렉토리 CLAUDE.md, .claude/rules/, AGENTS.md로 구성되는 계층적 컨텍스트 아키텍처를 스캐폴딩합니다. 기존 파일이 있으면 보존하고 보강합니다.
 argument-hint: "[대상 디렉토리 (생략 시 프로젝트 루트)]"
-allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Agent
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Glob
+  - Grep
+  - Bash
+  - Agent
 ---
 
 # Context Architecture Init
@@ -63,7 +70,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Agent
 
 **기존 파일이 없는 경우**: 새로 생성한다.
 
-참조: `context-architecture` 스킬의 `references/file-standards.md`에서 CLAUDE.md 작성 표준을 확인한다.
+참조: `guide` 스킬의 `references/file-standards.md`에서 CLAUDE.md 작성 표준을 확인한다.
 
 핵심 규칙:
 - 간결하게 유지 (장문이면 `@` import나 서브디렉토리 CLAUDE.md로 분산)
@@ -122,6 +129,6 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Agent
 
 ### 다음 단계
 1. 생성된 컨텍스트 파일의 내용을 검토하고 프로젝트 특성에 맞게 수정하세요.
-2. `/context-architect:verify`로 검증을 실행하세요.
-3. `/context-architect:audit`로 토큰 효율성을 확인하세요.
+2. `/agent-context:verify`로 검증을 실행하세요.
+3. `/agent-context:audit`로 토큰 효율성을 확인하세요.
 ```

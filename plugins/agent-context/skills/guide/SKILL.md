@@ -1,7 +1,11 @@
 ---
 name: guide
 description: This skill should be used when the user asks about "컨텍스트 아키텍처", "context architecture", "계층적 컨텍스트", "CONTEXT.md 설계", "주의력 예산", "attention budget", "컨텍스트 엔지니어링", "context engineering", "토큰 효율성", "컨텍스트 부패", "context rot", "점진적 노출", "progressive disclosure", or wants guidance on structuring CLAUDE.md, CONTEXT.md, AGENTS.md for large-scale projects. Common requests include "CLAUDE.md가 너무 길어요", "프로젝트 컨텍스트 파일을 어떻게 구성하죠?", "My CLAUDE.md is too long", "Set up context architecture for my project".
-version: 1.2.0
+version: 1.3.0
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
 ---
 
 # Hierarchical Context Architecture Guide
@@ -12,9 +16,9 @@ version: 1.2.0
 
 프로젝트에 컨텍스트 아키텍처를 도입하려면 다음 3단계를 따른다:
 
-1. **초기화**: `/context-architect:init` 실행 — 프로젝트를 분석하여 CLAUDE.md, 서브디렉토리 CLAUDE.md, `.claude/rules/`, AGENTS.md를 자동 생성한다.
-2. **검증**: `/context-architect:verify` 실행 — 참조 무결성, 코드 참조, 내용 정확성을 3단계로 검증한다.
-3. **유지**: 코드 변경 시 컨텍스트 문서도 함께 업데이트한다. `/context-architect:audit`로 주기적으로 토큰 효율성을 감사한다.
+1. **초기화**: `/agent-context:init` 실행 — 프로젝트를 분석하여 CLAUDE.md, 서브디렉토리 CLAUDE.md, `.claude/rules/`, AGENTS.md를 자동 생성한다.
+2. **검증**: `/agent-context:verify` 실행 — 참조 무결성, 코드 참조, 내용 정확성을 3단계로 검증한다.
+3. **유지**: 코드 변경 시 컨텍스트 문서도 함께 업데이트한다. `/agent-context:audit`로 주기적으로 토큰 효율성을 감사한다.
 
 ## Core Problem
 
@@ -133,13 +137,13 @@ XML 태그를 사용하면 데이터와 지침 사이의 경계가 명확해져 
 2. **코드 참조 검증**: 컨텍스트 내 파일 경로가 실제 구현과 일치하는지 확인
 3. **내용 정확성**: 기술적 주장이 현재 코드베이스의 실제 패턴과 일치하는지 검증
 
-## Available Commands
+## Available Skills
 
-이 플러그인은 다음 명령을 제공한다:
+이 플러그인은 다음 스킬을 제공한다:
 
-- **`/context-architect:init`** — 새 프로젝트에 컨텍스트 아키텍처를 도입하거나, 기존 프로젝트의 컨텍스트 파일을 보강할 때 사용. 빌드 도구를 자동 감지하여 CLAUDE.md, 서브디렉토리 CLAUDE.md, `.claude/rules/`, AGENTS.md를 생성한다.
-- **`/context-architect:verify`** — 컨텍스트 문서가 코드와 동기화되어 있는지 확인할 때 사용. 리팩토링, 파일 이동, 의존성 변경 후에 실행한다. 인자로 stage 번호(1/2/3)를 지정하면 특정 단계만 실행 가능하다.
-- **`/context-architect:audit`** — CLAUDE.md가 비대해지거나 계층 구조가 복잡해졌을 때 사용. 간결성 부족, 정보 중복, 커버리지 부족을 감지하고 개선안을 제시한다.
+- **`/agent-context:init`** — 새 프로젝트에 컨텍스트 아키텍처를 도입하거나, 기존 프로젝트의 컨텍스트 파일을 보강할 때 사용. 빌드 도구를 자동 감지하여 CLAUDE.md, 서브디렉토리 CLAUDE.md, `.claude/rules/`, AGENTS.md를 생성한다.
+- **`/agent-context:verify`** — 컨텍스트 문서가 코드와 동기화되어 있는지 확인할 때 사용. 리팩토링, 파일 이동, 의존성 변경 후에 실행한다. 인자로 stage 번호(1/2/3)를 지정하면 특정 단계만 실행 가능하다.
+- **`/agent-context:audit`** — CLAUDE.md가 비대해지거나 계층 구조가 복잡해졌을 때 사용. 간결성 부족, 정보 중복, 커버리지 부족을 감지하고 개선안을 제시한다.
 
 ## Additional Resources
 
