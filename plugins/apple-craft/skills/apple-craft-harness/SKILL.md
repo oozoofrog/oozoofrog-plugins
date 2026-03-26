@@ -55,30 +55,61 @@ Anthropic의 [Harness Design](https://www.anthropic.com/engineering/harness-desi
 사용자 요청
     │
     ▼
-┌─────────────────────────┐
-│  Phase 1: PLAN          │  harness-planner 에이전트
-│  제품 스펙 + features.json │
-│  사용자 확인              │
-└────────┬────────────────┘
+┌─────────────────────────────┐
+│  Phase 1: PLAN              │  harness-planner 에이전트
+│  제품 스펙 + features.json   │  AskUserQuestion으로 맥락 수집
+│  사용자 확인 (마지막 확인점)  │
+└────────┬────────────────────┘
          │
          ▼
-┌─────────────────────────┐
-│  Phase 2: BUILD         │  harness-builder 에이전트
-│  기능별 코드 작성 + 빌드  │  ◄── EVALUATE 피드백 (2회차+)
-│  기능별 git 커밋          │
-└────────┬────────────────┘
+┌─────────────────────────────┐
+│  Phase 1.5: VERIFY CRITERIA │  harness-evaluator (VERIFICATION_REVIEW 모드)
+│  검증 기준 리뷰 + 보강       │  자율 진행 (사용자 확인 없음)
+│  verification_steps 작성     │
+└────────┬────────────────────┘
          │
          ▼
-┌─────────────────────────┐
-│  Phase 3: EVALUATE      │  harness-evaluator 에이전트
-│  다차원 검증 (PASS/FAIL) │
-│  80% 통과 → 완료         │
-│  미달 → BUILD 재실행      │
-└────────┬────────────────┘
+┌─────────────────────────────┐
+│  Phase 2: BUILD             │  harness-builder 에이전트
+│  기능별 코드 작성 + 빌드     │  ◄── EVALUATE 피드백 (자동)
+│  기능별 git 커밋             │
+└────────┬────────────────────┘
          │
-    최대 3 라운드
-    3회 실패 → 사용자 확인
+         ▼
+┌─────────────────────────────┐
+│  Phase 3: EVALUATE          │  harness-evaluator 에이전트
+│  Step 0: 도구 탐색           │  baepsae/axe → Xcode MCP → static
+│  4축 다차원 검증             │  evaluation-round-{N}.md 생성
+│  80% 통과 → 완료             │
+│  미달 → BUILD 자동 재실행    │
+└────────┬────────────────────┘
+         │
+    자동 루프 (최대 3 라운드)
+    3회 실패 시에만 사용자 확인
 ```
+
+> **설계 원칙**: 이 하네스는 Anthropic의 Harness Design 블로그에 기반합니다.
+> 모든 에이전트는 시작 시 다음 문서를 참조합니다:
+> `${CLAUDE_PLUGIN_ROOT}/skills/apple-craft-harness/references/harness-design-principles.md`
+
+## 환경 도구 활용
+
+apple-craft 하네스는 Claude Code 환경의 모든 스킬/MCP/도구를 적극 활용합니다.
+하네스가 항상 오케스트레이션을 주도하며, 외부 도구는 하네스의 지휘 하에 동작합니다.
+
+### 핵심 도구 (Evaluator가 최우선 확인)
+- **mcp-baepsae** (app-automation 플러그인): iOS Simulator + macOS 앱 런타임 인터랙션
+- **axe-simulator**: iOS Simulator 접근성 기반 자동화
+
+### 빌드/검증 도구
+- **Xcode MCP**: BuildProject, RenderPreview, RunAllTests
+
+### 보조 도구 (있으면 활용)
+- safe-design-advisor, code-review, swift-master 등 환경의 기타 스킬
+
+### 동적 도구 탐색
+각 에이전트는 시작 시 Step 0에서 사용 가능한 도구를 탐색합니다.
+특정 도구에 의존하지 않으며, 환경에 따라 최적의 도구 조합을 자동 구성합니다.
 
 ## Orchestration Flow
 
@@ -110,6 +141,32 @@ Planner 에이전트 완료 후, 다음을 검증합니다:
 사용자가 수정 요청 시 → Planner를 다시 호출하여 수정.
 
 **Agent 실패 처리**: Planner 에이전트가 오류로 종료되면, 에러 내용을 사용자에게 보고하고 재시도 여부를 확인합니다.
+
+### Phase 1.5: VERIFICATION REVIEW
+
+Phase 1에서 충분한 맥락을 수집했으므로, 이 단계는 **사용자 확인 없이 자율 진행**합니다.
+
+harness-evaluator 에이전트를 "VERIFICATION_REVIEW 모드"로 호출합니다:
+
+```
+Agent 도구 호출:
+  description: "harness-evaluator: 검증 기준 리뷰"
+  subagent_type: "apple-craft:harness-evaluator"
+  prompt: |
+    모드: VERIFICATION_REVIEW
+    기능 목록: features.json
+    제품 스펙: harness-spec.md
+
+    각 기능의 verification 필드를 검토하고 보강하세요:
+    1. 검증 가능성 — "이 기준으로 실제로 PASS/FAIL 판단 가능한가?"
+    2. 누락된 관점 — 접근성, 에러 상태, 엣지 케이스
+    3. verification_steps 배열 작성 (시뮬레이터/macOS 인터랙션 시나리오)
+    기능 삭제 금지, verification/verification_steps만 수정.
+```
+
+**Phase 1.5 완료 처리:**
+- 수정된 features.json의 변경 사항만 간략히 보고
+- 사용자 확인 없이 Phase 2로 자동 진행
 
 ### Phase 2: BUILD
 
@@ -151,30 +208,40 @@ Agent 도구 호출:
 
     status=built인 기능을 회의적으로 검증하고,
     PASS/PARTIAL/FAIL 점수를 부여해주세요.
+
+    evaluation-round-{N}.md 파일을 프로젝트 루트에 작성하세요.
+    Step 0에서 baepsae/axe 도구를 최우선 탐지하세요.
+    4축 다차원 점수를 부여하세요:
+    - 기능완성(functionality), 코드품질(codeQuality),
+      UI품질(designQuality), 인터랙션(interactionQuality)
+    - 가중 평균(weightedAverage)으로 PASS/PARTIAL/FAIL 판정
 ```
 
 **Phase 3 결과 처리:**
 - 판정 PASS (80%+ 기능 통과) → **하네스 완료**
 - 판정 NEED_REVISION → Evaluator의 FAIL 피드백을 Builder에게 전달 → Phase 2 재실행
 
-### Loop Control
+### Loop Control (자율 진행)
 
 ```
 라운드 1: BUILD → EVALUATE
-  PASS → 완료
-  NEED_REVISION ↓
+  PASS → 완료, 사용자에게 최종 보고
+  NEED_REVISION → 자동으로 라운드 2 진행 (중간 보고만)
 
-라운드 2: BUILD (FAIL 피드백 반영) → EVALUATE
+라운드 2: BUILD (evaluation-round-1.md 참조) → EVALUATE
   PASS → 완료
-  NEED_REVISION ↓
+  NEED_REVISION → 자동으로 라운드 3 진행
 
-라운드 3: BUILD (FAIL 피드백 반영) → EVALUATE
+라운드 3: BUILD (evaluation-round-2.md 참조) → EVALUATE
   PASS → 완료
   NEED_REVISION → 사용자에게 상황 보고 + 선택:
     a) 계속 → 라운드 4 (최종, 추가 1회만 허용)
     b) 중단 → 현재 상태로 종료, features.json과 커밋 히스토리 보고
     c) 수동 수정 → 사용자가 직접 수정 후 Evaluate만 재실행
 ```
+
+Builder 재실행 시 프롬프트에 반드시 포함:
+- `evaluation-round-{N-1}.md를 참조하여 FAIL/PARTIAL 항목의 구체적 수정 지침을 확인하세요`
 
 ## features.json Schema
 
@@ -184,13 +251,28 @@ Agent 도구 호출:
     "id": "F001",
     "category": "ui|data|logic|test|config",
     "description": "기능 설명",
-    "verification": "Xcode MCP 도구로 검증 가능한 기준",
+    "verification": "텍스트 검증 기준 (기존, 유지)",
+    "verification_steps": [
+      {"action": "launch_app", "expect": "앱 실행 성공"},
+      {"action": "tap", "target": "설정 버튼", "expect": "설정 화면 전환"},
+      {"action": "screenshot", "expect": "Liquid Glass 효과 표시"}
+    ],
     "status": "pending|built|built_unverified|verified|partial|failed",
     "reference": "references/<doc>.md",
-    "priority": 1
+    "priority": 1,
+    "scores": {
+      "functionality": null,
+      "codeQuality": null,
+      "designQuality": null,
+      "interactionQuality": null,
+      "weightedAverage": null
+    }
   }
 ]
 ```
+
+- `verification_steps`: Planner가 초기 생성, Evaluator가 Phase 1.5에서 보강. optional — 없으면 verification 텍스트로 폴백
+- `scores`: Evaluator가 평가 시 기록. optional — 기존 PASS/PARTIAL/FAIL 상태와 호환
 
 **상태 전이:**
 ```
@@ -238,16 +320,16 @@ Phase 1: PLAN 시작 — Planner 에이전트가 스펙을 작성합니다...
 ```markdown
 ## 📊 Evaluate Round <N>/3
 
-| ID | 기능 | 점수 | 상세 |
-|----|------|------|------|
-| F001 | <설명> | PASS | <근거> |
-| F002 | <설명> | FAIL | <구체적 문제> |
+### 기능별 검증 결과
 
-**총점**: <N>/<Total> PASS (임계값: 80%)
+| ID | 기능 | 기능완성 | 코드품질 | UI품질 | 인터랙션 | 가중평균 | 판정 |
+|----|------|---------|---------|--------|---------|---------|------|
+| F001 | <설명> | 8 | 9 | 7 | 8 | 8.1 | PASS |
+
+**총점**: <PASS 수>/<전체> (임계값: 80%)
+**검증 도구**: <baepsae | axe | static>
 **판정**: PASS / NEED_REVISION
-
-### 다음 단계
-<PASS: 완료 보고 / NEED_REVISION: FAIL 항목 수정 계획>
+**상세 로그**: evaluation-round-<N>.md
 ```
 
 ### 완료 보고
@@ -276,7 +358,7 @@ Phase 1: PLAN 시작 — Planner 에이전트가 스펙을 작성합니다...
 
 2. **비용**: 3 라운드 × 3 에이전트 = 최대 9개 에이전트 호출. 간단한 작업은 기존 `apple-craft` implement 모드가 효율적입니다.
 
-3. **시뮬레이터 인터랙션 제한**: RenderPreview는 정적 스크린샷만 제공합니다. 탭/스와이프 등 인터랙션 테스트는 수동 확인이 필요합니다.
+3. **런타임 검증 도구 권장**: 런타임 인터랙션 검증을 위해 `app-automation` 플러그인(mcp-baepsae) 설치를 권장합니다. 미설치 시 정적 검증 모드로 동작합니다.
 
 4. **프로젝트 생성 한계**: 새 Xcode 프로젝트를 생성하는 것(xcodegen, Tuist 등)은 이 하네스의 범위 밖입니다. 기존 프로젝트에 기능을 추가하는 것이 주 용도입니다.
 
@@ -287,11 +369,17 @@ Phase 1: PLAN 시작 — Planner 에이전트가 스펙을 작성합니다...
 ```
 apple-craft-harness 실행 흐름
 ├─ Phase 1: PLAN (harness-planner)
-│   ├─ 참조 문서 식별
-│   ├─ harness-spec.md 생성
+│   ├─ 참조 문서 식별 + harness-design-principles.md 숙지
+│   ├─ AskUserQuestion으로 맥락 수집
+│   ├─ harness-spec.md 생성 (사용자 맥락 포함)
 │   ├─ features.json 생성
-│   └─ 사용자 확인
+│   └─ 사용자 확인 (마지막 확인점)
+├─ Phase 1.5: VERIFICATION REVIEW (harness-evaluator)
+│   ├─ verification 필드 검토/보강
+│   ├─ verification_steps 작성
+│   └─ 자동 진행 (사용자 확인 없음)
 ├─ Phase 2: BUILD (harness-builder)
+│   ├─ Step 0: 환경 도구 탐색
 │   ├─ features.json에서 pending/failed 기능 선택
 │   ├─ 참조 문서 Read
 │   ├─ Swift 코드 작성
@@ -299,12 +387,12 @@ apple-craft-harness 실행 흐름
 │   ├─ features.json status → built
 │   └─ git commit
 ├─ Phase 3: EVALUATE (harness-evaluator)
-│   ├─ 빌드 상태 검증
-│   ├─ 기능 동작 검증
-│   ├─ 코드 품질 검증
-│   ├─ PASS/PARTIAL/FAIL 점수
-│   └─ 80% 통과 → 완료 / 미달 → BUILD 재실행
-└─ 최대 3 라운드, 3회 실패 → 사용자 확인
+│   ├─ Step 0: baepsae/axe 최우선 탐지 + 보조 도구 탐색
+│   ├─ 4축 다차원 검증 (기능완성/코드품질/UI품질/인터랙션)
+│   ├─ evaluation-round-{N}.md 상세 로그 생성
+│   ├─ PASS/PARTIAL/FAIL 점수 + 가중 평균
+│   └─ 80% 통과 → 완료 / 미달 → BUILD 자동 재실행
+└─ 자율 루프 (최대 3 라운드), 3회 실패 시에만 사용자 확인
 ```
 
 ## Walkthrough Example

@@ -38,10 +38,21 @@ tools:
 2. `features.json` 읽기 — status별 현황 확인
 3. git log 확인 — 이전 커밋에서 무엇이 완료되었는지 파악
 4. Evaluator 피드백이 있으면 (재실행 시) 해당 피드백을 우선 반영
+5. harness-design-principles.md 읽기:
+   ```
+   Read: ${CLAUDE_PLUGIN_ROOT}/skills/apple-craft-harness/references/harness-design-principles.md
+   ```
+   → "V2 패턴" 섹션에서 Builder의 역할 확인
+   → "한 번에 한 기능씩"의 이론적 근거 확인
+6. evaluation-round-{N-1}.md가 있으면 (2회차 이후) Read하여 상세 수정 지침 확인
+   → 이 파일에 기능별 FAIL/PARTIAL 근거와 구체적 수정 방법이 기술되어 있음
+   → Evaluator의 피드백보다 이 파일이 더 상세하므로 우선 참조
 
 ### Step 2: 기능 선택
 
 `features.json`에서 **status=pending** (또는 **status=failed**)인 항목 중 **priority가 가장 높은** 기능을 선택합니다.
+
+**병렬 구현 힌트:** 독립적인 기능(예: 접근성 기능과 테마 기능처럼 코드 의존성이 없는 기능)은 병렬 서브에이전트로 동시 구현을 고려할 수 있습니다. 다만 features.json 동시 수정에 주의하세요.
 
 ### Step 3: 참조 문서 읽기
 
@@ -78,6 +89,13 @@ Write/Edit 도구로 코드 파일을 작성합니다.
 5. 빌드 성공 → Step 6으로
 ```
 
+**빌드 성공 후 시뮬레이터 배포 (선택적):**
+시뮬레이터 자동화 도구(mcp-baepsae)가 사용 가능하면, 빌드 성공 후 앱을 시뮬레이터에 설치/실행하여 Evaluator가 바로 런타임 테스트할 수 있도록 준비할 수 있습니다:
+```
+install_app → launch_app
+```
+이 단계는 선택적이며, Builder의 주 책임은 코드 작성 + 빌드입니다.
+
 Xcode MCP가 연결되지 않은 경우:
 - 코드의 문법적 정확성을 참조 문서 기반으로 최대한 검증
 - features.json status를 **"built_unverified"**로 설정 ("built" 대신)
@@ -108,3 +126,5 @@ Xcode MCP가 연결되지 않은 경우:
 - 참조 문서에 없는 API가 필요하면, 빌드 요약에 해당 API를 기록하고 Evaluator가 검증하도록 플래그하세요
 - Evaluator의 피드백이 있으면 해당 피드백의 **구체적 수정 지침**을 먼저 반영하세요
 - 한국어로 커밋 메시지와 주석을 작성하되, 코드/API명은 원문 유지
+- evaluation-round-{N-1}.md 파일이 있으면 **반드시 먼저 Read**하세요 — 이전 라운드의 FAIL/PARTIAL 수정 지침이 가장 구체적입니다
+- harness-spec.md의 **"사용자 맥락" 섹션**을 참조하여 사용자의 우선순위에 맞는 구현을 하세요
