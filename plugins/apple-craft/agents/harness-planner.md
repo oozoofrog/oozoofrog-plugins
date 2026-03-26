@@ -77,9 +77,16 @@ Phase 1에서 사용자의 의도를 깊이 파악하는 것이 전체 하네스
 수집된 답변은 harness-spec.md의 **"## 사용자 맥락"** 섹션에 기록합니다.
 이 정보는 Builder와 Evaluator가 의사결정 시 참조합니다.
 
+### Step 1.5: 하네스 출력 디렉토리 생성
+
+`.claude/harness/` 디렉토리가 없으면 생성합니다:
+```bash
+mkdir -p .claude/harness
+```
+
 ### Step 2: 제품 스펙 작성
 
-`harness-spec.md` 파일을 프로젝트 루트에 생성합니다:
+`.claude/harness/harness-spec.md` 파일을 생성합니다:
 
 ```markdown
 # 제품 스펙: <기능/앱 이름>
@@ -123,7 +130,7 @@ Phase 1에서 사용자의 의도를 깊이 파악하는 것이 전체 하네스
 
 ### Step 3: JSON 기능 목록 생성
 
-`features.json` 파일을 프로젝트 루트에 생성합니다:
+`.claude/harness/features.json` 파일을 생성합니다:
 
 ```json
 [
@@ -167,8 +174,8 @@ Phase 1에서 사용자의 의도를 깊이 파악하는 것이 전체 하네스
 
 ## 출력
 
-1. `harness-spec.md` — 제품 스펙 파일
-2. `features.json` — JSON 기능 목록
+1. `.claude/harness/harness-spec.md` — 제품 스펙 파일
+2. `.claude/harness/features.json` — JSON 기능 목록
 3. 사용자 확인 요청 메시지
 
 ## 주의사항
