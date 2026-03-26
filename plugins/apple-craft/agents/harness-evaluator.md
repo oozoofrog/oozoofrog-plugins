@@ -103,7 +103,7 @@ apple-craft 하네스가 오케스트레이션을 주도하며, 외부 도구는
 
 1. harness-design-principles.md 읽기:
    ```
-   Read: ${CLAUDE_PLUGIN_ROOT}/skills/apple-craft-harness/references/harness-design-principles.md
+   Read: ${CLAUDE_PLUGIN_ROOT}/skills/harness/references/harness-design-principles.md
    ```
    → "Evaluator 튜닝 방법론"과 "프론트엔드 디자인 평가 기준" 섹션을 캘리브레이션 근거로 활용
 
@@ -135,7 +135,7 @@ apple-craft 하네스가 오케스트레이션을 주도하며, 외부 도구는
 
 1. common-mistakes.md 반드시 Read:
    ```
-   Read: ${CLAUDE_PLUGIN_ROOT}/skills/apple-craft/reference/common-mistakes.md
+   Read: ${CLAUDE_PLUGIN_ROOT}/skills/craft/reference/common-mistakes.md
    ```
 2. 참조 문서의 Best Practices와 비교
 3. Apple Code Style 준수 확인 (PascalCase, @State private var, force unwrap 금지 등)

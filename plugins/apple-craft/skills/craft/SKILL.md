@@ -1,5 +1,5 @@
 ---
-name: apple-craft
+name: craft
 description: Apple 플랫폼 통합 개발 어시스턴트 — Swift, SwiftUI, UIKit, AppKit, Xcode 빌드/프리뷰/디버깅, 코드 작성/리뷰/리팩토링, Xcode MCP 연동. Xcode 26 최신 API 참조 문서 내장 (Liquid Glass, FoundationModels, Swift 6.2 등 20개 주제). iOS, macOS, watchOS, visionOS. swift, swiftui, uikit, appkit, xcode, 빌드, 프리뷰, 코드 리뷰, 리팩토링, 아키텍처, 디버깅, SPM, CocoaPods, xcodeproj, swift concurrency, combine, swiftdata, coredata, objective-c, swift package, 테스트, unit test, 시뮬레이터, instruments, 성능, 메모리, 앱 개발, Apple 플랫폼 코딩, iOS 26, macOS 26, WWDC, 최신 API, 새 프레임워크.
 argument-hint: "[topic, question, or task]"
 allowed-tools:
@@ -161,7 +161,7 @@ Xcode MCP 서버가 연결되어 있으면 적극 활용합니다. 미연결 시
    - 복합 주제 (예: "위젯에 Liquid Glass") → 2-3개 파일
 3. **Fallback 검색**: 매칭이 불명확하면 Grep으로 references/ 전체 검색:
    ```
-   Grep: pattern="검색어" path="${CLAUDE_PLUGIN_ROOT}/skills/apple-craft/references/"
+   Grep: pattern="검색어" path="${CLAUDE_PLUGIN_ROOT}/skills/craft/references/"
    ```
 4. **외부 검색**: 로컬 참조에 없는 API는 `mcp__xcode__DocumentationSearch` 사용
 

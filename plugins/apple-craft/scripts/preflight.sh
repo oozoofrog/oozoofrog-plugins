@@ -8,7 +8,7 @@ if [[ -z "${CLAUDE_PLUGIN_ROOT:-}" ]]; then
   exit 1
 fi
 
-REF_DIR="${CLAUDE_PLUGIN_ROOT}/skills/apple-craft/references"
+REF_DIR="${CLAUDE_PLUGIN_ROOT}/skills/craft/references"
 
 if [[ ! -d "$REF_DIR" ]]; then
   echo "apple-craft: 참조 디렉토리가 존재하지 않습니다: $REF_DIR" >&2

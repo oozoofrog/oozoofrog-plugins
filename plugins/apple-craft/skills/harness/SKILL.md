@@ -1,5 +1,5 @@
 ---
-name: apple-craft-harness
+name: harness
 description: apple-craft 하네스 모드 — Plan→Build→Evaluate 에이전트 루프로 장기 개발 작업 자동화. Anthropic V2 간소화 패턴 기반. "처음부터", "전체", "기능 개발", "feature development", "앱 만들어", "프로젝트 생성", "리팩토링", "대규모 변경", "harness", "하네스", "처음부터 만들어", "전체 구현", "새 앱", "new app", "full implementation", "from scratch" 요청 시 활성화
 argument-hint: "[feature description or project idea]"
 allowed-tools:
@@ -90,7 +90,7 @@ Anthropic의 [Harness Design](https://www.anthropic.com/engineering/harness-desi
 
 > **설계 원칙**: 이 하네스는 Anthropic의 Harness Design 블로그에 기반합니다.
 > 모든 에이전트는 시작 시 다음 문서를 참조합니다:
-> `${CLAUDE_PLUGIN_ROOT}/skills/apple-craft-harness/references/harness-design-principles.md`
+> `${CLAUDE_PLUGIN_ROOT}/skills/harness/references/harness-design-principles.md`
 
 ## 환경 도구 활용
 
@@ -127,7 +127,7 @@ Agent 도구 호출:
 
     harness-spec.md와 features.json을 생성해주세요.
     apple-craft 참조 문서 라우팅 테이블을 참조하세요:
-    ${CLAUDE_PLUGIN_ROOT}/skills/apple-craft/SKILL.md
+    ${CLAUDE_PLUGIN_ROOT}/skills/craft/SKILL.md
 ```
 
 **Phase 1 완료 검증 (필수):**
@@ -400,7 +400,7 @@ apple-craft-harness 실행 흐름
 실제 하네스 실행의 전체 과정을 보려면 참조 문서를 읽으세요:
 
 ```
-Read: ${CLAUDE_PLUGIN_ROOT}/skills/apple-craft-harness/references/walkthrough-liquid-glass-settings.md
+Read: ${CLAUDE_PLUGIN_ROOT}/skills/harness/references/walkthrough-liquid-glass-settings.md
 ```
 
 이 워크스루는 "Liquid Glass 설정 화면 구현"의 Phase 1→2→3 전체 과정을 보여줍니다:

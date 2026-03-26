@@ -40,7 +40,7 @@ tools:
 4. Evaluator 피드백이 있으면 (재실행 시) 해당 피드백을 우선 반영
 5. harness-design-principles.md 읽기:
    ```
-   Read: ${CLAUDE_PLUGIN_ROOT}/skills/apple-craft-harness/references/harness-design-principles.md
+   Read: ${CLAUDE_PLUGIN_ROOT}/skills/harness/references/harness-design-principles.md
    ```
    → "V2 패턴" 섹션에서 Builder의 역할 확인
    → "한 번에 한 기능씩"의 이론적 근거 확인
@@ -58,7 +58,7 @@ tools:
 
 선택한 기능의 `reference` 필드에 지정된 apple-craft 참조 문서를 Read합니다:
 ```
-Read: ${CLAUDE_PLUGIN_ROOT}/skills/apple-craft/references/<doc>.md
+Read: ${CLAUDE_PLUGIN_ROOT}/skills/craft/references/<doc>.md
 ```
 
 참조 문서의 내용을 학습 데이터보다 **항상 우선**합니다.
