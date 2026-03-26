@@ -6,3 +6,6 @@ firebase-debug.log
 
 # Claude Code
 .claude/ralph-loop.local.md
+
+# Git Worktrees
+.worktrees/

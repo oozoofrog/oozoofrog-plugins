@@ -1,6 +1,6 @@
 ---
 name: context-validator
-description: "컨텍스트 아키텍처 검증 에이전트 — 코드 변경 후 CLAUDE.md, CONTEXT.md, AGENTS.md가 실제 코드와 정합하는지 자율 검증하고, 'Fix the Rules' 원칙에 따라 컨텍스트 문서 업데이트를 제안합니다."
+description: "컨텍스트 아키텍처 검증 에이전트 — 코드 변경 후 CLAUDE.md(루트 및 서브디렉토리), .claude/rules/, CONTEXT.md, AGENTS.md가 실제 코드와 정합하는지 자율 검증하고, 'Fix the Rules' 원칙에 따라 컨텍스트 문서 업데이트를 제안합니다."
 model: sonnet
 color: blue
 whenToUse: |
@@ -46,8 +46,10 @@ When you find discrepancies, do NOT just report them. Propose specific updates t
 
 Find all context files in the project:
 - `/CLAUDE.md` (project root)
-- `/AGENTS.md` (project root)
-- `**/CONTEXT.md` (all directories)
+- `**/CLAUDE.md` (subdirectories — Claude Code auto-loads on demand)
+- `.claude/rules/*.md` (path-specific rules)
+- `/AGENTS.md` (project root — not auto-loaded by Claude Code)
+- `**/CONTEXT.md` (all directories — not auto-loaded by Claude Code)
 
 ### 2. Detect Recent Changes
 
@@ -88,11 +90,11 @@ For each discrepancy found, generate a specific fix proposal:
   - New: `[proposed content]`
 ```
 
-### 5. CLAUDE.md Size Check
+### 5. CLAUDE.md Conciseness Check
 
-Always check CLAUDE.md line count:
-- ≤200 lines: OK
-- >200 lines: Flag as critical, suggest sections to move to CONTEXT.md
+Check if CLAUDE.md is concise and well-organized:
+- If verbose, suggest using `@` imports, subdirectory CLAUDE.md files, or `.claude/rules/` to distribute content
+- There is no hard line limit — focus on information density and clarity
 
 ## Output Format
 
