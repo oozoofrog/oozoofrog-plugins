@@ -24,6 +24,24 @@ tools:
 "Builder가 참조할 수 있는 충분한 구조적 명세를 최소 비용으로 생성한다."
 — 완벽한 시각 디자인이 아닌, **토큰 매핑 + 화면 구조 + 컴포넌트 목록**이 핵심 산출물.
 
+## Design Philosophy: HIG Foundation + Free Expression
+
+디자인은 2계층으로 접근합니다:
+
+**1층 — HIG Foundation (필수)**
+- Apple HIG의 핵심 규칙을 반드시 준수
+- Safe Area, 터치 영역, 시맨틱 색상, Dynamic Type, 접근성, Liquid Glass 규칙
+- `apple-hig-map.md`의 "HIG Foundation 체크리스트" 전체 통과 필수
+
+**2층 — Free Expression (자유)**
+- Foundation 위에서 자유로운 디자인
+- 색상 팔레트, 카드/섹션 형태, 레이아웃 구성, 애니메이션, 아이콘 스타일
+- Pencil의 get_style_guide로 시각적 방향성 설정
+- harness-spec.md의 "사용자 맥락 > 디자인 취향" 반영
+
+HIG는 **제약이 아니라 기반**입니다. Things 3, Halide, Bear처럼
+HIG를 준수하면서도 독자적인 미학을 가진 앱이 최고의 Apple 앱입니다.
+
 ## 입력
 
 오케스트레이터가 전달하는 정보:
@@ -37,6 +55,12 @@ tools:
 `get_editor_state` 호출을 시도합니다.
 - 성공 → Pencil MCP 사용 가능, Step 1로 진행
 - 실패 → "Pencil MCP가 연결되지 않았습니다" 보고 후 종료
+
+2. apple-hig-map.md 읽기:
+   ```
+   Read: ${CLAUDE_PLUGIN_ROOT}/skills/harness/references/apple-hig-map.md
+   ```
+   → "조건부 DocumentationSearch 전략"과 "HIG Foundation 체크리스트" 숙지
 
 ### Step 1: 기존 디자인 탐색 (최우선)
 
@@ -68,6 +92,15 @@ Glob: **/*.pen → 프로젝트 내 .pen 파일 탐색
    - `get_style_guide(tags: [...])` 호출
    - Apple HIG에 맞는 기본 태그: ["mobile", "modern", "clean", "minimal", "soft-corners", "light-mode"]
 4. `open_document("new")` → 새 .pen 파일 생성
+5. **Apple HIG 조건부 조회** (apple-hig-map.md의 전략에 따라):
+   - Liquid Glass 관련 기능이 features.json에 있으면:
+     → `DocumentationSearch("Liquid Glass materials design")`
+   - iOS 26 새 컴포넌트 마이그레이션이 필요하면:
+     → `DocumentationSearch("Adopting Liquid Glass visual refresh")`
+   - Glass 색상 틴팅이 필요하면:
+     → `DocumentationSearch("Color Liquid Glass color")`
+   - 그 외 일반 HIG는 apple-hig-map.md의 빠른 참조로 충분 (추가 조회 불필요)
+   - **실패 시**: 정적 참조(apple-hig-map.md 체크리스트)로 진행, design-spec.md에 기록
 
 ### Step 3: 디자인 토큰 정의
 
@@ -169,6 +202,18 @@ content=I(screen,{type:"frame",layout:"vertical",width:"fill_container",height:"
   - 프로필 카드: HStack, $radius-card, $surface 배경
   - 설정 섹션: List > Section
 - 사용 토큰: $bg, $surface, $accent, $radius-card, $font-headline
+
+## HIG Foundation 체크리스트
+- [ ] Safe Area 준수 (Status Bar, Home Indicator, Dynamic Island)
+- [ ] 터치 타겟 최소 44×44pt
+- [ ] 시맨틱 색상 사용 (systemBackground, label, separator)
+- [ ] Dark Mode 대응 (양쪽 색상 제공)
+- [ ] Dynamic Type 지원 (body, headline 최소)
+- [ ] accessibilityLabel 인터랙티브 요소 전체
+- [ ] 네비게이션 Back 제스처 동작
+- [ ] 키보드 dismiss 처리
+- [ ] 대비율 4.5:1 이상 (WCAG AA)
+- [ ] Liquid Glass 컨트롤/네비게이션 레이어만
 ```
 
 ### Step 6: features.json 업데이트
