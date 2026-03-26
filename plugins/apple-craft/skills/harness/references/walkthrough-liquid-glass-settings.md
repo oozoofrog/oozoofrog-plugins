@@ -1,8 +1,12 @@
 # Walkthrough: Liquid Glass 설정 화면 구현
 
-apple-craft-harness의 Plan -> Build -> Evaluate 루프를 사용하여 SwiftUI 설정 화면에
+apple-craft-harness의 Plan→Build→Evaluate 루프를 사용하여 SwiftUI 설정 화면에
 Liquid Glass 디자인을 적용하는 전체 과정입니다. 10개 기능(기본 5 + 차별화 5)을
 4축 다차원 평가로 검증하는 개선된 하네스 흐름을 시연합니다.
+
+> **참고**: 이 워크스루는 **Pencil MCP 미연결 환경**에서의 실행 예시입니다.
+> Phase 2(DESIGN)은 Pencil MCP가 사용 가능할 때만 실행되므로, 여기서는 자동 스킵됩니다.
+> Phase 번호는 스킵된 Phase를 제외한 실제 실행 순서를 따릅니다.
 
 ---
 
@@ -357,10 +361,10 @@ Read: harness-design-principles.md -> 4축 평가 가중치
 
 | 축 | 가중치 | 설명 |
 |----|--------|------|
-| 기능 완성도 | 30% | 핵심 기능이 의도대로 동작하는가 |
-| 코드 품질 | 20% | Best Practices, 안티패턴 부재 |
-| UI 품질 | 30% | 레이아웃, 색상, 타이포, 다크모드 |
-| 인터랙션 | 20% | 터치 반응, 전환, 접근성 |
+| 기능 완성도 | 35% | 핵심 기능이 의도대로 동작하는가 |
+| 코드 품질 | 25% | Best Practices, 안티패턴 부재 |
+| UI 품질 | 25% | 레이아웃, 색상, 타이포, 다크모드 |
+| 인터랙션 | 15% | 터치 반응, 전환, 접근성 |
 
 ---
 

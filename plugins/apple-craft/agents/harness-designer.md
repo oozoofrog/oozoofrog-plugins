@@ -119,12 +119,13 @@ Glob: **/*.pen → 프로젝트 내 .pen 파일 탐색
   $error: #FF3B30 (systemRed)
   $success: #34C759 (systemGreen)
 
-타이포:
-  $font-title: 28 (largeTitleSize)
-  $font-headline: 18
-  $font-body: 16
-  $font-caption: 14
-  $font-footnote: 12
+타이포 (HIG Text Style 기준):
+  $font-largeTitle: 34 (Large Title)
+  $font-title: 28 (Title 1)
+  $font-headline: 17 (Headline, Semibold)
+  $font-body: 17 (Body)
+  $font-caption: 12 (Caption 1)
+  $font-footnote: 13 (Footnote)
 
 스페이싱:
   $spacing-xs: 4
@@ -188,8 +189,8 @@ content=I(screen,{type:"frame",layout:"vertical",width:"fill_container",height:"
 | $accent | #007AFF | Color.accentColor |
 | $text-primary | #000000 | Color(.label) |
 | $text-secondary | #3C3C4399 | Color(.secondaryLabel) |
-| $font-title | 28pt Bold | .font(.system(size: 28, weight: .bold)) |
-| $font-body | 16pt Regular | .font(.body) |
+| $font-title | 28pt Regular | .font(.title) |
+| $font-body | 17pt Regular | .font(.body) |
 | $radius-card | 16 | .clipShape(RoundedRectangle(cornerRadius: 16)) |
 | $spacing-lg | 16 | .padding(16) 또는 VStack(spacing: 16) |
 

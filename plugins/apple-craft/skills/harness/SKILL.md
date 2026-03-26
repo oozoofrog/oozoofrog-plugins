@@ -477,8 +477,8 @@ apple-craft-harness 실행 흐름
 Read: ${CLAUDE_PLUGIN_ROOT}/skills/harness/references/walkthrough-liquid-glass-settings.md
 ```
 
-이 워크스루는 "Liquid Glass 설정 화면 구현"의 Phase 1→3→4 전체 과정을 보여줍니다:
-- harness-spec.md와 features.json 예시
-- 5개 기능의 순차 구현 코드
-- Evaluator의 다차원 검증 결과 (PASS 4개 + PARTIAL 1개)
-- 1라운드에서 90% 통과한 실제 흐름
+이 워크스루는 "Liquid Glass 설정 화면 구현"의 Phase 1→1.5→3→4 전체 과정을 보여줍니다
+(Phase 2 DESIGN은 Pencil MCP 미연결으로 자동 스킵된 시나리오):
+- harness-spec.md와 features.json 예시 (10개 기능)
+- Evaluator의 4축 다차원 검증 결과
+- 1라운드에서 80% 통과한 실제 흐름
