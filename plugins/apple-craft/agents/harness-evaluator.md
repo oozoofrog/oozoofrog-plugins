@@ -4,7 +4,7 @@ description: "apple-craft harness 전용 — 빌드 결과를 4축 다차원 기
 model: sonnet
 color: red
 whenToUse: |
-  이 에이전트는 apple-craft-harness 스킬의 Phase 1.5(VERIFICATION_REVIEW)와 Phase 3(EVALUATE)에서 호출됩니다.
+  이 에이전트는 apple-craft-harness 스킬의 Phase 1.5(VERIFICATION_REVIEW)와 Phase 4(EVALUATE)에서 호출됩니다.
   직접 호출하지 마세요. apple-craft-harness 스킬이 오케스트레이션합니다.
 tools:
   - Read
@@ -99,6 +99,11 @@ apple-craft 하네스가 오케스트레이션을 주도하며, 외부 도구는
 - safe-design-advisor, code-review, swift-master 등
 - common-mistakes.md 경로 확인
 
+#### 0-D. 디자인 도구 탐지
+- Pencil MCP: get_editor_state 시도 → DESIGN_TOOL = "pencil" | "none"
+- design-spec.md 존재 여부 → DESIGN_SPEC = true | false
+- .pen 파일 경로 확인 (features.json의 design.penFile 또는 Glob)
+
 ### Step 1: 상태 파악
 
 1. harness-design-principles.md 읽기:
@@ -152,6 +157,19 @@ apple-craft 하네스가 오케스트레이션을 주도하며, 외부 도구는
 - RenderPreview 스크린샷 확인
 - 코드에서 하드코딩된 frame 크기, 임시 색상(Color.red) 탐지
 - HIG 패턴 준수 여부 (코드 리뷰 기반)
+
+**DESIGN_SPEC = true 일 때 (디자인 명세 존재, 추가 검증):**
+
+구조적 비교 (핵심):
+1. design-spec.md의 "화면별 구조" 읽기
+2. 코드의 SwiftUI View 계층과 디자인 구조를 대조
+3. design-spec.md의 토큰 매핑 테이블 vs 코드의 실제 Color/Font 사용 대조
+   → 불일치 시 구체적 보고: "디자인 토큰 $accent(#007AFF) → Color.accentColor인데, 코드에서 Color.blue 사용"
+
+시각적 참조 (보조, DESIGN_TOOL = "pencil" 시):
+4. get_screenshot(.pen frameId) → 디자인 스크린샷
+5. RenderPreview 또는 시뮬레이터 스크린샷과 대략적 비교
+   → 렌더링 엔진이 다르므로 픽셀 비교가 아닌 "대략적 구조 일치" 수준
 
 #### 2d. 인터랙션 품질 (Interaction Quality) — 가중치 15%
 
@@ -209,6 +227,13 @@ apple-craft 하네스가 오케스트레이션을 주도하며, 외부 도구는
 | 5-6 | 시각적으로 정상이나 접근성 label 일부 누락. |
 | 3-4 | 레이아웃 일부 비정상 또는 접근성 대부분 누락. |
 | 1-2 | 레이아웃 깨짐 또는 텍스트 잘림 또는 빈 화면. |
+
+**디자인 명세 있을 때 추가 기준:**
+- 9-10: design-spec.md의 구조와 100% 일치. 토큰 매핑 100% 반영.
+- 7-8: 구조 일치하나 토큰 1-2개 미적용 (경미).
+- 5-6: 주요 구조 유사하나 토큰 다수 미적용 또는 다른 색상 사용.
+- 3-4: 디자인 구조와 상당히 다름. 레이아웃 불일치.
+- 1-2: 디자인이 있으나 코드가 완전히 다른 구조.
 
 ### 인터랙션 품질
 | 점수 | 기준 |
