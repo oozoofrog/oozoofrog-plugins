@@ -1,8 +1,8 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "oozoofrog-plugins",
-  "version": "1.13.0",
-  "description": "oozoofrog의 개인 Claude Code 플러그인 마켓플레이스 — macOS 릴리스 자동화, 컨텍스트 아키텍처, GPT 리서치, Codex CLI 위임, Apple 앱 자동화, Apple 플랫폼 통합 개발 어시스턴트",
+  "version": "1.14.0",
+  "description": "oozoofrog의 개인 Claude Code 플러그인 마켓플레이스 — macOS 릴리스 자동화, 컨텍스트 아키텍처, GPT 리서치, Codex CLI 위임, Apple 앱 자동화, Apple 플랫폼 통합 개발 어시스턴트, 플러그인 진단·수정",
   "owner": {
     "name": "oozoofrog",
     "email": "oozoofrog@gmail.com"
@@ -66,6 +66,16 @@
         "name": "oozoofrog"
       },
       "source": "./plugins/apple-craft",
+      "category": "development"
+    },
+    {
+      "name": "plugin-doctor",
+      "description": "Claude Code 플러그인 종합 진단·수정·개선 도구: 마켓플레이스/plugin.json/스킬/에이전트/훅 검증 및 자동 수정",
+      "version": "1.0.0",
+      "author": {
+        "name": "oozoofrog"
+      },
+      "source": "./plugins/plugin-doctor",
       "category": "development"
     }
   ]
