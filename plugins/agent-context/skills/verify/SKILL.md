@@ -2,12 +2,16 @@
 name: verify
 description: 계층적 컨텍스트 아키텍처의 3단계 검증을 실행합니다 — 참조 무결성, 코드 참조 유효성, 내용 정확성을 순차적으로 검사하여 리포트를 생성합니다.
 argument-hint: "[stage 번호: 1|2|3|all (기본: all)]"
-allowed-tools: Read, Glob, Grep, Bash
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
+  - Bash
 ---
 
 # Context Architecture Verify
 
-계층적 컨텍스트 아키텍처의 3단계 검증을 수행한다. 상세 검증 절차는 `context-architecture` 스킬의 `references/verification-guide.md`를 참조한다.
+계층적 컨텍스트 아키텍처의 3단계 검증을 수행한다. 상세 검증 절차는 `guide` 스킬의 `references/verification-guide.md`를 참조한다.
 
 ## Execution Steps
 
@@ -20,7 +24,7 @@ allowed-tools: Read, Glob, Grep, Bash
 - `AGENTS.md` (프로젝트 루트 — Claude Code 자동 로딩 안 됨)
 - `**/CONTEXT.md` (전체 디렉토리 — Claude Code 자동 로딩 안 됨)
 
-파일이 하나도 없으면 "컨텍스트 아키텍처가 아직 초기화되지 않았습니다. `/context-architect:init`을 먼저 실행하세요."를 출력하고 종료한다.
+파일이 하나도 없으면 "컨텍스트 아키텍처가 아직 초기화되지 않았습니다. `/agent-context:init`을 먼저 실행하세요."를 출력하고 종료한다.
 
 인자로 stage 번호가 지정된 경우 해당 단계만 실행한다. 기본값은 `all` (전체 실행).
 

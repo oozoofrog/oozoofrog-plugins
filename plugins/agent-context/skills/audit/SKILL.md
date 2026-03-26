@@ -1,12 +1,16 @@
 ---
 name: audit
 description: 컨텍스트 아키텍처의 토큰 효율성을 감사합니다 — CLAUDE.md 간결성, 계층 구조 깊이, 정보 중복, 컨텍스트 분산 활용도를 분석하여 개선 제안을 제공합니다.
-allowed-tools: Read, Glob, Grep, Bash
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
+  - Bash
 ---
 
 # Context Architecture Audit
 
-컨텍스트 아키텍처의 토큰 효율성을 종합 감사한다. 상세 최적화 기법은 `context-architecture` 스킬의 `references/token-optimization.md`를 참조한다.
+컨텍스트 아키텍처의 토큰 효율성을 종합 감사한다. 상세 최적화 기법은 `guide` 스킬의 `references/token-optimization.md`를 참조한다.
 
 ## Execution Steps
 
