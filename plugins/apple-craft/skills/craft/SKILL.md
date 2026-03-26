@@ -121,8 +121,8 @@ Xcode MCP 서버가 연결되어 있으면 적극 활용합니다. 미연결 시
 
 - 사용자 쿼리 키워드가 아래 Document Routing Table과 **매칭되면** → Read로 참조 문서를 로드하여 최신 API 정보 제공
 - **매칭되지 않으면** → 참조 문서 없이 일반 Swift/Apple 프레임워크 지식 + Xcode MCP 도구로 대응
-- 코드 스타일은 `reference/code-style.md`를 참조
-- 흔한 실수 방지는 `reference/common-mistakes.md`를 참조
+- 코드 스타일은 `references/code-style.md`를 참조
+- 흔한 실수 방지는 `references/common-mistakes.md`를 참조
 
 ---
 
@@ -179,8 +179,8 @@ Swift/Xcode 프로젝트에서 코드를 작성하거나 수정할 때 사용합
 ### Phase 2: 코드 작성
 1. 매칭된 참조 문서가 있으면 코드 예시를 기반으로 작성, 없으면 일반 Swift 지식으로 작성
 2. Write/Edit 도구로 파일에 적용
-3. 코드 스타일은 `reference/code-style.md`를 Read하여 참조
-4. 참조 문서 매칭 시 `reference/common-mistakes.md`를 Read하여 흔한 실수 방지
+3. 코드 스타일은 `references/code-style.md`를 Read하여 참조
+4. 참조 문서 매칭 시 `references/common-mistakes.md`를 Read하여 흔한 실수 방지
 
 ### Phase 3: 빌드 검증 (Xcode MCP 연결 시)
 1. `mcp__xcode__XcodeRefreshCodeIssuesInFile`로 빠른 진단 (1순위)
@@ -191,7 +191,7 @@ Swift/Xcode 프로젝트에서 코드를 작성하거나 수정할 때 사용합
 1. `mcp__xcode__RenderPreview`로 SwiftUI 프리뷰 확인
 2. Liquid Glass, Charts 3D, Toolbar 등 시각적 기능은 프리뷰 검증 필수
 
-응답 형식은 `reference/response-templates.md`를 참조하세요.
+응답 형식은 `references/response-templates.md`를 참조하세요.
 
 ---
 
@@ -213,7 +213,7 @@ Apple 프레임워크 API 설명, 변경 사항 비교, 사용법 안내를 할 
 1. `mcp__xcode__ExecuteSnippet`으로 API 동작 확인 가능
 2. 사용자가 원하면 실행 결과를 보여줌
 
-응답 형식은 `reference/response-templates.md`를 참조하세요.
+응답 형식은 `references/response-templates.md`를 참조하세요.
 
 ---
 
@@ -228,7 +228,7 @@ Apple 프레임워크 API 설명, 변경 사항 비교, 사용법 안내를 할 
 
 ### Phase 2: 원인 분석
 1. Document Routing Table에서 키워드 매칭 → 매칭 시 참조 파일 검색
-2. 매칭 시 `reference/common-mistakes.md`를 Read하여 알려진 패턴 확인
+2. 매칭 시 `references/common-mistakes.md`를 Read하여 알려진 패턴 확인
 3. 매칭 없으면 일반 Swift/Xcode 디버깅 지식으로 원인 분석
 4. 사용자 코드와 올바른 패턴 비교
 
@@ -242,7 +242,7 @@ Apple 프레임워크 API 설명, 변경 사항 비교, 사용법 안내를 할 
 2. 필요 시 `mcp__xcode__BuildProject`로 재빌드
 3. 에러 해소 및 추가 경고 없는지 확인
 
-응답 형식은 `reference/response-templates.md`를 참조하세요.
+응답 형식은 `references/response-templates.md`를 참조하세요.
 
 ---
 
