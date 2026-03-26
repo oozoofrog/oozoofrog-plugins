@@ -46,8 +46,10 @@ When you find discrepancies, do NOT just report them. Propose specific updates t
 
 Find all context files in the project:
 - `/CLAUDE.md` (project root)
-- `/AGENTS.md` (project root)
-- `**/CONTEXT.md` (all directories)
+- `**/CLAUDE.md` (subdirectories — Claude Code auto-loads on demand)
+- `.claude/rules/*.md` (path-specific rules)
+- `/AGENTS.md` (project root — not auto-loaded by Claude Code)
+- `**/CONTEXT.md` (all directories — not auto-loaded by Claude Code)
 
 ### 2. Detect Recent Changes
 
@@ -88,11 +90,11 @@ For each discrepancy found, generate a specific fix proposal:
   - New: `[proposed content]`
 ```
 
-### 5. CLAUDE.md Size Check
+### 5. CLAUDE.md Conciseness Check
 
-Always check CLAUDE.md line count:
-- ≤200 lines: OK
-- >200 lines: Flag as critical, suggest sections to move to CONTEXT.md
+Check if CLAUDE.md is concise and well-organized:
+- If verbose, suggest using `@` imports, subdirectory CLAUDE.md files, or `.claude/rules/` to distribute content
+- There is no hard line limit — focus on information density and clarity
 
 ## Output Format
 

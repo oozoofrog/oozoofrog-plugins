@@ -2,13 +2,23 @@
 
 대규모 프로젝트를 위한 계층적 컨텍스트 아키텍처 자동화 플러그인.
 
-CLAUDE.md, CONTEXT.md, AGENTS.md로 구성되는 3계층 컨텍스트 구조를 스캐폴딩하고, 검증하고, 토큰 효율성을 감사합니다.
+CLAUDE.md(루트 + 서브디렉토리), `.claude/rules/`, AGENTS.md로 구성되는 계층적 컨텍스트 구조를 스캐폴딩하고, 검증하고, 토큰 효율성을 감사합니다. CONTEXT.md는 타 AI 도구 호환용으로 지원합니다.
 
 ## 핵심 개념
 
 - **주의력 예산(Attention Budget)**: LLM의 토큰 제한 내에서 최적의 정보만 노출
 - **국소성(Locality)**: 정보를 해당 코드와 물리적으로 인접하게 배치
 - **점진적 노출(Progressive Disclosure)**: 필요한 시점에만 컨텍스트 로드
+
+## Claude Code 컨텍스트 로딩
+
+| 파일 | 자동 로딩 | 로딩 시점 |
+|------|-----------|-----------|
+| `/CLAUDE.md` | ✅ | 세션 시작 시 |
+| 서브디렉토리 `CLAUDE.md` | ✅ | 해당 디렉토리 파일 접근 시 (on-demand) |
+| `.claude/rules/*.md` | ✅ | glob 패턴 매칭 시 |
+| `AGENTS.md` | ❌ | `@AGENTS.md` import 필요 |
+| `CONTEXT.md` | ❌ | 명시적 Read 또는 `@` import 필요 |
 
 ## 설치
 
@@ -36,7 +46,7 @@ CLAUDE.md, CONTEXT.md, AGENTS.md로 구성되는 3계층 컨텍스트 구조를 
 
 ### Hook
 
-`SessionStart` — CLAUDE.md가 200라인을 초과하면 세션 시작 시 경고 표시.
+`SessionStart` — CLAUDE.md가 없으면 세션 시작 시 초기화 안내 표시.
 
 ## 사용 예시
 

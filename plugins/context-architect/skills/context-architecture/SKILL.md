@@ -12,13 +12,13 @@ version: 1.0.0
 
 프로젝트에 컨텍스트 아키텍처를 도입하려면 다음 3단계를 따른다:
 
-1. **초기화**: `/context-architect:init` 실행 — 프로젝트를 분석하여 CLAUDE.md(≤200라인), 서브시스템별 CONTEXT.md, AGENTS.md를 자동 생성한다.
+1. **초기화**: `/context-architect:init` 실행 — 프로젝트를 분석하여 CLAUDE.md, 서브디렉토리 CLAUDE.md, `.claude/rules/`, AGENTS.md를 자동 생성한다.
 2. **검증**: `/context-architect:verify` 실행 — 참조 무결성, 코드 참조, 내용 정확성을 3단계로 검증한다.
 3. **유지**: 코드 변경 시 컨텍스트 문서도 함께 업데이트한다. `/context-architect:audit`로 주기적으로 토큰 효율성을 감사한다.
 
 ## Core Problem
 
-LLM은 **주의력 예산(Attention Budget)** 제약 하에 작동한다. 토큰 증가 시 O(n²) 연산 복잡도로 인해 정보 회상 능력이 저하되는 **컨텍스트 부패(Context Rot)** 현상이 발생한다. 정보를 전략적으로 구조화하여 고신호 토큰만 선별 노출하는 것이 핵심이다.
+LLM은 **주의력 예산(Attention Budget)** 제약 하에 작동한다. 토큰이 증가하면 정보 회상 능력이 저하되는 **컨텍스트 부패(Context Rot)** 현상이 발생할 수 있다. 정보를 전략적으로 구조화하여 고신호 토큰만 선별 노출하는 것이 핵심이다.
 
 ## Two Fundamental Principles
 
@@ -32,45 +32,73 @@ LLM은 **주의력 예산(Attention Budget)** 제약 하에 작동한다. 토큰
 
 ## Three-Tier File Standard
 
-### CLAUDE.md — Project Root (Layer 0)
+### CLAUDE.md — Project Root & Subdirectories (Layer 0-2)
 
-프로젝트 루트의 최상위 지속적 컨텍스트. **반드시 200라인 이내**를 유지한다.
+프로젝트 루트의 최상위 지속적 컨텍스트. 간결하게 유지하는 것을 권장한다.
 
-- **컴팩션 생존**: 대화 이력 요약 시 디스크에서 다시 읽어 재주입됨
+- **컴팩션 생존**: 대화 이력 요약 시 디스크에서 다시 읽어 재주입됨 (파일 길이와 무관)
+- **계층적 로딩**: Claude Code는 working directory에서 git root까지 모든 CLAUDE.md를 자동 로딩하며, 하위 디렉토리의 CLAUDE.md는 해당 파일 접근 시 on-demand 로딩
+- **`@` import**: `@path/to/file` 구문으로 외부 파일 참조 가능 (예: `@src/api/API-GUIDE.md`)
 - **포함**: 빌드/테스트 명령, 아키텍처 결정, 환경 변수
 - **제외**: 빈번히 변경되는 정보, 상세 API 문서, 스타일 가이드
 
-### CONTEXT.md — Subsystem (Layer 1-2)
+### `.claude/rules/` — Path-Specific Rules (Layer 1-2)
+
+Claude Code 네이티브 기능. glob 패턴으로 특정 경로의 파일 작업 시 자동 적용되는 규칙 파일.
+
+- **자동 로딩**: 파일 경로가 glob 패턴에 매칭되면 해당 규칙이 자동 적용됨
+- **예시**: `.claude/rules/api-rules.md` (패턴: `src/api/**`) → API 관련 파일 작업 시 자동 로딩
+- CONTEXT.md의 "경로별 컨텍스트" 역할을 네이티브로 대체 가능
+
+### CONTEXT.md — Subsystem Context (수동 참조용)
 
 서브시스템별 상세 도메인 지식을 담은 계층적 지식 트리.
 
+> **주의**: Claude Code는 CONTEXT.md를 **자동 로딩하지 않는다**. 에이전트가 명시적으로 Read하거나, CLAUDE.md에서 `@CONTEXT.md`로 import해야 로딩된다. 자동 로딩이 필요하면 서브디렉토리 CLAUDE.md 또는 `.claude/rules/`를 사용한다.
+
 - **포함**: 도메인 로직의 의도(Why), 서브시스템 고유 패턴, 하위 지식 링크
 - **제외**: 린터가 처리 가능한 스타일 규칙, 표준 라이브러리 설명
+- **타 도구 호환**: Cursor, Windsurf 등 CONTEXT.md를 인식하는 도구와의 호환성 유지
 
-### AGENTS.md — Universal Portability (Layer 0)
+### AGENTS.md — Universal Portability (타 도구 호환용)
 
-Cursor, Aider, GitHub Copilot 등 20,000+ 프로젝트가 채택한 범용 표준.
+Cursor, Aider, GitHub Copilot 등 다양한 AI 도구가 참조하는 범용 표준.
+
+> **주의**: Claude Code는 AGENTS.md를 **자동 로딩하지 않는다**. CLAUDE.md에서 `@AGENTS.md`로 import하면 내용을 공유할 수 있다.
 
 - **포함**: 범용 에이전트 지침, 마크다운 기반 협업 규칙
 - **제외**: 복잡한 메타데이터, 도구 전용 설정값
 
 ## Layered Discovery Mechanism
 
-에이전트는 작업 대상 파일(Leaf)에서 루트까지 거슬러 올라가며 컨텍스트를 수집한다. 하위의 구체적 지침이 상위의 일반 지침보다 우선한다.
+Claude Code는 CLAUDE.md 파일을 계층적으로 탐색한다. 하위의 구체적 지침이 상위의 일반 지침보다 우선한다.
+
+**Claude Code의 실제 자동 로딩 동작:**
 
 ```
 예: src/api/auth.ts 작업 시
-Layer 0: /CLAUDE.md          ← 아키텍처 표준, 도구 명령
-Layer 1: /src/CONTEXT.md     ← 소스 폴더 구조, 데이터 흐름
-Layer 2: /src/api/CONTEXT.md ← API 명세, 인증 로직 특이사항
-Layer 3: src/api/auth.ts     ← 코드, Diff, 테스트 결과
+
+[세션 시작 시 자동 로딩]
+Layer 0: /CLAUDE.md              ← 아키텍처 표준, 도구 명령
+
+[해당 파일 접근 시 on-demand 로딩]
+Layer 1: /src/CLAUDE.md          ← 소스 폴더 구조, 데이터 흐름
+Layer 2: /src/api/CLAUDE.md      ← API 명세, 인증 로직 특이사항
+
+[glob 패턴 매칭 시 자동 로딩]
+Rules:  .claude/rules/api.md     ← src/api/** 패턴에 매칭되는 규칙
+
+[항상 접근 가능]
+Layer 3: src/api/auth.ts         ← 코드, Diff, 테스트 결과
 ```
+
+> **참고**: CONTEXT.md와 AGENTS.md는 자동 로딩 대상이 아니다. `@` import 또는 명시적 Read로 접근해야 한다.
 
 ## Token Optimization Techniques
 
 ### XML 태깅으로 지침 누출 방지
 
-마크다운보다 XML 태그 사용 시 지시 이행 정밀도 15% 향상. 데이터가 지침으로 오인되는 지침 누출(Instruction Leakage) 방지:
+XML 태그를 사용하면 데이터와 지침 사이의 경계가 명확해져 지시 이행 정밀도가 향상된다. 데이터가 지침으로 오인되는 지침 누출(Instruction Leakage) 방지:
 
 ```xml
 <instructions>
@@ -82,6 +110,8 @@ Layer 3: src/api/auth.ts     ← 코드, Diff, 테스트 결과
 ```
 
 ### 프롬프트 캐싱 (Prefix Preservation)
+
+> **참고**: Claude Code CLI는 프롬프트 캐싱을 내부적으로 관리한다. 아래 내용은 Claude API를 직접 사용하는 경우에 해당한다.
 
 정적 지침(CLAUDE.md 등)을 프롬프트 앞부분에 배치하여 캐시 히트를 극대화한다. 동적 질문과 실시간 로그는 뒤에 배치한다.
 
