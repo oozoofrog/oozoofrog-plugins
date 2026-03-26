@@ -16,7 +16,7 @@ oozoofrog의 개인 Claude Code 플러그인 마켓플레이스입니다.
 | [context-architect](plugins/context-architect/) | 계층적 컨텍스트 아키텍처 자동화 (스캐폴딩, 검증, 토큰 효율성 감사) | `/plugin install context-architect@oozoofrog-plugins` |
 | [gpt-research](plugins/gpt-research/) | GPT-PRO 리서치 위임용 구조화된 프롬프트 생성 (module/arch/issue/custom) | `/plugin install gpt-research@oozoofrog-plugins` |
 | [hey-codex](plugins/hey-codex/) | Codex CLI에 작업 위임 (코드 생성, 분석, 리팩토링) | `/plugin install hey-codex@oozoofrog-plugins` |
-| [apple-craft](plugins/apple-craft/) | Apple 최신 API 통합 개발 가이드 (Xcode 26, 20개 주제) | `/plugin install apple-craft@oozoofrog-plugins` |
+| [apple-craft](plugins/apple-craft/) | Apple 플랫폼 통합 개발 어시스턴트 — Swift/SwiftUI/UIKit + Xcode MCP 연동 + 최신 API 참조 문서 20개 내장 | `/plugin install apple-craft@oozoofrog-plugins` |
 
 ## 플러그인 구조
 
