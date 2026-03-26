@@ -1,8 +1,8 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "oozoofrog-plugins",
-  "version": "1.8.0",
-  "description": "oozoofrog의 개인 Claude Code 플러그인 마켓플레이스 — macOS 릴리스 자동화, 컨텍스트 아키텍처, GPT 리서치, Codex CLI 위임, Apple 최신 API 개발 가이드",
+  "version": "1.9.0",
+  "description": "oozoofrog의 개인 Claude Code 플러그인 마켓플레이스 — macOS 릴리스 자동화, 컨텍스트 아키텍처, GPT 리서치, Codex CLI 위임, Apple 플랫폼 통합 개발 어시스턴트",
   "owner": {
     "name": "oozoofrog",
     "email": "oozoofrog@gmail.com"
@@ -50,8 +50,8 @@
     },
     {
       "name": "apple-craft",
-      "description": "Apple 플랫폼 최신 API 통합 개발 가이드 (Xcode 26) — 20개 주제 + Plan→Build→Evaluate 하네스 에이전트 루프",
-      "version": "1.2.0",
+      "description": "Apple 플랫폼 통합 개발 어시스턴트 — Swift/SwiftUI/UIKit 코드 작성·리뷰·디버깅 + Xcode MCP 연동 + Xcode 26 최신 API 참조 문서 20개 내장 + Plan→Build→Evaluate 하네스",
+      "version": "1.3.0",
       "author": {
         "name": "oozoofrog"
       },
