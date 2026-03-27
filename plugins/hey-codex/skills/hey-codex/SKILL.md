@@ -2,13 +2,6 @@
 name: hey-codex
 description: Codex CLI에 작업을 위임합니다. "codex", "codex한테", "codex로", "코덱스", "codex 시켜", "codex에게", "codex delegate" 등 Codex CLI에 작업을 넘기거나 위임하는 요청에 사용하세요.
 argument-hint: "[작업 설명]"
-allowed-tools:
-  - Bash
-  - Read
-  - Write
-  - Edit
-  - Glob
-  - Grep
 ---
 
 <example>

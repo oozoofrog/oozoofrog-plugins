@@ -2,13 +2,6 @@
 name: macos-release
 description: macOS 앱 릴리스 파이프라인 자동화 — Xcode 버전 범프, Release 빌드, DMG 패키징, 로컬 설치, GitHub Release, Homebrew Cask 배포, GitHub Actions CI/CD를 관리합니다. "릴리스", "release", "버전 업데이트", "version bump", "배포", "deploy", "홈브루 업데이트", "brew cask", "DMG 만들기", "새 버전 배포", "publish", "CI/CD", "workflow", "자동 배포", "GitHub Actions" 등 macOS 앱 배포 관련 요청이 있을 때 반드시 사용하세요. "새 버전 배포해주세요", "릴리스 스크립트 만들어주세요", "홈브루에 올려주세요", "배포 자동화 워크플로우 만들어주세요" 같은 요청도 포함합니다.
 argument-hint: "[release | setup | dry-run | brew-only | ci-setup] [version]"
-allowed-tools:
-  - Read
-  - Glob
-  - Grep
-  - Edit
-  - Write
-  - Bash
 ---
 
 <example>

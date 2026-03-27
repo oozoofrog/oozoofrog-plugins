@@ -2,5 +2,5 @@
   "name": "app-automation",
   "description": "Apple 앱 자동화 — iOS Simulator + macOS 앱 UI 인터랙션, 접근성 검증, 스크린샷, 워크플로우 자동화. mcp-baepsae MCP 서버 통합.",
   "author": { "name": "oozoofrog" },
-  "version": "1.0.0"
+  "version": "1.0.1"
 }

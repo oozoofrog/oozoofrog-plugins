@@ -2,24 +2,6 @@
 name: app-automation
 description: Apple 앱 자동화 가이드 — iOS Simulator + macOS 앱 UI 인터랙션, 접근성 검증, 스크린샷/비디오, 워크플로우 자동화. "시뮬레이터 자동화", "앱 자동화", "app automation", "UI 테스트", "접근성 검증", "스크린샷", "시뮬레이터 탭", "macOS 앱 조작", "인터랙션 테스트", "워크플로우 자동화" 요청 시 활성화
 argument-hint: "[자동화 대상 앱, 시나리오, 또는 질문]"
-allowed-tools:
-  - Bash
-  - Read
-  - Glob
-  - Grep
-  - Write
-  - Edit
-  - mcp__plugin_axe-simulator_axe-simulator__axe_tap
-  - mcp__plugin_axe-simulator_axe-simulator__axe_swipe
-  - mcp__plugin_axe-simulator_axe-simulator__axe_type
-  - mcp__plugin_axe-simulator_axe-simulator__axe_key
-  - mcp__plugin_axe-simulator_axe-simulator__axe_key_combo
-  - mcp__plugin_axe-simulator_axe-simulator__axe_button
-  - mcp__plugin_axe-simulator_axe-simulator__axe_gesture
-  - mcp__plugin_axe-simulator_axe-simulator__axe_screenshot
-  - mcp__plugin_axe-simulator_axe-simulator__axe_describe_ui
-  - mcp__plugin_axe-simulator_axe-simulator__axe_list_simulators
-  - mcp__plugin_axe-simulator_axe-simulator__axe_batch
 ---
 
 <example>

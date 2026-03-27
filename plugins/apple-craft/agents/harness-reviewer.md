@@ -6,13 +6,6 @@ color: orange
 whenToUse: |
   이 에이전트는 apple-review 스킬의 Phase R1(SCAN + CLASSIFY + ACT)에서 호출됩니다.
   직접 호출하지 마세요. apple-review 스킬이 오케스트레이션합니다.
-tools:
-  - Read
-  - Write
-  - Edit
-  - Glob
-  - Grep
-  - Bash
 ---
 
 # Harness Reviewer Agent

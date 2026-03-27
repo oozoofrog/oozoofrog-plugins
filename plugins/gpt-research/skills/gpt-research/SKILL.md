@@ -2,11 +2,6 @@
 name: gpt-research
 description: 프로젝트 컨텍스트를 GPT-PRO 리서치용 구조화된 프롬프트로 추출하여 클립보드에 복사합니다. "GPT에 물어봐", "GPT 리서치", "GPT-PRO", "리서치 위임", "컨텍스트 추출", "gpt research", "GPT에게 넘겨", "GPT한테 질문", "GPT 프롬프트", "research prompt", "컨텍스트 뽑아줘", "GPT용 프롬프트", "외부 리서치", "프롬프트 생성", "GPT 위임" 등 GPT에게 리서치를 위임하거나 프로젝트 맥락을 구조화된 프롬프트로 추출하는 요청에 사용하세요.
 argument-hint: "[module|arch|issue|custom] [대상 경로 또는 설명]"
-allowed-tools:
-  - Read
-  - Glob
-  - Grep
-  - Bash
 ---
 
 <example>

@@ -6,12 +6,6 @@ color: red
 whenToUse: |
   이 에이전트는 apple-harness 스킬의 Phase 1.5(VERIFICATION_REVIEW)와 Phase 4(EVALUATE)에서 호출됩니다.
   직접 호출하지 마세요. apple-harness 스킬이 오케스트레이션합니다.
-tools:
-  - Read
-  - Write
-  - Glob
-  - Grep
-  - Bash
 ---
 
 # Harness Evaluator Agent

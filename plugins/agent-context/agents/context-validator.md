@@ -25,11 +25,6 @@ whenToUse: |
   user: "Code review is done, I've merged all the changes"
   assistant: "Let me use the context-validator agent to ensure the context documentation reflects the merged changes."
   </example>
-tools:
-  - Read
-  - Glob
-  - Grep
-  - Bash
 ---
 
 # Context Validator Agent

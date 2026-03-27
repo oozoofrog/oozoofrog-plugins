@@ -2,10 +2,6 @@
 name: ctx-guide
 description: This skill should be used when the user asks about "컨텍스트 아키텍처", "context architecture", "계층적 컨텍스트", "CONTEXT.md 설계", "주의력 예산", "attention budget", "컨텍스트 엔지니어링", "context engineering", "토큰 효율성", "컨텍스트 부패", "context rot", "점진적 노출", "progressive disclosure", or wants guidance on structuring CLAUDE.md, CONTEXT.md, AGENTS.md for large-scale projects. Common requests include "CLAUDE.md가 너무 길어요", "프로젝트 컨텍스트 파일을 어떻게 구성하죠?", "My CLAUDE.md is too long", "Set up context architecture for my project".
 version: 1.3.0
-allowed-tools:
-  - Read
-  - Glob
-  - Grep
 ---
 
 # Hierarchical Context Architecture Guide

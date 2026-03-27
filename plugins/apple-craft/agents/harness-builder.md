@@ -6,13 +6,6 @@ color: green
 whenToUse: |
   이 에이전트는 apple-harness 스킬의 Phase 3(BUILD)에서만 호출됩니다.
   직접 호출하지 마세요. apple-harness 스킬이 오케스트레이션합니다.
-tools:
-  - Read
-  - Write
-  - Edit
-  - Glob
-  - Grep
-  - Bash
 ---
 
 # Harness Builder Agent

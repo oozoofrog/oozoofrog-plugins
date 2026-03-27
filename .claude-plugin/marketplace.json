@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "oozoofrog-plugins",
-  "version": "1.17.3",
+  "version": "1.18.0",
   "description": "oozoofrog의 개인 Claude Code 플러그인 마켓플레이스 — macOS 릴리스 자동화, 컨텍스트 아키텍처, GPT 리서치, Codex CLI 위임, Apple 앱 자동화, Apple 플랫폼 통합 개발 어시스턴트, 플러그인 진단·수정",
   "owner": {
     "name": "oozoofrog",
@@ -11,7 +11,7 @@
     {
       "name": "macos-release",
       "description": "macOS 앱/CLI 릴리스 자동화: 버전 범프, 빌드, DMG/ZIP 패키징, GitHub Release, Homebrew Cask/Formula, release workflow 구축",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "author": {
         "name": "oozoofrog"
       },
@@ -21,7 +21,7 @@
     {
       "name": "agent-context",
       "description": "대규모 프로젝트를 위한 계층적 컨텍스트 아키텍처 자동화: CLAUDE.md/CONTEXT.md/AGENTS.md 스캐폴딩, 3단계 검증, 토큰 효율성 감사",
-      "version": "1.4.0",
+      "version": "1.4.1",
       "author": {
         "name": "oozoofrog"
       },
@@ -31,7 +31,7 @@
     {
       "name": "gpt-research",
       "description": "프로젝트 컨텍스트를 GPT-PRO 리서치용 구조화된 프롬프트로 추출하여 클립보드에 복사",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "author": {
         "name": "oozoofrog"
       },
@@ -41,7 +41,7 @@
     {
       "name": "hey-codex",
       "description": "Codex CLI에 작업을 위임하여 코드 생성, 분석, 리팩토링 등을 수행",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "author": {
         "name": "oozoofrog"
       },
@@ -51,7 +51,7 @@
     {
       "name": "app-automation",
       "description": "Apple 앱 자동화 — iOS Simulator + macOS 앱 UI 인터랙션, 접근성 검증, 스크린샷, 워크플로우 자동화. mcp-baepsae MCP 서버 통합",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "author": {
         "name": "oozoofrog"
       },
@@ -61,7 +61,7 @@
     {
       "name": "apple-craft",
       "description": "Apple 플랫폼 통합 개발 어시스턴트 — Swift/SwiftUI/UIKit 코드 작성·코드 리뷰·디버깅 + Xcode MCP 연동 + Xcode 26 최신 API 참조 문서 20개 내장 + Apple 에코시스템 참조 문서 기반 코드 리뷰 + Plan→Design→Build→Evaluate 하네스 (V2, Pencil 디자인+다차원 평가+런타임 검증)",
-      "version": "1.9.3",
+      "version": "1.9.4",
       "author": {
         "name": "oozoofrog"
       },
@@ -71,7 +71,7 @@
     {
       "name": "plugin-doctor",
       "description": "Claude Code 플러그인 종합 진단·수정·개선 도구: 마켓플레이스/plugin.json/스킬/에이전트/훅 검증 및 자동 수정",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "author": {
         "name": "oozoofrog"
       },

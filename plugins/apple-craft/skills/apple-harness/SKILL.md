@@ -2,39 +2,6 @@
 name: apple-harness
 description: apple-craft 하네스 모드 — Plan→Design→Build→Evaluate 에이전트 루프로 장기 개발 작업 자동화. Anthropic V2 간소화 패턴 기반. "처음부터", "전체", "기능 개발", "feature development", "앱 만들어", "프로젝트 생성", "리팩토링", "대규모 변경", "harness", "하네스", "처음부터 만들어", "전체 구현", "새 앱", "new app", "full implementation", "from scratch" 요청 시 활성화
 argument-hint: "[feature description or project idea]"
-allowed-tools:
-  - Agent
-  - Read
-  - Write
-  - Edit
-  - Bash
-  - Glob
-  - Grep
-  - mcp__xcode__DocumentationSearch
-  - mcp__xcode__BuildProject
-  - mcp__xcode__GetBuildLog
-  - mcp__xcode__XcodeRefreshCodeIssuesInFile
-  - mcp__xcode__XcodeListNavigatorIssues
-  - mcp__xcode__ExecuteSnippet
-  - mcp__xcode__RenderPreview
-  - mcp__xcode__XcodeRead
-  - mcp__xcode__XcodeWrite
-  - mcp__xcode__XcodeUpdate
-  - mcp__xcode__XcodeGrep
-  - mcp__xcode__XcodeGlob
-  # Pencil MCP (디자인)
-  - mcp__pencil__get_editor_state
-  - mcp__pencil__open_document
-  - mcp__pencil__get_guidelines
-  - mcp__pencil__get_style_guide_tags
-  - mcp__pencil__get_style_guide
-  - mcp__pencil__batch_design
-  - mcp__pencil__batch_get
-  - mcp__pencil__get_screenshot
-  - mcp__pencil__get_variables
-  - mcp__pencil__set_variables
-  - mcp__pencil__export_nodes
-  - mcp__pencil__find_empty_space_on_canvas
 ---
 
 <example>

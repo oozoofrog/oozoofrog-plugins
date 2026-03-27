@@ -2,25 +2,6 @@
 name: apple-review
 description: apple-craft 리뷰 모드 — Apple 에코시스템 참조 문서 20개 + common-mistakes.md + code-style.md 기반 코드 리뷰 + 자동 수정 + GitHub Issue 생성. "리뷰", "코드 리뷰", "review", "검토", "점검", "PR 리뷰", "audit", "봐줘", "확인해", "체크", "살펴", "분석", "check", "analyze", "inspect", "코드 봐줘", "PR 확인", "코드 점검" 요청 시 활성화
 argument-hint: "[file, directory, or PR number]"
-allowed-tools:
-  - Agent
-  - Read
-  - Write
-  - Edit
-  - Bash
-  - Glob
-  - Grep
-  - mcp__xcode__DocumentationSearch
-  - mcp__xcode__BuildProject
-  - mcp__xcode__GetBuildLog
-  - mcp__xcode__XcodeRefreshCodeIssuesInFile
-  - mcp__xcode__XcodeListNavigatorIssues
-  - mcp__xcode__ExecuteSnippet
-  - mcp__xcode__XcodeRead
-  - mcp__xcode__XcodeGrep
-  - mcp__xcode__XcodeGlob
-  - mcp__plugin_github_github__issue_write
-  - mcp__plugin_github_github__search_issues
 ---
 
 <example>
