@@ -45,13 +45,13 @@ tools:
    ```
 1.5. **하네스 설계 원칙 숙지:**
    ```
-   Read: ${CLAUDE_PLUGIN_ROOT}/skills/harness/references/harness-design-principles.md
+   Read: ${CLAUDE_PLUGIN_ROOT}/skills/apple-harness/references/harness-design-principles.md
    ```
    → "핵심 원칙"과 "V2 패턴" 섹션을 숙지하고 스펙 설계에 반영
    → Planner는 전체 비용의 0.4%로 가장 높은 ROI를 제공하는 에이전트 — 이 단계에서의 질문 투자가 이후 전체 품질을 결정합니다.
 2. apple-craft 참조 문서 라우팅 테이블 읽기:
    ```
-   Read: ${CLAUDE_PLUGIN_ROOT}/skills/craft/SKILL.md
+   Read: ${CLAUDE_PLUGIN_ROOT}/skills/apple-craft/SKILL.md
    ```
    Document Routing Table에서 사용자 요구사항과 관련된 참조 문서를 식별합니다.
    **만약 SKILL.md를 읽을 수 없으면 STOP** — 사용자에게 "apple-craft 참조 문서에 접근할 수 없습니다. 플러그인이 올바르게 설치되었는지 확인해주세요."라고 보고하고 진행하지 마세요.
