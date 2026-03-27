@@ -32,10 +32,10 @@ CLAUDE.md(루트 + 서브디렉토리), `.claude/rules/`, AGENTS.md로 구성되
 
 | 스킬 | 설명 |
 |------|------|
-| `/agent-context:guide` | 계층적 컨텍스트 설계 원칙 및 실무 가이드 |
-| `/agent-context:init` | 프로젝트 분석 → 계층적 컨텍스트 스캐폴딩 |
-| `/agent-context:verify` | 3단계 검증 (참조 무결성, 코드 참조, 내용 정확성) |
-| `/agent-context:audit` | 토큰 효율성 감사 (간결성, 계층 깊이, 중복, 커버리지) |
+| `/agent-context:ctx-guide` | 계층적 컨텍스트 설계 원칙 및 실무 가이드 |
+| `/agent-context:ctx-init` | 프로젝트 분석 → 계층적 컨텍스트 스캐폴딩 |
+| `/agent-context:ctx-verify` | 3단계 검증 (참조 무결성, 코드 참조, 내용 정확성) |
+| `/agent-context:ctx-audit` | 토큰 효율성 감사 (간결성, 계층 깊이, 중복, 커버리지) |
 
 ### Agent
 
@@ -49,17 +49,17 @@ CLAUDE.md(루트 + 서브디렉토리), `.claude/rules/`, AGENTS.md로 구성되
 
 ```bash
 # 새 프로젝트에 컨텍스트 아키텍처 초기화
-/agent-context:init
+/agent-context:ctx-init
 
 # 주기적 검증 (전체)
-/agent-context:verify
+/agent-context:ctx-verify
 
 # 특정 단계만 검증
-/agent-context:verify 1    # 참조 무결성만
-/agent-context:verify 2    # 코드 참조만
+/agent-context:ctx-verify 1    # 참조 무결성만
+/agent-context:ctx-verify 2    # 코드 참조만
 
 # 토큰 효율성 감사
-/agent-context:audit
+/agent-context:ctx-audit
 ```
 
 ## 파일 구조
@@ -69,17 +69,17 @@ agent-context/
 ├── .claude-plugin/
 │   └── plugin.json
 ├── skills/
-│   ├── guide/
+│   ├── ctx-guide/
 │   │   ├── SKILL.md
 │   │   └── references/
 │   │       ├── file-standards.md
 │   │       ├── token-optimization.md
 │   │       └── verification-guide.md
-│   ├── init/
+│   ├── ctx-init/
 │   │   └── SKILL.md
-│   ├── verify/
+│   ├── ctx-verify/
 │   │   └── SKILL.md
-│   └── audit/
+│   └── ctx-audit/
 │       └── SKILL.md
 ├── agents/
 │   └── context-validator.md

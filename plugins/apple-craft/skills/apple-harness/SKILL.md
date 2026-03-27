@@ -1,5 +1,5 @@
 ---
-name: harness
+name: apple-harness
 description: apple-craft 하네스 모드 — Plan→Design→Build→Evaluate 에이전트 루프로 장기 개발 작업 자동화. Anthropic V2 간소화 패턴 기반. "처음부터", "전체", "기능 개발", "feature development", "앱 만들어", "프로젝트 생성", "리팩토링", "대규모 변경", "harness", "하네스", "처음부터 만들어", "전체 구현", "새 앱", "new app", "full implementation", "from scratch" 요청 시 활성화
 argument-hint: "[feature description or project idea]"
 allowed-tools:

@@ -12,11 +12,11 @@ Claude Code 플러그인 마켓플레이스 리포지토리.
 | 플러그인 | 스킬 | 에이전트 | 훅 |
 |----------|------|---------|-----|
 | macos-release | macos-release | — | — |
-| agent-context | guide, init, verify, audit | context-validator | SessionStart |
+| agent-context | ctx-guide, ctx-init, ctx-verify, ctx-audit | context-validator | SessionStart |
 | gpt-research | gpt-research | — | — |
 | hey-codex | hey-codex | — | — |
 | app-automation | app-automation | — | — (.mcp.json: baepsae) |
-| apple-craft | craft, harness | harness-planner, harness-builder, harness-designer, harness-evaluator | — |
+| apple-craft | apple-craft, apple-harness | harness-planner, harness-builder, harness-designer, harness-evaluator | — |
 | plugin-doctor | fixer | — | — |
 
 ## 플러그인 개발 규칙
