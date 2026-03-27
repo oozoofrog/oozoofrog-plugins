@@ -11,7 +11,7 @@ Xcode 26 번들 문서 기반 최신 API 참조 문서 20개 내장.
 | **코드 작성** | Swift/SwiftUI/UIKit/AppKit 코드 작성, 리팩토링, 마이그레이션 |
 | **빌드 & 디버깅** | Xcode MCP 연동으로 빌드, 프리뷰, 에러 진단 |
 | **API 탐색** | DocumentationSearch + 20개 최신 API 참조 문서 |
-| **코드 리뷰** | 코드 스타일, 아키텍처, 성능 검토 |
+| **코드 리뷰** | Apple 에코시스템 참조 문서 기반 심층 코드 리뷰 + 자동 수정/GitHub Issue 생성 |
 | **Harness 모드** | Plan→Build→Evaluate 에이전트 루프로 장기 개발 자동화 |
 
 ## 내장 참조 문서 (20개)
@@ -40,6 +40,10 @@ Xcode 26 번들 문서 기반 최신 API 참조 문서 20개 내장.
 - "Liquid Glass 적용 방법 알려줘" → explore 모드 + 참조 문서 로드
 - "FoundationModels로 세션 만드는 코드" → implement 모드 + 참조 문서 로드
 
+### 코드 리뷰
+- "이 코드 리뷰해줘" → review 모드
+- "PR #42 리뷰 부탁해" → review 모드
+
 ### 장기 개발 작업 (Harness 모드)
 - "처음부터 Liquid Glass 설정 화면 만들어줘" → harness 모드
 - "전체 UI를 Liquid Glass로 리팩토링해줘" → harness 모드
@@ -53,6 +57,7 @@ Anthropic의 [Harness Design](https://www.anthropic.com/engineering/harness-desi
 | `harness-planner` | 제품 스펙 + JSON 기능 목록 생성 | 🔵 |
 | `harness-builder` | Swift 코드 작성 + Xcode 빌드 + Git 커밋 | 🟢 |
 | `harness-evaluator` | 회의적 QA 검증 (PASS/PARTIAL/FAIL) | 🔴 |
+| `harness-reviewer` | Apple 에코시스템 참조 문서 기반 코드 리뷰 | 🟠 |
 
 ```
 Plan(스펙) → Build(코드+빌드) → Evaluate(검증) → 최대 3 라운드
