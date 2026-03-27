@@ -104,14 +104,53 @@ common-mistakes.md의 `❌ Wrong` 패턴과 대상 코드를 비교합니다:
 - @State private var 패턴
 - 파일/타입 구조
 
-#### 2-3. 참조 문서 Best Practices 비교
+#### 2-3. 코드 위생 (Code Hygiene) 스캔
+
+Grep으로 다음 패턴을 반드시 스캔합니다:
+
+**주석 마커**:
+```
+Grep: pattern="(TODO|FIXME|HACK|XXX|TEMP|WORKAROUND):" path=<대상 파일>
+```
+- `TODO:` — 미완성 로직 잔존 (minor, production 코드에서는 major)
+- `FIXME:` — 알려진 결함 미수정 (major)
+- `HACK:` / `XXX:` / `WORKAROUND:` — 임시 해결책 잔존 (minor)
+- `TEMP` / `temporary` — 임시 코드 (minor)
+
+**deprecated API 패턴**:
+```
+Grep: pattern="(PreviewProvider|UIAlertView|UIWebView|NSURLConnection|NSURLSession\.shared\.dataTask\(with:|\.observe\(\\.|addObserver\(self)" path=<대상 파일>
+```
+- `PreviewProvider` → `#Preview` 매크로
+- `UIAlertView` → `UIAlertController`
+- `UIWebView` → `WKWebView`
+- `NSURLConnection` → `URLSession`
+- `dataTask(with:completionHandler:)` → `data(from:) async`
+- KVO `observe` / `addObserver` → Combine 또는 `@Observable`
+
+**위험 패턴**:
+```
+Grep: pattern="(try!|as!|force_cast|implicitly.unwrapped|Color\.(red|blue|green)\b|\.frame\(width:\s*\d+)" path=<대상 파일>
+```
+- `try!` / `as!` — force unwrap / force cast
+- 하드코딩된 `Color.red`, `Color.blue` — 임시 디버그 색상 잔존
+- `.frame(width: 숫자)` — 하드코딩된 프레임 크기
+
+**빈 구현 패턴**:
+```
+Grep: pattern="catch\s*\{(\s*\}|\s*//|\s*/\*)" path=<대상 파일> multiline=true
+```
+- empty catch block — 에러 무시
+- `{ }` 또는 `{ // }` 형태의 빈 클로저
+
+#### 2-4. 참조 문서 Best Practices 비교
 
 매칭된 참조 문서의 Best Practices/권장 패턴 대비:
-- deprecated API 사용 여부
+- deprecated API 사용 여부 (2-3에서 탐지된 항목 + 참조 문서별 deprecated 패턴)
 - 최신 API 사용 가능 시 구버전 API 사용
 - 참조 문서에서 권장하는 패턴과 상이한 구현
 
-#### 2-4. Xcode MCP 활용 (연결 시)
+#### 2-5. Xcode MCP 활용 (연결 시)
 
 Xcode MCP 서버가 연결되어 있으면:
 - `XcodeRefreshCodeIssuesInFile`로 각 파일 빠른 진단
@@ -128,10 +167,10 @@ Xcode MCP 서버가 연결되어 있으면:
 
 | Level | 기준 | 예시 |
 |-------|------|------|
-| `critical` | 크래시, 데이터 레이스, 메모리 릭, 보안 취약점 | force unwrap of nil-possible optional, actor isolation 위반 |
-| `major` | common-mistakes.md 위반, 잘못된 API 사용, 에러 처리 누락 | FoundationModels availability 미체크, GlassEffectContainer 미사용 |
-| `minor` | 스타일 위반, accessibilityLabel 누락, TODO 잔존 | @State var (private 누락), PreviewProvider 사용 |
-| `suggestion` | 더 나은 대안 존재, 성능 최적화 기회, 최신 API 활용 가능 | Combine → async/await 전환 가능, InlineArray 활용 가능 |
+| `critical` | 크래시, 데이터 레이스, 메모리 릭, 보안 취약점 | force unwrap (`try!`, `as!`), actor isolation 위반, empty catch block |
+| `major` | common-mistakes.md 위반, 잘못된 API 사용, 에러 처리 누락, FIXME 잔존 | FoundationModels availability 미체크, GlassEffectContainer 미사용, FIXME 주석 |
+| `minor` | 스타일 위반, accessibilityLabel 누락, TODO/HACK/TEMP 잔존, deprecated API | @State var (private 누락), PreviewProvider 사용, TODO 주석, 하드코딩 Color/frame |
+| `suggestion` | 더 나은 대안 존재, 성능 최적화 기회, 최신 API 활용 가능 | Combine → async/await 전환 가능, InlineArray 활용 가능, KVO → @Observable |
 
 #### complexity (수정 난이도)
 
@@ -260,6 +299,7 @@ complexity가 needs-investigation인 항목:
 | `accessibility` | accessibilityLabel 누락, VoiceOver 미지원 등 |
 | `concurrency` | 동시성 관련 문제 (data race, actor isolation 등) |
 | `security` | 보안 취약점 (하드코딩된 시크릿, 입력 검증 누락 등) |
+| `code-hygiene` | TODO/FIXME/HACK/TEMP 잔존, empty catch, 하드코딩 Color/frame, 임시 코드 |
 
 ## Rules
 
