@@ -40,9 +40,9 @@ Xcode 26 번들 문서 기반 최신 API 참조 문서 20개 내장.
 - "Liquid Glass 적용 방법 알려줘" → explore 모드 + 참조 문서 로드
 - "FoundationModels로 세션 만드는 코드" → implement 모드 + 참조 문서 로드
 
-### 코드 리뷰
-- "이 코드 리뷰해줘" → review 모드
-- "PR #42 리뷰 부탁해" → review 모드
+### 코드 리뷰 (`/apple-review`)
+- "이 코드 리뷰해줘" → `/apple-review` 스킬
+- "PR #42 리뷰 부탁해" → `/apple-review` 스킬
 
 ### 장기 개발 작업 (Harness 모드)
 - "처음부터 Liquid Glass 설정 화면 만들어줘" → harness 모드

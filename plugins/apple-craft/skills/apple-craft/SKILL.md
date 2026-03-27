@@ -21,9 +21,6 @@ allowed-tools:
   - mcp__xcode__XcodeUpdate
   - mcp__xcode__XcodeGrep
   - mcp__xcode__XcodeGlob
-  - Agent
-  - mcp__plugin_github_github__issue_write
-  - mcp__plugin_github_github__search_issues
 ---
 
 <example>
@@ -100,7 +97,7 @@ Xcode 26 참조 문서(20개 주제) 내장으로 최신 API도 정확하게 지
 | **implement** | 만들어, 작성, 적용, 구현, 추가, 코드, 리팩토링, 마이그레이션, build, create, add, apply, refactor | 코드 작성 + 빌드 검증. 참조 문서 매칭 시 최신 API 활용 |
 | **explore** | 알려줘, 설명, 뭐가 바뀌었어, 차이, 어떻게, 비교, 추천, what, how, explain, diff, compare | API/코드 설명 + 코드 예시. `DocumentationSearch`로 공식 문서 검색 |
 | **troubleshoot** | 에러, 오류, 안돼, 크래시, 빌드 실패, 느려, 성능, 메모리, error, crash, fix, debug, slow | 빌드 로그/코드 분석 + 수정. `GetBuildLog`, `XcodeListNavigatorIssues` 활용 |
-| **review** | 리뷰, 코드 리뷰, review, 검토, 점검, PR 리뷰, audit, 봐줘, 확인해, 체크, 살펴, 분석, check, analyze, inspect | Apple 에코시스템 참조 문서 기반 코드 리뷰 + 자동 수정/이슈 생성 |
+| **review** | 리뷰, 코드 리뷰, review, 검토, 점검, PR 리뷰, audit, 봐줘, 확인해, 체크, 살펴, 분석, check, analyze, inspect | → `apple-review` 스킬로 전환 |
 | **harness** | 처음부터, 전체, 기능 개발, 대규모, 전면 리팩토링, harness | → `apple-craft-harness` 스킬로 전환 |
 
 **자동 선택**: 키워드가 불명확하면 사용자 의도를 추론합니다. 코드 파일이 언급되면 implement, 질문형이면 explore, 에러 메시지가 포함되면 troubleshoot, 기존 코드에 대한 평가/의견 요청이면 review.
@@ -259,66 +256,6 @@ Apple 프레임워크 API 설명, 변경 사항 비교, 사용법 안내를 할 
 3. 에러 해소 및 추가 경고 없는지 확인
 
 응답 형식은 `references/response-templates.md`를 참조하세요.
-
----
-
-## Mode: review
-
-Apple 에코시스템 참조 문서 기반의 심층 코드 리뷰를 수행합니다.
-일반 코드 리뷰와 달리, 20개 Apple API 참조 문서 + common-mistakes.md를 기준으로
-Apple 플랫폼 고유의 문제를 발견하고 트리아지합니다.
-
-### Phase R0: 리뷰 범위 결정
-
-1. AskUserQuestion으로 리뷰 대상 확인:
-   - "현재 브랜치의 변경사항 (git diff)"
-   - "특정 파일/디렉토리"
-   - "PR #N"
-2. 선택적: 리뷰 초점 확인 (전체 / Apple 에코시스템 / 보안 / 성능 / 스타일)
-3. 대상 파일 목록 수집:
-   - git diff: `git diff --name-only <base>..HEAD -- '*.swift'`
-   - PR: `gh pr diff <N> --name-only`
-   - 디렉토리: `Glob: pattern="**/*.swift" path=<경로>`
-
-### Phase R1: 스캔 + 분류 + 수정
-
-harness-reviewer 에이전트를 디스패치합니다:
-
-```
-Agent: harness-reviewer
-  - 리뷰 대상 파일 목록
-  - 리뷰 초점
-```
-
-에이전트가 수행하는 작업:
-- common-mistakes.md + code-style.md + 매칭된 참조 문서 기반 정적 분석
-- severity(critical/major/minor/suggestion) × complexity(simple-fix/needs-investigation/complex) 분류
-- critical/major + simple-fix 항목 자동 수정 + git commit
-- needs-investigation 항목 심층 분석
-- `.claude/review/review-findings.json` + `.claude/review/review-report.md` 출력
-
-### Phase R2: 트리아지
-
-review-findings.json을 읽고 action별 처리:
-
-1. **action=fixed**: 이미 수정 완료 → 보고만 (커밋 해시 포함)
-2. **action=issue**: AskUserQuestion으로 GitHub Issue 생성 여부 확인
-   - 승인 시 `mcp__plugin_github_github__issue_write` 사용
-   - Title: `[apple-craft review] {description}`
-   - Body: 발견 사항, 참조 문서 출처, 수정 방향 포함
-   - Labels: `apple-craft-review` + severity 라벨
-3. **action=user-decision**: AskUserQuestion으로 사용자 판단 요청
-   - minor + simple-fix 항목을 일괄 제시: "다음 N건을 자동 수정할까요?"
-   - 승인 시 Edit으로 수정 + git commit
-4. **action=report-only**: 보고만 (suggestions)
-
-### Phase R3: 최종 보고
-
-review-report.md를 기반으로 사용자에게 요약 출력:
-- severity별 건수 + 조치 현황 (수정됨/이슈 생성됨/보고만)
-- 자동 수정된 커밋 목록
-- 생성된 GitHub Issue 링크 목록
-- 잔여 suggestions 요약
 
 ---
 
