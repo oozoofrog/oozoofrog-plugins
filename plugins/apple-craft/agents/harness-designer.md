@@ -13,6 +13,7 @@ tools:
   - Glob
   - Grep
   - Bash
+  - ToolSearch
 ---
 
 # Harness Designer Agent
