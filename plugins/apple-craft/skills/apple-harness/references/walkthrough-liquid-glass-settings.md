@@ -43,7 +43,7 @@ Q4: 테스트 환경은?
 A4: iPhone 16 Pro 시뮬레이터, iOS 26 beta.
 ```
 
-### Step 2: .claude/harness/harness-spec.md 생성
+### Step 2: {HARNESS_DIR}/harness-spec.md 생성
 
 ```markdown
 # 제품 스펙: Liquid Glass 설정 화면
@@ -69,7 +69,7 @@ haptic, 다크모드 전환, 에러 처리까지 포괄.
 iOS 26+ / SwiftUI + Liquid Glass, FoundationModels, MVVM + @Observable
 ```
 
-### Step 3: .claude/harness/features.json 생성
+### Step 3: {HARNESS_DIR}/features.json 생성
 
 10개 기능. Planner가 verification_steps를 초기 작성합니다.
 
@@ -90,8 +90,8 @@ iOS 26+ / SwiftUI + Liquid Glass, FoundationModels, MVVM + @Observable
 
 ### 사용자 확인 (마지막 확인점)
 
-> .claude/harness/harness-spec.md: 10개 기능, iOS 26+, MVVM + @Observable
-> .claude/harness/features.json: F001-F010 (기본 5 + 차별화 5)
+> {HARNESS_DIR}/harness-spec.md: 10개 기능, iOS 26+, MVVM + @Observable
+> {HARNESS_DIR}/features.json: F001-F010 (기본 5 + 차별화 5)
 > "이 스펙으로 진행할까요?" -> 사용자: "좋아요, 진행해주세요."
 
 ---
@@ -440,7 +440,7 @@ tap "검색 결과 항목" -> 탭 대상 없음 (FAIL)
 | F009 | 다크모드 전환 | 8 | 7 | 8 | 8 | 7.8 | PASS |
 | F010 | 에러 상태 처리 | 8 | 8 | 8 | 7 | 7.8 | PASS |
 
-### .claude/harness/evaluation-round-1.md 생성
+### {HARNESS_DIR}/evaluation-round-1.md 생성
 
 ```markdown
 # Evaluation Round 1
@@ -517,7 +517,7 @@ Git 히스토리:
 ### 1. Planner가 질문으로 맥락 수집 -- 이후 자율 진행의 기반
 
 4개의 AskUserQuestion으로 대상 사용자, 아키텍처, 차별화 요구, 테스트 환경을 수집.
-이 정보가 .claude/harness/harness-spec.md "사용자 맥락" 섹션에 기록되어 Phase 1.5 -> 3 전체 과정의
+이 정보가 {HARNESS_DIR}/harness-spec.md "사용자 맥락" 섹션에 기록되어 Phase 1.5 -> 3 전체 과정의
 의사결정 기반이 됩니다. 사용자는 Phase 1 확인 후 완료까지 개입 불필요.
 
 ### 2. Evaluator가 검증 기준을 사전 리뷰 (Phase 1.5)
@@ -546,7 +546,7 @@ UI 품질 6점(접근성 label 누락)으로 PARTIAL. harness-design-principles.
 Design Quality/Originality/Craft/Functionality를 적용한 결과. "빌드 성공"만으로는
 잡을 수 없는 품질 문제를 구조적으로 탐지.
 
-### 6. .claude/harness/evaluation-round-1.md로 구체적 수정 지침
+### 6. {HARNESS_DIR}/evaluation-round-1.md로 구체적 수정 지침
 
 단순 점수가 아닌 파일명, 라인 번호, 참조 문서까지 명시하는 수정 지침 제공.
 Builder가 다음 라운드에서 추가 조사 없이 바로 수정 착수 가능. Anthropic 사례의

@@ -26,8 +26,8 @@ whenToUse: |
 일반 검증(Step 0-5)은 실행하지 않습니다.
 
 ### VR-1: 입력 확인
-- .claude/harness/features.json 읽기
-- .claude/harness/harness-spec.md 읽기
+- {HARNESS_DIR}/features.json 읽기
+- {HARNESS_DIR}/harness-spec.md 읽기
 
 ### VR-2: 기능별 verification 검토
 
@@ -53,8 +53,8 @@ whenToUse: |
    ]
    ```
 
-### VR-3: .claude/harness/features.json 업데이트
-- 수정된 verification/verification_steps를 .claude/harness/features.json에 저장
+### VR-3: {HARNESS_DIR}/features.json 업데이트
+- 수정된 verification/verification_steps를 {HARNESS_DIR}/features.json에 저장
 - 기능을 삭제하거나 description을 변경하지 마세요
 
 ### VR-4: 리뷰 결과 요약 출력
@@ -95,7 +95,7 @@ apple-craft 하네스가 오케스트레이션을 주도하며, 외부 도구는
 
 #### 0-D. 디자인 도구 탐지
 - Pencil MCP: get_editor_state 시도 → DESIGN_TOOL = "pencil" | "none"
-- .claude/harness/design-spec.md 존재 여부 → DESIGN_SPEC = true | false
+- {HARNESS_DIR}/design-spec.md 존재 여부 → DESIGN_SPEC = true | false
 - .pen 파일 경로 확인 (features.json의 design.penFile 또는 Glob)
 
 ### Step 1: 상태 파악
@@ -106,10 +106,10 @@ apple-craft 하네스가 오케스트레이션을 주도하며, 외부 도구는
    ```
    → "Evaluator 튜닝 방법론"과 "프론트엔드 디자인 평가 기준" 섹션을 캘리브레이션 근거로 활용
 
-2. .claude/harness/features.json 읽기 — status=built인 기능 목록 확인
-3. .claude/harness/harness-spec.md 읽기 — 원래 의도, **사용자 맥락** 섹션 확인
+2. {HARNESS_DIR}/features.json 읽기 — status=built인 기능 목록 확인
+3. {HARNESS_DIR}/harness-spec.md 읽기 — 원래 의도, **사용자 맥락** 섹션 확인
 4. git log 확인 — Builder의 커밋 히스토리로 변경 내용 파악
-5. .claude/harness/evaluation-round-{N-1}.md가 있으면 읽기 — 이전 라운드 피드백 반영 여부 확인
+5. {HARNESS_DIR}/evaluation-round-{N-1}.md가 있으면 읽기 — 이전 라운드 피드백 반영 여부 확인
 
 ### Step 2: 기능별 4축 검증
 
@@ -155,9 +155,9 @@ apple-craft 하네스가 오케스트레이션을 주도하며, 외부 도구는
 **DESIGN_SPEC = true 일 때 (디자인 명세 존재, 추가 검증):**
 
 구조적 비교 (핵심):
-1. .claude/harness/design-spec.md의 "화면별 구조" 읽기
+1. {HARNESS_DIR}/design-spec.md의 "화면별 구조" 읽기
 2. 코드의 SwiftUI View 계층과 디자인 구조를 대조
-3. .claude/harness/design-spec.md의 토큰 매핑 테이블 vs 코드의 실제 Color/Font 사용 대조
+3. {HARNESS_DIR}/design-spec.md의 토큰 매핑 테이블 vs 코드의 실제 Color/Font 사용 대조
    → 불일치 시 구체적 보고: "디자인 토큰 $accent(#007AFF) → Color.accentColor인데, 코드에서 Color.blue 사용"
 
 시각적 참조 (보조, DESIGN_TOOL = "pencil" 시):
@@ -223,7 +223,7 @@ apple-craft 하네스가 오케스트레이션을 주도하며, 외부 도구는
 | 1-2 | 레이아웃 깨짐 또는 텍스트 잘림 또는 빈 화면. |
 
 **디자인 명세 있을 때 추가 기준:**
-- 9-10: .claude/harness/design-spec.md의 구조와 100% 일치. 토큰 매핑 100% 반영.
+- 9-10: {HARNESS_DIR}/design-spec.md의 구조와 100% 일치. 토큰 매핑 100% 반영.
 - 7-8: 구조 일치하나 토큰 1-2개 미적용 (경미).
 - 5-6: 주요 구조 유사하나 토큰 다수 미적용 또는 다른 색상 사용.
 - 3-4: 디자인 구조와 상당히 다름. 레이아웃 불일치.
@@ -246,13 +246,13 @@ apple-craft 하네스가 오케스트레이션을 주도하며, 외부 도구는
 
 ### Step 4: 결과 기록
 
-1. .claude/harness/features.json 업데이트:
+1. {HARNESS_DIR}/features.json 업데이트:
    - scores 필드에 4축 점수 기록
    - PASS(가중≥7) → status를 "verified"로
    - PARTIAL(4≤가중<7) → status를 "partial"로
    - FAIL(가중<4) → status를 "failed"로
 
-2. **`.claude/harness/evaluation-round-{N}.md` 파일 생성**:
+2. **`{HARNESS_DIR}/evaluation-round-{N}.md` 파일 생성**:
 
 ```markdown
 # Evaluation Round {N}/{MAX}
@@ -297,13 +297,13 @@ apple-craft 하네스가 오케스트레이션을 주도하며, 외부 도구는
 ### Step 5: 판정
 
 - 전체 기능의 **80% 이상이 PASS 또는 PARTIAL** → 판정: **PASS**
-- 미달 → 판정: **NEED_REVISION** (Builder에게 .claude/harness/evaluation-round-{N}.md의 수정 지침 전달)
+- 미달 → 판정: **NEED_REVISION** (Builder에게 {HARNESS_DIR}/evaluation-round-{N}.md의 수정 지침 전달)
 
 ## 주의사항
 
 - **절대 자기칭찬하지 마세요** — Builder의 코드가 아무리 잘 작성되어도 문제가 있으면 FAIL
 - **구체적으로** — "코드가 좋지 않다"가 아니라 "SettingsView.swift:42에서 GlassEffectContainer 누락" 수준으로
-- .claude/harness/features.json의 기능을 **삭제하거나 기준을 완화하지 마세요**
+- {HARNESS_DIR}/features.json의 기능을 **삭제하거나 기준을 완화하지 마세요**
 - 참조 문서의 Best Practices를 **검증 기준으로 적극 활용**하세요
 - common-mistakes.md를 **반드시 Read**하여 안티패턴을 기계적으로 대조하세요
 - **외부 도구는 보조 역할** — PASS/FAIL 판정은 반드시 이 Evaluator가 수행

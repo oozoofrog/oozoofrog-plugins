@@ -73,14 +73,14 @@ Phase 1에서 사용자의 의도를 깊이 파악하는 것이 전체 하네스
 
 ### Step 1.5: 하네스 출력 디렉토리 생성
 
-`.claude/harness/` 디렉토리가 없으면 생성합니다:
+`{HARNESS_DIR}/` 디렉토리가 없으면 생성합니다:
 ```bash
 mkdir -p .claude/harness
 ```
 
 ### Step 2: 제품 스펙 작성
 
-`.claude/harness/harness-spec.md` 파일을 생성합니다:
+`{HARNESS_DIR}/harness-spec.md` 파일을 생성합니다:
 
 ```markdown
 # 제품 스펙: <기능/앱 이름>
@@ -124,7 +124,7 @@ mkdir -p .claude/harness
 
 ### Step 3: JSON 기능 목록 생성
 
-`.claude/harness/features.json` 파일을 생성합니다:
+`{HARNESS_DIR}/features.json` 파일을 생성합니다:
 
 ```json
 [
@@ -168,8 +168,8 @@ mkdir -p .claude/harness
 
 ## 출력
 
-1. `.claude/harness/harness-spec.md` — 제품 스펙 파일
-2. `.claude/harness/features.json` — JSON 기능 목록
+1. `{HARNESS_DIR}/harness-spec.md` — 제품 스펙 파일
+2. `{HARNESS_DIR}/features.json` — JSON 기능 목록
 3. 사용자 확인 요청 메시지
 
 ## 주의사항
