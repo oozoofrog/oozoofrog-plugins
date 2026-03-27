@@ -1,5 +1,5 @@
 ---
-name: verify
+name: ctx-verify
 description: 계층적 컨텍스트 아키텍처의 3단계 검증을 실행합니다 — 참조 무결성, 코드 참조 유효성, 내용 정확성을 순차적으로 검사하여 리포트를 생성합니다.
 argument-hint: "[stage 번호: 1|2|3|all (기본: all)]"
 allowed-tools:

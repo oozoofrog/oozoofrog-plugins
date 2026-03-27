@@ -1,5 +1,5 @@
 ---
-name: init
+name: ctx-init
 description: 프로젝트를 분석하여 CLAUDE.md, 서브디렉토리 CLAUDE.md, .claude/rules/, AGENTS.md로 구성되는 계층적 컨텍스트 아키텍처를 스캐폴딩합니다. 기존 파일이 있으면 보존하고 보강합니다.
 argument-hint: "[대상 디렉토리 (생략 시 프로젝트 루트)]"
 allowed-tools:
