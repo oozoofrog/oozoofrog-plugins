@@ -84,7 +84,7 @@ Anthropic의 [Harness Design](https://www.anthropic.com/engineering/harness-desi
 ┌─────────────────────────────────┐
 │  Phase 2: DESIGN (선택적)       │  harness-designer 에이전트
 │  기존 .pen 읽기 또는 새로 생성  │  Apple HIG + 스타일 가이드
-│  디자인 토큰 + .claude/harness/design-spec.md │  Pencil 미연결 시 자동 스킵
+│  디자인 토큰 + .claude/harness/design-spec.md │  Pencil 미연결→자동 스킵 / 연결→유저 선택
 └────────┬────────────────────────┘
          │
          ▼
@@ -109,7 +109,7 @@ Anthropic의 [Harness Design](https://www.anthropic.com/engineering/harness-desi
 
 > **설계 원칙**: 이 하네스는 Anthropic의 Harness Design 블로그에 기반합니다.
 > 모든 에이전트는 시작 시 다음 문서를 참조합니다:
-> `${CLAUDE_PLUGIN_ROOT}/skills/harness/references/harness-design-principles.md`
+> `${CLAUDE_PLUGIN_ROOT}/skills/apple-harness/references/harness-design-principles.md`
 
 ## 환경 도구 활용
 
@@ -151,7 +151,7 @@ Agent 도구 호출:
 
     .claude/harness/harness-spec.md와 .claude/harness/features.json을 생성해주세요.
     apple-craft 참조 문서 라우팅 테이블을 참조하세요:
-    ${CLAUDE_PLUGIN_ROOT}/skills/craft/SKILL.md
+    ${CLAUDE_PLUGIN_ROOT}/skills/apple-craft/SKILL.md
 ```
 
 **Phase 1 완료 검증 (필수):**
@@ -194,12 +194,37 @@ Agent 도구 호출:
 
 ### Phase 2: DESIGN (선택적)
 
-Pencil MCP가 사용 가능한 경우에만 실행합니다.
-이 단계는 **사용자 확인 없이 자율 진행**합니다.
+Pencil MCP 사용 가능 여부와 작업 맥락에 따라 실행 여부를 결정합니다.
 
-**Pencil 탐지**: get_editor_state 호출 시도
-- 성공 → harness-designer 에이전트 호출
-- 실패 → Phase 2 스킵, Phase 3(BUILD)로 직행
+**Step 1: Pencil 탐지** — get_editor_state 호출 시도
+- 실패 → Phase 2 자동 스킵, Phase 3(BUILD)로 직행 (사용자 알림만)
+
+**Step 2: 맥락 기반 자동 선택 권장** — Pencil 연결 시, 작업 맥락을 분석하여 권장 옵션을 결정:
+
+| 맥락 신호 | 권장 |
+|----------|------|
+| UI/화면/레이아웃/디자인 관련 키워드 포함 | Design 진행 권장 |
+| 기존 .pen 파일이 프로젝트에 존재 | Design 진행 권장 |
+| features.json에 category:"ui" 기능이 50% 이상 | Design 진행 권장 |
+| 로직/데이터/API/백엔드 중심 작업 | Design 스킵 권장 |
+| 리팩토링/성능 최적화 작업 | Design 스킵 권장 |
+
+**Step 3: 사용자 선택** — AskUserQuestion으로 확인:
+
+```
+AskUserQuestion:
+  question: "Phase 2 디자인 과정을 진행할까요?"
+  header: "Design"
+  options:
+    - label: "디자인 진행 (권장)"  # 또는 "디자인 스킵 (권장)" — 맥락에 따라 권장 옵션 변경
+      description: "Pencil MCP로 Apple HIG 기반 UI 디자인을 생성하고, 디자인 토큰을 코드에 반영합니다."
+    - label: "디자인 스킵"
+      description: "디자인 없이 코드 기반으로 직접 구현합니다. 로직/데이터 중심 작업에 적합합니다."
+```
+
+**사용자 선택 결과:**
+- "디자인 진행" → harness-designer 에이전트 호출
+- "디자인 스킵" → Phase 3(BUILD)로 직행
 
 ```
 Agent 도구 호출:
@@ -445,12 +470,13 @@ apple-craft-harness 실행 흐름
 │   ├─ verification_steps 작성
 │   └─ 자동 진행 (사용자 확인 없음)
 ├─ Phase 2: DESIGN (harness-designer, 선택적)
-│   ├─ Pencil MCP 탐지 (미연결 시 스킵)
+│   ├─ Pencil MCP 탐지 (미연결 → 자동 스킵)
+│   ├─ 맥락 분석 → 자동 선택 권장 (UI 작업→권장, 로직 작업→스킵 권장)
+│   ├─ AskUserQuestion으로 사용자 선택 확인
 │   ├─ 기존 .pen 읽기 또는 새 디자인 생성
 │   ├─ 디자인 토큰 정의 (Apple HIG 기반)
-│   ├─ 화면별 .pen 디자인
 │   ├─ .claude/harness/design-spec.md 생성 (토큰 매핑 + 화면 구조)
-│   └─ 자동 진행
+│   └─ Phase 3으로 진행
 ├─ Phase 3: BUILD (harness-builder)
 │   ├─ Step 0: 환경 도구 탐색
 │   ├─ .claude/harness/features.json에서 pending/failed 기능 선택
@@ -474,7 +500,7 @@ apple-craft-harness 실행 흐름
 실제 하네스 실행의 전체 과정을 보려면 참조 문서를 읽으세요:
 
 ```
-Read: ${CLAUDE_PLUGIN_ROOT}/skills/harness/references/walkthrough-liquid-glass-settings.md
+Read: ${CLAUDE_PLUGIN_ROOT}/skills/apple-harness/references/walkthrough-liquid-glass-settings.md
 ```
 
 이 워크스루는 "Liquid Glass 설정 화면 구현"의 Phase 1→1.5→3→4 전체 과정을 보여줍니다

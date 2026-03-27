@@ -7,8 +7,8 @@ SCRIPT_DIR="${0:A:h}"
 PLUGIN_ROOT="${SCRIPT_DIR:h}"
 SYNC_SCRIPT="$SCRIPT_DIR/sync-docs.sh"
 PREFLIGHT_SCRIPT="$SCRIPT_DIR/preflight.sh"
-SKILL_MD="$PLUGIN_ROOT/skills/craft/SKILL.md"
-REF_DIR="$PLUGIN_ROOT/skills/craft/references"
+SKILL_MD="$PLUGIN_ROOT/skills/apple-craft/SKILL.md"
+REF_DIR="$PLUGIN_ROOT/skills/apple-craft/references"
 
 MOCK_DIR="$(mktemp -d)"
 trap 'rm -rf "$MOCK_DIR"' EXIT
@@ -99,7 +99,7 @@ setup_mock_xcode() {
 SYNC_MOCK_PLUGIN="$MOCK_DIR/sync-plugin"
 
 setup_sync_mock() {
-  mkdir -p "$SYNC_MOCK_PLUGIN/skills/craft/references"
+  mkdir -p "$SYNC_MOCK_PLUGIN/skills/apple-craft/references"
   mkdir -p "$SYNC_MOCK_PLUGIN/scripts"
   cp "$SYNC_SCRIPT" "$SYNC_MOCK_PLUGIN/scripts/sync-docs.sh"
 }
@@ -185,10 +185,10 @@ assert_contains "$output" "존재하지 않습니다" "9. 존재하지 않는 �
 
 # Test 10: _index.md 손상
 local mock_p10="$MOCK_DIR/p10"
-mkdir -p "$mock_p10/skills/craft/references" "$mock_p10/scripts"
+mkdir -p "$mock_p10/skills/apple-craft/references" "$mock_p10/scripts"
 cp "$SYNC_SCRIPT" "$mock_p10/scripts/sync-docs.sh"
 zsh "$mock_p10/scripts/sync-docs.sh" --xcode-path "$MOCK_XCODE" >/dev/null 2>&1
-printf '| corrupted.md | Corrupted.md | 0 | not-a-valid-checksum |\n' >> "$mock_p10/skills/craft/references/_index.md"
+printf '| corrupted.md | Corrupted.md | 0 | not-a-valid-checksum |\n' >> "$mock_p10/skills/apple-craft/references/_index.md"
 output="$(zsh "$mock_p10/scripts/sync-docs.sh" --xcode-path "$MOCK_XCODE" 2>&1)"
 assert_contains "$output" "잘못된 체크섬" "10. 손상된 _index.md 체크섬 경고"
 
@@ -199,20 +199,20 @@ mkdir -p "$empty_xcode/Contents/Developer"
 /usr/libexec/PlistBuddy -c "Add :CFBundleShortVersionString string 99.0" "$empty_xcode/Contents/Info.plist" >/dev/null 2>&1
 /usr/libexec/PlistBuddy -c "Add :CFBundleVersion string 99000" "$empty_xcode/Contents/Info.plist" >/dev/null 2>&1
 local mock_p11="$MOCK_DIR/p11"
-mkdir -p "$mock_p11/skills/craft/references" "$mock_p11/scripts"
+mkdir -p "$mock_p11/skills/apple-craft/references" "$mock_p11/scripts"
 cp "$SYNC_SCRIPT" "$mock_p11/scripts/sync-docs.sh"
 output="$(zsh "$mock_p11/scripts/sync-docs.sh" --xcode-path "$empty_xcode" 2>&1 || true)"
 assert_contains "$output" ".md 파일이 없습니다" "11. 빈 문서 디렉토리 에러"
 
 # Test 12: 체크섬 정확성
 local mock_p12="$MOCK_DIR/p12"
-mkdir -p "$mock_p12/skills/craft/references" "$mock_p12/scripts"
+mkdir -p "$mock_p12/skills/apple-craft/references" "$mock_p12/scripts"
 cp "$SYNC_SCRIPT" "$mock_p12/scripts/sync-docs.sh"
 zsh "$mock_p12/scripts/sync-docs.sh" --xcode-path "$MOCK_XCODE" >/dev/null 2>&1
-local ref_file="$mock_p12/skills/craft/references/liquid-glass-swiftui.md"
+local ref_file="$mock_p12/skills/apple-craft/references/liquid-glass-swiftui.md"
 if [[ -f "$ref_file" ]]; then
   local actual_checksum="$(shasum -a 256 "$ref_file" | awk '{print $1}')"
-  local idx_12="$mock_p12/skills/craft/references/_index.md"
+  local idx_12="$mock_p12/skills/apple-craft/references/_index.md"
   if grep -q "$actual_checksum" "$idx_12"; then
     pass "12. _index.md 체크섬 == 실제 파일 shasum"
   else
@@ -239,8 +239,8 @@ assert_contains "$output" "디렉토리" "2. references/ 없음 에러"
 
 # Test 3: references/에 md 0개
 local empty_plugin="$MOCK_DIR/empty-plugin"
-mkdir -p "$empty_plugin/skills/craft/references"
-touch "$empty_plugin/skills/craft/references/_index.md"
+mkdir -p "$empty_plugin/skills/apple-craft/references"
+touch "$empty_plugin/skills/apple-craft/references/_index.md"
 output="$(run_preflight "$empty_plugin")"
 ec=$?
 assert_exit_code "$ec" "1" "3. 빈 references/ exit 1"
@@ -263,7 +263,7 @@ local routing_files=($(grep -oE 'references/[a-z0-9-]+\.md' "$SKILL_MD" | sort -
 local all_exist=true
 local missing_files=""
 for rf in "${routing_files[@]}"; do
-  if [[ ! -f "$PLUGIN_ROOT/skills/craft/$rf" ]]; then
+  if [[ ! -f "$PLUGIN_ROOT/skills/apple-craft/$rf" ]]; then
     all_exist=false
     missing_files+="$rf "
   fi
@@ -323,7 +323,7 @@ part_summary
 section "Part 3b: Harness 구조 검증"
 
 AGENTS_DIR="$PLUGIN_ROOT/agents"
-HARNESS_SKILL="$PLUGIN_ROOT/skills/harness/SKILL.md"
+HARNESS_SKILL="$PLUGIN_ROOT/skills/apple-harness/SKILL.md"
 
 # Test 1: 에이전트 파일 존재 (3개)
 local expected_agents=("harness-planner.md" "harness-builder.md" "harness-evaluator.md")

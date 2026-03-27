@@ -161,7 +161,7 @@ Xcode MCP 서버가 연결되어 있으면 적극 활용합니다. 미연결 시
    - 복합 주제 (예: "위젯에 Liquid Glass") → 2-3개 파일
 3. **Fallback 검색**: 매칭이 불명확하면 Grep으로 references/ 전체 검색:
    ```
-   Grep: pattern="검색어" path="${CLAUDE_PLUGIN_ROOT}/skills/craft/references/"
+   Grep: pattern="검색어" path="${CLAUDE_PLUGIN_ROOT}/skills/apple-craft/references/"
    ```
 4. **외부 검색**: 로컬 참조에 없는 API는 `mcp__xcode__DocumentationSearch` 사용
 
