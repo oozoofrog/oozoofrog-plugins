@@ -2,5 +2,5 @@
   "name": "apple-craft",
   "description": "Apple 플랫폼 통합 개발 어시스턴트 — Swift/SwiftUI/UIKit 코드 작성·리뷰·디버깅 + Xcode MCP 연동 + Xcode 26 최신 API 참조 문서 20개 내장 + Pencil 디자인 통합",
   "author": { "name": "oozoofrog" },
-  "version": "1.9.0"
+  "version": "1.9.1"
 }

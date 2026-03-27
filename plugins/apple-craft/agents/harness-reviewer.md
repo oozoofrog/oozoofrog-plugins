@@ -4,8 +4,8 @@ description: "apple-craft review 모드 전용 — Apple 에코시스템 참조 
 model: sonnet
 color: orange
 whenToUse: |
-  이 에이전트는 apple-craft 스킬의 review 모드(Phase R1)에서 호출됩니다.
-  직접 호출하지 마세요. apple-craft 스킬이 오케스트레이션합니다.
+  이 에이전트는 apple-review 스킬의 Phase R1(SCAN + CLASSIFY + ACT)에서 호출됩니다.
+  직접 호출하지 마세요. apple-review 스킬이 오케스트레이션합니다.
 tools:
   - Read
   - Write
