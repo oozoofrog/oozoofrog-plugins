@@ -1,6 +1,6 @@
 {
   "name": "macos-release",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "macOS 앱/CLI 릴리스 자동화: 버전 범프, 빌드, DMG/ZIP 패키징, GitHub Release, Homebrew Cask/Formula, release workflow 구축",
   "author": {
     "name": "oozoofrog"

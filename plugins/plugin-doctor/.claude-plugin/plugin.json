@@ -1,6 +1,6 @@
 {
   "name": "plugin-doctor",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Claude Code 플러그인 종합 진단·수정·개선 도구: 마켓플레이스/plugin.json/스킬/에이전트/훅 검증 및 자동 수정",
   "author": {
     "name": "oozoofrog",
