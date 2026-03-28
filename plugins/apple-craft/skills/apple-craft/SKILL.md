@@ -181,6 +181,28 @@ Swift/Xcode 프로젝트에서 코드를 작성하거나 수정할 때 사용합
 2. 필요 시 `mcp__xcode__BuildProject`로 전체 빌드
 3. 에러 발생 시 → `mcp__xcode__GetBuildLog`로 로그 확인 → 수정 → 재빌드
 
+### Phase 3.5: 요구사항 재검증
+
+빌드 성공은 컴파일 성공일 뿐, 사용자 요구사항 충족을 의미하지 않는다.
+
+1. **요구사항 대조**:
+   - Phase 1에서 파악한 사용자 요구사항을 목록화
+   - 작성된 코드가 각 요구사항을 충족하는지 1:1 대조
+   - 코드를 Read하여 핵심 로직/API 사용을 직접 확인
+
+2. **참조 문서 Best Practices 최종 확인**:
+   - Phase 1에서 매칭된 참조 문서가 있으면 Best Practices 재확인
+   - `references/common-mistakes.md`를 Read하여 안티패턴 최종 대조
+   - Grep으로 "Wrong" 패턴이 작성된 코드에 남아있는지 스캔
+
+3. **판정**:
+   - 모든 요구사항 충족 + 안티패턴 없음 → Phase 4로 진행
+   - 미충족 요구사항 있음 → **Phase 2로 회귀**하여 코드 재작성
+   - 안티패턴 발견 → 해당 부분만 수정 후 Phase 3(빌드 재검증)
+
+4. **회귀 제한**: Phase 2 → 3 → 3.5 루프는 **최대 2회**.
+   2회 회귀 후에도 미충족이면 사용자에게 현재 상태를 보고하고 판단 요청.
+
 ### Phase 4: 시각적 검증 (UI 관련 시)
 1. `mcp__xcode__RenderPreview`로 SwiftUI 프리뷰 확인
 2. Liquid Glass, Charts 3D, Toolbar 등 시각적 기능은 프리뷰 검증 필수
