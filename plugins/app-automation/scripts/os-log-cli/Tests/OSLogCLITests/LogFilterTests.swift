@@ -8,14 +8,7 @@ struct LogFilterTests {
 
     @Test("모든 옵션이 nil이면 빈 배열 반환")
     func allOptionsNilReturnsEmptyArray() {
-        var filter = LogFilter()
-        filter.subsystem = nil
-        filter.category = nil
-        filter.level = nil
-        filter.process = nil
-        filter.predicate = nil
-        filter.device = nil
-
+        let filter = LogFilterValues()
         let args = filter.buildArguments()
         #expect(args.isEmpty)
     }
@@ -24,7 +17,7 @@ struct LogFilterTests {
 
     @Test("subsystem만 설정 시 NSPredicate 형식 인자 생성")
     func subsystemOnlyGeneratesPredicate() {
-        var filter = LogFilter()
+        var filter = LogFilterValues()
         filter.subsystem = "com.example.myapp"
 
         let args = filter.buildArguments()
@@ -37,7 +30,7 @@ struct LogFilterTests {
 
     @Test("category와 level 조합 시 올바른 인자 순서")
     func categoryAndLevelCombination() {
-        var filter = LogFilter()
+        var filter = LogFilterValues()
         filter.category = "network"
         filter.level = .debug
 
@@ -52,7 +45,7 @@ struct LogFilterTests {
 
     @Test("subsystem과 category 동시 설정 시 AND로 조합")
     func subsystemAndCategoryANDPredicate() {
-        var filter = LogFilter()
+        var filter = LogFilterValues()
         filter.subsystem = "com.example"
         filter.category = "auth"
 
@@ -66,7 +59,7 @@ struct LogFilterTests {
 
     @Test("predicate 직접 설정 시 그대로 전달")
     func directPredicatePassthrough() {
-        var filter = LogFilter()
+        var filter = LogFilterValues()
         filter.predicate = #"subsystem == "com.x" AND messageType == fault"#
 
         let args = filter.buildArguments()
@@ -77,7 +70,7 @@ struct LogFilterTests {
 
     @Test("predicate와 subsystem 동시 설정 시 predicate 우선")
     func predicateOverridesSubsystem() {
-        var filter = LogFilter()
+        var filter = LogFilterValues()
         filter.predicate = "messageType == error"
         filter.subsystem = "com.ignored"
 
@@ -91,7 +84,7 @@ struct LogFilterTests {
 
     @Test("device 설정 시 인자 포함")
     func deviceArgumentIncluded() {
-        var filter = LogFilter()
+        var filter = LogFilterValues()
         filter.device = "00000000-AAAA-BBBB-CCCC-000000000001"
 
         let args = filter.buildArguments()
@@ -104,7 +97,7 @@ struct LogFilterTests {
 
     @Test("level=default 인자 생성")
     func levelDefault() {
-        var filter = LogFilter()
+        var filter = LogFilterValues()
         filter.level = .default
 
         let args = filter.buildArguments()
@@ -118,7 +111,7 @@ struct LogFilterTests {
 
     @Test("level=info 인자 생성")
     func levelInfo() {
-        var filter = LogFilter()
+        var filter = LogFilterValues()
         filter.level = .info
 
         let args = filter.buildArguments()
@@ -131,7 +124,7 @@ struct LogFilterTests {
 
     @Test("level=debug 인자 생성")
     func levelDebug() {
-        var filter = LogFilter()
+        var filter = LogFilterValues()
         filter.level = .debug
 
         let args = filter.buildArguments()
@@ -144,7 +137,7 @@ struct LogFilterTests {
 
     @Test("level=error 인자 생성")
     func levelError() {
-        var filter = LogFilter()
+        var filter = LogFilterValues()
         filter.level = .error
 
         let args = filter.buildArguments()
@@ -157,7 +150,7 @@ struct LogFilterTests {
 
     @Test("level=fault 인자 생성")
     func levelFault() {
-        var filter = LogFilter()
+        var filter = LogFilterValues()
         filter.level = .fault
 
         let args = filter.buildArguments()
@@ -172,7 +165,7 @@ struct LogFilterTests {
 
     @Test("process 설정 시 인자 포함")
     func processArgumentIncluded() {
-        var filter = LogFilter()
+        var filter = LogFilterValues()
         filter.process = "MyApp"
 
         let args = filter.buildArguments()
@@ -185,7 +178,7 @@ struct LogFilterTests {
 
     @Test("모든 옵션 설정 시 올바른 인자 순서")
     func allOptionsSetCorrectOrder() {
-        var filter = LogFilter()
+        var filter = LogFilterValues()
         filter.subsystem = "com.test"
         filter.level = .error
         filter.process = "TestApp"

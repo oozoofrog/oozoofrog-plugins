@@ -1,38 +1,11 @@
-# os-log-cli 코드 커버리지 리포트
-# 생성: 2026-03-28
-# 방법: swift test --enable-code-coverage
-
-## 빌드 상태
-- swift build: Build complete! (에러/경고 없음)
-- Swift 6.3 strict concurrency: 준수
-- swift-argument-parser 1.7.1: 의존성 확인
-
-## 테스트 결과 요약
-- LogFilterTests: 12개 테스트 @Test — PASSED
-- OutputFormatterTests: 12개 테스트 @Test — PASSED
-- DevicesCommandTests: 14개 테스트 @Test — PASSED
-- StreamCommandTests: 6개 테스트 @Test — PASSED
-- ShowCommandTests: 9개 테스트 @Test — PASSED
-- IntegrationTests: 5개 테스트 @Test — PASSED (macOS #if 조건부)
-- 총 테스트: 58개 @Test
-
-## 주요 커버리지 노트
-- LogFilter.swift: buildArguments() 순수 함수, 모든 분기 커버됨
-- OutputFormatter.swift: parse()/format() compact/json/verbose 모두 커버됨
-- DevicesCommand.swift: DeviceParser 순수 함수, simctl/devicectl 파싱 커버됨
-- StreamCommand.swift: runWithRunner() Mock 주입으로 timeout/maxLines 분기 커버됨
-- ShowCommand.swift: validate() --last/--start/--end 상호 배제 커버됨
-- ProcessRunner.swift: SystemProcessRunner run()/stream() 통합 테스트에서 커버됨
-
-## 주의사항
-- Swift Testing + ArgumentParser 병렬 subprocess 실행 시 ArgumentParser 에러 출력 발생
-  (알려진 이슈: ParsableCommand가 있는 타겟을 @testable import할 때 subprocess에서 충돌)
-- 개별 테스트 실행 (--filter) 시 모두 EXIT: 0 통과
-- 전체 실행 시 EXIT: 1 (Swift Testing subprocess + ArgumentParser 충돌)
-
-## 커버리지 리포트 생성 명령 (실행 시)
-swift test --package-path /PATH/os-log-cli --enable-code-coverage
-xcrun llvm-cov report \
-  $(find .build/debug -name 'OSLogCLIPackageTests' -not -name '*.o' | head -1) \
-  -instr-profile $(find .build/debug/codecov -name 'default.profdata' | head -1) \
-  --ignore-filename-regex '.build|Tests'
+Filename                      Regions    Missed Regions     Cover   Functions  Missed Functions  Executed       Lines      Missed Lines     Cover    Branches   Missed Branches     Cover
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+DevicesCommand.swift               78                41    47.44%          17                10    41.18%         202                91    54.95%           0                 0         -
+LogFilter.swift                    17                 1    94.12%           8                 1    87.50%          50                10    80.00%           0                 0         -
+OSLogCLI.swift                      1                 1     0.00%           1                 1     0.00%           1                 1     0.00%           0                 0         -
+OutputFormatter.swift              30                 4    86.67%           7                 0   100.00%         115                 2    98.26%           0                 0         -
+ProcessRunner.swift                45                 8    82.22%          20                 3    85.00%         175                17    90.29%           0                 0         -
+ShowCommand.swift                  25                 4    84.00%           7                 1    85.71%          48                 5    89.58%           0                 0         -
+StreamCommand.swift                21                 5    76.19%          10                 1    90.00%          47                 7    85.11%           0                 0         -
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+TOTAL                             217                64    70.51%          70                17    75.71%         638               133    79.15%           0                 0         -

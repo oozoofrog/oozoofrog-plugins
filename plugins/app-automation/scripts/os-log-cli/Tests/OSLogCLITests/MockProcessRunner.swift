@@ -36,7 +36,7 @@ final class MockProcessRunner: ProcessRunner, @unchecked Sendable {
         arguments: [String],
         timeout: TimeInterval,
         maxLines: Int,
-        onLine: @Sendable (String) -> Void
+        onLine: @escaping @Sendable (String) -> Void
     ) throws -> ProcessResult {
         lastStreamExecutable = executable
         lastStreamArguments = arguments

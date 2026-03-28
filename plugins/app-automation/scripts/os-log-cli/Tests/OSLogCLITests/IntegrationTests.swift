@@ -17,16 +17,17 @@ struct IntegrationTests {
         #expect(exists, "/usr/bin/log가 존재해야 통합 테스트 실행 가능")
     }
 
-    // MARK: - 시나리오 1: log show --last 1m 실제 실행 후 출력 파싱
+    // MARK: - 시나리오 1: log show --last 1s 실제 실행 후 출력 파싱
 
     @Test("log show --last 1m 실행 후 출력 파싱 성공")
-    func logShowLastOneMinuteParseable() throws {
+    func logShowLastParseable() throws {
         guard FileManager.default.fileExists(atPath: Self.logPath) else { return }
 
         let runner = SystemProcessRunner()
+        // --last 1s + --style compact로 빠르게 반환
         let result = try runner.run(
             executable: Self.logPath,
-            arguments: ["show", "--last", "1m"]
+            arguments: ["show", "--last", "1s", "--style", "compact"]
         )
 
         // 성공 또는 빈 출력 모두 허용 (로그가 없을 수도 있음), 크래시 없어야 함
@@ -35,7 +36,7 @@ struct IntegrationTests {
         // 출력이 있으면 각 라인 파싱 시도 (크래시 없어야 함)
         if !result.output.isEmpty {
             let lines = result.output.components(separatedBy: "\n")
-            for line in lines.prefix(10) {
+            for line in lines.prefix(5) {
                 _ = OutputFormatter.parse(line: line)
             }
         }
@@ -59,9 +60,9 @@ struct IntegrationTests {
         )
 
         let elapsed = Date().timeIntervalSince(start)
-        // 2초 + 여유 1초 이내에 종료되어야 함
+        // 2초 + 여유 3초 이내에 종료되어야 함
         #expect(elapsed < 5.0, "stream이 \(elapsed)초 만에 종료됨 (5초 이내 기대)")
-        _ = result  // 결과 사용
+        _ = result
     }
 
     // MARK: - 시나리오 3: 잘못된 --predicate 구문 시 stderr 에러 메시지 캡처

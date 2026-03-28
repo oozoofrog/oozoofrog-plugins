@@ -28,15 +28,14 @@ struct StreamCommand: ParsableCommand {
     }
 
     mutating func run() throws {
-        try runWithRunner(SystemProcessRunner())
+        try runWithRunner(SystemProcessRunner(), filterValues: filter.toValues())
     }
 
-    /// ProcessRunner를 주입받아 실행 (테스트 가능)
-    mutating func runWithRunner(_ runner: any ProcessRunner) throws {
+    /// ProcessRunner와 LogFilterValues를 주입받아 실행 (테스트 가능)
+    func runWithRunner(_ runner: any ProcessRunner, filterValues: LogFilterValues) throws {
         var args = ["stream"]
-        args += filter.buildArguments()
+        args += filterValues.buildArguments()
 
-        // @Sendable 클로저에서 inout self 캡처 불가 — 값 미리 복사
         let capturedFormat = format
         let result = try runner.stream(
             executable: "/usr/bin/log",

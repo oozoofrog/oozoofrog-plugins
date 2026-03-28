@@ -1,5 +1,71 @@
 import Foundation
 
+/// 비동기 라인 수집기 (readabilityHandler에서 사용)
+final class LineCollector: @unchecked Sendable {
+    private let lock = NSLock()
+    private var buffer = ""
+    private let maxLines: Int
+    private let onLine: @Sendable (String) -> Void
+    private(set) var lines: [String] = []
+
+    var lineCount: Int {
+        lock.lock()
+        defer { lock.unlock() }
+        return lines.count
+    }
+
+    init(maxLines: Int, onLine: @escaping @Sendable (String) -> Void) {
+        self.maxLines = maxLines
+        self.onLine = onLine
+    }
+
+    func append(_ chunk: String) {
+        lock.lock()
+        defer { lock.unlock() }
+
+        guard lines.count < maxLines else { return }
+
+        buffer += chunk
+        while let newline = buffer.firstIndex(of: "\n") {
+            let line = String(buffer[buffer.startIndex..<newline])
+            buffer = String(buffer[buffer.index(after: newline)...])
+            lines.append(line)
+            onLine(line)
+            if lines.count >= maxLines { break }
+        }
+    }
+
+    /// 남은 버퍼를 마지막 라인으로 처리
+    func flush() {
+        lock.lock()
+        defer { lock.unlock() }
+
+        if !buffer.isEmpty && lines.count < maxLines {
+            lines.append(buffer)
+            onLine(buffer)
+            buffer = ""
+        }
+    }
+}
+
+/// Thread-safe 문자열 버퍼 (readabilityHandler에서 사용)
+final class ThreadSafeBuffer: @unchecked Sendable {
+    private let lock = NSLock()
+    private var chunks: [String] = []
+
+    func append(_ chunk: String) {
+        lock.lock()
+        chunks.append(chunk)
+        lock.unlock()
+    }
+
+    var value: String {
+        lock.lock()
+        defer { lock.unlock() }
+        return chunks.joined()
+    }
+}
+
 /// 프로세스 실행 결과
 struct ProcessResult: Sendable {
     let output: String
@@ -21,7 +87,7 @@ protocol ProcessRunner: Sendable {
         arguments: [String],
         timeout: TimeInterval,
         maxLines: Int,
-        onLine: @Sendable (String) -> Void
+        onLine: @escaping @Sendable (String) -> Void
     ) throws -> ProcessResult
 }
 
@@ -40,17 +106,30 @@ struct SystemProcessRunner: ProcessRunner {
         process.standardOutput = stdoutPipe
         process.standardError = stderrPipe
 
+        // 대량 출력 시 파이프 버퍼 데드락 방지: 비동기로 읽기
+        let stdoutCollector = ThreadSafeBuffer()
+        let stderrCollector2 = ThreadSafeBuffer()
+
+        stdoutPipe.fileHandleForReading.readabilityHandler = { handle in
+            let data = handle.availableData
+            guard !data.isEmpty, let chunk = String(data: data, encoding: .utf8) else { return }
+            stdoutCollector.append(chunk)
+        }
+        stderrPipe.fileHandleForReading.readabilityHandler = { handle in
+            let data = handle.availableData
+            guard !data.isEmpty, let chunk = String(data: data, encoding: .utf8) else { return }
+            stderrCollector2.append(chunk)
+        }
+
         try process.run()
         process.waitUntilExit()
 
-        let stdoutData = stdoutPipe.fileHandleForReading.readDataToEndOfFile()
-        let stderrData = stderrPipe.fileHandleForReading.readDataToEndOfFile()
-        let output = String(data: stdoutData, encoding: .utf8) ?? ""
-        let error = String(data: stderrData, encoding: .utf8) ?? ""
+        stdoutPipe.fileHandleForReading.readabilityHandler = nil
+        stderrPipe.fileHandleForReading.readabilityHandler = nil
 
         return ProcessResult(
-            output: output,
-            error: error,
+            output: stdoutCollector.value,
+            error: stderrCollector2.value,
             exitCode: process.terminationStatus
         )
     }
@@ -60,7 +139,7 @@ struct SystemProcessRunner: ProcessRunner {
         arguments: [String],
         timeout: TimeInterval,
         maxLines: Int,
-        onLine: @Sendable (String) -> Void
+        onLine: @escaping @Sendable (String) -> Void
     ) throws -> ProcessResult {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: executable)
@@ -71,63 +150,52 @@ struct SystemProcessRunner: ProcessRunner {
         process.standardOutput = stdoutPipe
         process.standardError = stderrPipe
 
+        // 비동기 라인 수집 (readabilityHandler로 블로킹 방지)
+        let collectedLines = LineCollector(maxLines: maxLines, onLine: onLine)
+
+        // stderr도 비동기로 수집 (readDataToEndOfFile 데드락 방지)
+        let stderrCollector = ThreadSafeBuffer()
+
+        stdoutPipe.fileHandleForReading.readabilityHandler = { handle in
+            let data = handle.availableData
+            guard !data.isEmpty else { return }
+            guard let chunk = String(data: data, encoding: .utf8) else { return }
+            collectedLines.append(chunk)
+            if collectedLines.lineCount >= maxLines {
+                process.terminate()
+            }
+        }
+
+        stderrPipe.fileHandleForReading.readabilityHandler = { handle in
+            let data = handle.availableData
+            guard !data.isEmpty, let chunk = String(data: data, encoding: .utf8) else { return }
+            stderrCollector.append(chunk)
+        }
+
         try process.run()
 
-        var lineCount = 0
-        var collectedOutput: [String] = []
-        var stderrOutput = ""
+        // 타임아웃 대기
+        let deadline = DispatchTime.now() + timeout
+        let semaphore = DispatchSemaphore(value: 0)
 
-        // 타임아웃을 위한 타이머
-        let deadline = Date().addingTimeInterval(timeout)
-
-        let handle = stdoutPipe.fileHandleForReading
-        var buffer = ""
-
-        // 실시간 라인 읽기 루프
-        while process.isRunning {
-            let now = Date()
-            if now >= deadline {
-                process.terminate()
-                break
-            }
-            if lineCount >= maxLines {
-                process.terminate()
-                break
-            }
-
-            // 0.05초 단위로 읽기
-            let available = handle.availableData
-            if !available.isEmpty, let chunk = String(data: available, encoding: .utf8) {
-                buffer += chunk
-                while let newline = buffer.firstIndex(of: "\n") {
-                    let line = String(buffer[buffer.startIndex..<newline])
-                    buffer = String(buffer[buffer.index(after: newline)...])
-                    onLine(line)
-                    collectedOutput.append(line)
-                    lineCount += 1
-                    if lineCount >= maxLines {
-                        process.terminate()
-                        break
-                    }
-                }
-            } else {
-                Thread.sleep(forTimeInterval: 0.05)
-            }
+        process.terminationHandler = { _ in
+            semaphore.signal()
         }
 
-        // 남은 버퍼 처리
-        if !buffer.isEmpty {
-            let line = buffer
-            onLine(line)
-            collectedOutput.append(line)
+        let waitResult = semaphore.wait(timeout: deadline)
+        if waitResult == .timedOut && process.isRunning {
+            process.terminate()
+            process.waitUntilExit()
         }
 
-        process.waitUntilExit()
-        let stderrData = stderrPipe.fileHandleForReading.readDataToEndOfFile()
-        stderrOutput = String(data: stderrData, encoding: .utf8) ?? ""
+        // readabilityHandler 해제
+        stdoutPipe.fileHandleForReading.readabilityHandler = nil
+        stderrPipe.fileHandleForReading.readabilityHandler = nil
+
+        let stderrOutput = stderrCollector.value
 
         return ProcessResult(
-            output: collectedOutput.joined(separator: "\n"),
+            output: collectedLines.lines.joined(separator: "\n"),
             error: stderrOutput,
             exitCode: process.terminationStatus
         )

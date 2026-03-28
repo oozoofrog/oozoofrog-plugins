@@ -29,11 +29,11 @@ struct ShowCommand: ParsableCommand {
     }
 
     mutating func run() throws {
-        try runWithRunner(SystemProcessRunner())
+        try runWithRunner(SystemProcessRunner(), filterValues: filter.toValues())
     }
 
-    /// ProcessRunner를 주입받아 실행 (테스트 가능)
-    mutating func runWithRunner(_ runner: any ProcessRunner) throws {
+    /// ProcessRunner와 LogFilterValues를 주입받아 실행 (테스트 가능)
+    func runWithRunner(_ runner: any ProcessRunner, filterValues: LogFilterValues) throws {
         var args = ["show"]
 
         if let last {
@@ -47,7 +47,7 @@ struct ShowCommand: ParsableCommand {
             }
         }
 
-        args += filter.buildArguments()
+        args += filterValues.buildArguments()
 
         let result = try runner.run(
             executable: "/usr/bin/log",

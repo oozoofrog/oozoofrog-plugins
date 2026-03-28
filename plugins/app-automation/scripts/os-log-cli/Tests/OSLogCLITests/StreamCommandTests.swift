@@ -1,6 +1,5 @@
 import Testing
 import Foundation
-import ArgumentParser
 @testable import OSLogCLICore
 
 @Suite("StreamCommand 유닛 테스트")
@@ -23,12 +22,9 @@ struct StreamCommandTests {
         let mock = MockProcessRunner()
         mock.streamLines = sampleLogLines
 
-        var command = StreamCommand()
-        command.timeout = 3
-        command.maxLines = 100
+        var command = StreamCommand.testInstance(timeout: 3, maxLines: 100)
 
-        // Mock을 사용하므로 실제 3초 대기 없음
-        try command.runWithRunner(mock)
+        try command.runWithRunner(mock, filterValues: LogFilterValues())
 
         #expect(mock.lastStreamTimeout == 3)
         #expect(mock.lastStreamExecutable == "/usr/bin/log")
@@ -42,12 +38,9 @@ struct StreamCommandTests {
         let mock = MockProcessRunner()
         mock.streamLines = sampleLogLines  // 7줄
 
-        var command = StreamCommand()
-        command.timeout = 30
-        command.maxLines = 5
+        var command = StreamCommand.testInstance(timeout: 30, maxLines: 5)
 
-        // MockProcessRunner는 maxLines만큼만 onLine 호출
-        try command.runWithRunner(mock)
+        try command.runWithRunner(mock, filterValues: LogFilterValues())
 
         #expect(mock.lastStreamMaxLines == 5)
     }
@@ -57,8 +50,9 @@ struct StreamCommandTests {
         let mock = MockProcessRunner()
         mock.streamLines = []
 
-        var command = StreamCommand()
-        try command.runWithRunner(mock)
+        var command = StreamCommand.testInstance()
+
+        try command.runWithRunner(mock, filterValues: LogFilterValues())
 
         #expect(mock.lastStreamExecutable == "/usr/bin/log")
         #expect(mock.lastStreamArguments.first == "stream")
@@ -71,9 +65,10 @@ struct StreamCommandTests {
         let mock = MockProcessRunner()
         mock.streamLines = []
 
-        var command = StreamCommand()
-        command.filter.subsystem = "com.example"
-        try command.runWithRunner(mock)
+        var command = StreamCommand.testInstance()
+        var filterValues = LogFilterValues()
+        filterValues.subsystem = "com.example"
+        try command.runWithRunner(mock, filterValues: filterValues)
 
         #expect(mock.lastStreamArguments.contains("--predicate"))
         let predicateIdx = mock.lastStreamArguments.firstIndex(of: "--predicate")
@@ -86,8 +81,7 @@ struct StreamCommandTests {
 
     @Test("timeout이 0이면 ValidationError 발생")
     func timeoutZeroThrowsValidationError() {
-        var command = StreamCommand()
-        command.timeout = 0
+        var command = StreamCommand.testInstance(timeout: 0)
 
         #expect(throws: (any Error).self) {
             try command.validate()
@@ -96,8 +90,7 @@ struct StreamCommandTests {
 
     @Test("maxLines가 0이면 ValidationError 발생")
     func maxLinesZeroThrowsValidationError() {
-        var command = StreamCommand()
-        command.maxLines = 0
+        var command = StreamCommand.testInstance(maxLines: 0)
 
         #expect(throws: (any Error).self) {
             try command.validate()
@@ -106,10 +99,25 @@ struct StreamCommandTests {
 
     @Test("양수 timeout과 maxLines는 ValidationError 없음")
     func validTimeoutAndMaxLinesNoError() throws {
-        var command = StreamCommand()
-        command.timeout = 10
-        command.maxLines = 50
+        var command = StreamCommand.testInstance(timeout: 10, maxLines: 50)
 
-        try command.validate()  // 예외 없어야 함
+        try command.validate()
+    }
+}
+
+// MARK: - 테스트 헬퍼
+
+extension StreamCommand {
+    /// ArgumentParser property wrapper를 우회하여 테스트용 인스턴스 생성
+    static func testInstance(
+        timeout: TimeInterval = 30,
+        maxLines: Int = 100,
+        format: OutputStyle = .compact
+    ) -> StreamCommand {
+        var command = StreamCommand()
+        command.timeout = timeout
+        command.maxLines = maxLines
+        command.format = format
+        return command
     }
 }
