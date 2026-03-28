@@ -45,5 +45,25 @@ plugins/{name}/
 - commands는 deprecated. 반드시 skills/ 사용
 - 기존 commands가 있으면 `skills/{name}/SKILL.md`로 마이그레이션
 
+### 도구 접근
+- 스킬/에이전트의 `tools`/`allowed-tools` 필드는 **생략** — 메인 대화의 모든 도구(MCP 포함) 자동 상속
+- 특정 도구를 제한해야 할 때만 `disallowedTools`로 역방향 제어
+- MCP 서버 버전업 시 도구명 변경에 대한 유지보수 부담 제거
+
+### 평가 프로토콜 (Skeptical Re-verification)
+
+Anthropic의 [Harness Design](https://www.anthropic.com/engineering/harness-design-long-running-apps) 블로그 기반.
+
+**핵심 원칙:**
+- **Generator-Evaluator 역할 분리** — 자기평가의 "자기 칭찬" 함정을 별도 역할로 극복 (GAN의 "적대성"이 아닌 **협력적 회의**)
+- **Sprint Contract** — 수정 시작 전에 "done" 기준을 사전 합의하여 평가 일관성 보장
+- **회의적 평가** — 수정이 실제로 적용되었는가, 새 문제를 유발하지 않았는가, 기준을 완화한 것은 아닌가
+- **하네스 간소화** — "every component in a harness encodes an assumption about what the model can't do on its own" → 모델 개선 시 불필요해진 구성요소는 제거
+
+**적용 현황:**
+- apple-craft/apple-harness: Builder↔Evaluator 자율 루프 (원본, 4축 다차원 평가)
+- plugin-doctor/fixer: Stage 9 회의적 재검증 루프
+- agent-context/ctx-verify: 수정-재검증 루프
+
 ### 진단
 - `/fixer` 실행으로 전체 마켓플레이스 검증 가능
