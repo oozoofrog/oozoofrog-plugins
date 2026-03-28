@@ -181,4 +181,43 @@ plugin-doctor 자체를 Stage 1~6과 동일한 기준으로 검증한다.
 1. [Critical] plugin-b: ...
 ```
 
-사용자가 자동 수정을 승인하면 해당 항목을 즉시 수정하고, 수정 결과를 요약 출력한다.
+사용자가 자동 수정을 승인하면 해당 항목을 즉시 수정한다.
+
+### Stage 9: 적대적 재검증 루프 (Adversarial Re-verification)
+
+> 프로토콜 참조: `references/evaluation-protocol.md`
+
+Stage 8에서 자동 수정을 실행한 후, 수정이 올바르게 적용되었는지 **재검증**한다.
+
+**재검증 범위 결정:**
+수정한 항목의 Stage만 재실행한다:
+- plugin.json 수정 → Stage 2 재실행
+- version 동기화 → Stage 1 + Stage 2 재실행
+- SKILL.md 수정 → Stage 3 재실행
+- 에이전트 수정 → Stage 4 재실행
+- 디렉토리 삭제 → Stage 6 재실행
+
+**루프 제어:**
+```
+Round 1: Stage 1~8 (최초 진단 + 수정)
+Round 2: 수정 항목 관련 Stage만 재검증
+  → CLEAN (Critical+Warning=0) → 완료
+  → 잔여 findings → 추가 수정 + Round 3
+Round 3: 재검증 (최종)
+  → CLEAN → 완료
+  → 잔여 → "수동 조치 필요" 리포트 출력 후 종료
+```
+
+**종료 조건 (하나라도 충족 시):**
+1. Critical + Warning findings = 0 → **CLEAN**
+2. 이번 라운드 findings ≥ 이전 라운드 → **CONVERGED** (수렴 실패)
+3. 라운드 3 완료 → **MAX_ROUNDS**
+
+**최종 리포트에 루프 이력 추가:**
+```markdown
+## 검증 루프 이력
+| 라운드 | findings | 수정 | 잔여 | 판정 |
+|--------|----------|------|------|------|
+| 1 | 5 | 4 | 1 | CONTINUE |
+| 2 | 1 | 1 | 0 | CLEAN |
+```
