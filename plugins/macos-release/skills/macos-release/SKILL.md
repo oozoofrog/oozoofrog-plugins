@@ -214,6 +214,88 @@ jobs:
 
 **병행 운영** 패턴이 가장 유연합니다: 로컬에서 빌드+릴리스, CI에서 Homebrew 자동 업데이트.
 
+## 릴���스 아티팩트 검증
+
+DMG 생성(Step 3) 후, 로컬 설치(Step 4) 전에 아티팩트 무결성을 검증한다.
+
+1. **빌드된 앱 버전 확인**:
+   - `.app/Contents/Info.plist`에서 `CFBundleShortVersionString` 읽기
+   - 예상 버전과 일치하지 않으면 → 파이프라인 중단 + 원인 보고
+2. **DMG 파일 검증**:
+   - 파일 크기 확인 (0 바이트 또는 비정상적으로 작으면 실패)
+   - SHA256 해시 계산 → GitHub Release 본문에 포함
+3. **코드사이닝 검증** (서명된 앱인 경우):
+   - `codesign --verify --deep --strict` 실행
+   - 실패 시 → 파이프라인 중단
+
+## 사용자 재검증 체크포인트 (Step 4 → Step 5 게이트)
+
+로컬 설치(Step 4) 성공 후, 외부 publish(Step 5: Git Push) 전에 **사용자 확인 게이트**를 삽입한다.
+이 체크포인트는 되돌리기 어려운 원격 작업 전 마지막 안전 장치이다.
+
+1. 로컬 설치된 앱의 실행 상태 확인
+2. AskUserQuestion으로 사용자에게 확인:
+   ```
+   로컬 설치가 완료되었습니다.
+   - 앱 버전: {version}
+   - 설치 경로: {path}
+   - DMG: {dmg_path} (SHA256: {hash_prefix}...)
+
+   앱이 정상 동작하는지 직접 확인해주세요.
+   다음 단계(Git Push + GitHub Release + Homebrew)를 진행할까요?
+   ```
+3. 사용자 승인 → Step 5(Git Push)로 진행
+4. 사용자 거부 → 파이프라인 중단, 문제 설명 요청
+
+## 실패 복구 및 단계별 재시작
+
+### 파이프라인 상태 추적
+
+각 단계의 성공/실패를 `.claude/release/pipeline-state.json`에 기록한다:
+
+```json
+{
+  "version": "1.5",
+  "startedAt": "2026-03-28T10:00:00Z",
+  "steps": [
+    {"step": 1, "name": "version-bump", "status": "completed"},
+    {"step": 2, "name": "build", "status": "completed"},
+    {"step": 3, "name": "dmg", "status": "failed", "error": "hdiutil: Resource busy"},
+    {"step": 4, "name": "local-install", "status": "pending"},
+    {"step": 5, "name": "git-push", "status": "pending"},
+    {"step": 6, "name": "github-release", "status": "pending"},
+    {"step": 7, "name": "homebrew", "status": "pending"}
+  ]
+}
+```
+
+### 재시작 로직
+
+1. 파이프라인 실행 시 `pipeline-state.json` 존재 여부 확인
+2. 존재하면 AskUserQuestion으로 안내:
+   ```
+   이전 릴리스 v{version}이 Step {N}({name})에서 실패했습니다.
+   오류: {error}
+
+   [1] Step {N}부터 재시작
+   [2] 처음부터 다시 시작
+   [3] 취소
+   ```
+3. 재시작 시: 실패 단계의 전제 조건만 재확인 후 해당 단계부터 실행
+4. 완전 완료 시: `pipeline-state.json` 삭제
+
+### 단계별 전제 조건
+
+| 재시작 단계 | 전제 조건 |
+|------------|----------|
+| Step 1 (버전 범프) | git clean 상태 |
+| Step 2 (빌드) | 버전이 pbxproj에 반영됨 |
+| Step 3 (DMG) | 빌드 산출물(.app) 존재 |
+| Step 4 (로컬 설치) | DMG 파일 존재 |
+| Step 5 (Git Push) | 버전 커밋 존재 + DMG 존재 |
+| Step 6 (GitHub Release) | 태그 push됨 + DMG 존재 |
+| Step 7 (Homebrew) | GitHub Release 존재 |
+
 ## 트러블슈팅
 
 | 증상 | 원인 | 해결 |
