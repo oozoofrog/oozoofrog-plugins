@@ -102,11 +102,25 @@ argument-hint: "[stage 번호: 1|2|3|all (기본: all)]"
 3. [Warning] ...
 ```
 
-## 적대적 수정-재검증 루프
+## 회의적 수정-재검증 루프 (Skeptical Re-verification)
 
-종합 리포트에서 **자동 수정 가능한 findings**가 있으면 수정→재검증 루프를 실행한다.
+> 원칙: Generator-Evaluator **역할 분리** + **회의적 평가** (Anthropic Harness Design 블로그)
+> "tuning a standalone evaluator to be skeptical turns out to be far more tractable
+> than making a generator critical of its own work"
 
-### 자동 수정 가능 항목
+### Step 1: Sprint Contract 정의
+
+자동 수정을 시작하기 **전에** 완료 기준을 합의한다:
+
+```markdown
+## Sprint Contract
+- 자동 수정 대상: [아래 표의 자동 수정 가능 항목]
+- CLEAN 기준: Critical + Warning findings = 0
+- 수동 조치 항목: [고립 파일 구조 변경, 수동 검증 필요 기술적 주장]
+- 수정이 아닌 것: findings 삭제, 심각도 하향, 검증 기준 완화
+```
+
+### Step 2: 자동 수정 가능 항목
 
 | 유형 | Stage | 수정 방식 |
 |------|-------|----------|
@@ -115,30 +129,39 @@ argument-hint: "[stage 번호: 1|2|3|all (기본: all)]"
 | 빌드/테스트 명령 불일치 | 2 | package.json/Makefile에서 정확한 명령 추출 → 갱신 |
 | 라이브러리 기술 불일치 | 3 | 의존성 파일에서 실제 목록 추출 → 갱신 |
 
-수동 수정 필요 항목 (고립 파일 구조 변경, 수동 검증 필요 기술적 주장)은 리포트에만 표시한다.
+수동 수정 필요 항목은 리포트에만 표시한다.
+
+### Step 3: 회의적 재검증
+
+수정 후, **별도의 회의적 평가자 역할**로 전환하여 재검증한다.
+
+**회의적 평가 관점** (자기평가 함정 회피):
+1. 수정된 경로/명령이 실제로 존재하는가? — Glob/Read로 재확인
+2. 수정이 다른 컨텍스트 파일의 참조를 깨뜨리지 않았는가? — 영향 범위 추적
+3. 수정 전후 파일을 비교하여 의도하지 않은 내용 변경이 없는가?
 
 ### 루프 제어
 
 ```
-Round 1: Stage 1~3 검증 → 리포트 → 자동 수정 (사용자 승인)
-Round 2: 수정한 Stage만 재검증
-  → CLEAN (Critical+Warning=0) → 완료
+Round 1: Sprint Contract 정의 → Stage 1~3 검증 → 자동 수정 (사용자 승인)
+Round 2: 회의적 재검증 (수정한 Stage만)
+  → CLEAN → 완료
   → 잔여 findings → 추가 수정 + Round 3
-Round 3: 재검증 (최종)
+Round 3: 회의적 재검증 (최종)
   → CLEAN → 완료
   → 잔여 → "수동 조치 필요" 리포트 출력 후 종료
 ```
 
 **종료 조건 (하나라도 충족 시):**
-1. Critical + Warning findings = 0 → **CLEAN**
-2. 이번 라운드 findings ≥ 이전 라운드 → **CONVERGED**
+1. Sprint Contract의 CLEAN 기준 충족 → **CLEAN**
+2. 이번 라운드 findings ≥ 이전 라운드 → **CONVERGED** (수정이 새 문제 유발)
 3. 라운드 3 완료 → **MAX_ROUNDS**
 
 **최종 리포트에 루프 이력 추가:**
 ```markdown
 ## 검증 루프 이력
-| 라운드 | findings | 수정 | 잔여 | 판정 |
-|--------|----------|------|------|------|
-| 1 | 4 | 3 | 1 | CONTINUE |
-| 2 | 1 | 0 | 1 | CONVERGED (수동 조치 필요) |
+| 라운드 | Sprint Contract | findings | 수정 | 잔여 | 판정 |
+|--------|----------------|----------|------|------|------|
+| 1 | Critical+Warning=0 | 4 | 3 | 1 | CONTINUE |
+| 2 | Critical+Warning=0 | 1 | 0 | 1 | CONVERGED (수동 조치 필요) |
 ```
