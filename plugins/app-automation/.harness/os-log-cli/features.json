@@ -1,0 +1,423 @@
+[
+  {
+    "id": "F001",
+    "category": "config",
+    "description": "Swift Package 구조 생성: plugins/app-automation/scripts/os-log-cli/Package.swift (swift-argument-parser 1.7.1 의존성, OSLogCLI 실행 타겟, OSLogCLITests 테스트 타겟), Sources/ 및 Tests/ 디렉토리 구조. swift-tools-version: 6.0, platforms: [.macOS(.v13)]",
+    "verification": "`swift build` 성공, `swift test --list-tests` 실행 가능. Package.swift에 swift-tools-version: 6.0, platforms: [.macOS(.v13)] 명시 확인. OSLogCLI 실행 타겟과 OSLogCLITests 테스트 타겟이 별도로 선언되어 있음. swift-argument-parser 1.7.1 의존성 명시 확인.",
+    "verification_steps": [
+      {
+        "action": "run_command",
+        "target": "swift build --package-path /Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli",
+        "expect": "Build complete! 메시지 출력, 에러/경고 없음"
+      },
+      {
+        "action": "run_command",
+        "target": "swift test --package-path /Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli --list-tests 2>&1",
+        "expect": "테스트 목록 출력 (에러 없음, 최소 1개 이상의 테스트 케이스 목록)"
+      },
+      {
+        "action": "run_command",
+        "target": "grep -E 'swift-tools-version|macOS.*v1[3-9]|argument-parser.*1\\.7' /Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli/Package.swift",
+        "expect": "swift-tools-version: 6.0, .macOS(.v13), swift-argument-parser 1.7.1 세 항목 모두 매칭"
+      },
+      {
+        "action": "run_command",
+        "target": "ls /Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli/Sources/ /Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli/Tests/",
+        "expect": "Sources/ 와 Tests/ 디렉토리 모두 존재"
+      }
+    ],
+    "status": "built",
+    "reference": null,
+    "priority": 1,
+    "scores": null
+  },
+  {
+    "id": "F002",
+    "category": "logic",
+    "description": "LogFilter.swift 구현: --subsystem, --category, --level (default/info/debug/error/fault), --process, --predicate, --device 옵션을 ArgumentParser @OptionGroup으로 정의. buildArguments() -> [String] 메서드로 `log` CLI 인자 배열 변환. nil 옵션은 인자에서 제외. Swift 6.3 Sendable 준수.",
+    "verification": "LogFilter 인스턴스 생성 후 buildArguments() 호출 시 올바른 인자 배열 반환. 빌드 에러 없음. Swift 6.3 strict concurrency(-strict-concurrency=complete) 경고/에러 없음. @OptionGroup으로 선언되어 있어야 하며, buildArguments()는 순수 함수(외부 I/O 없음)여야 함. --subsystem과 --category가 동시에 있을 때 NSPredicate 형태('subsystem == X AND category == Y')로 올바르게 합성되는지 확인.",
+    "verification_steps": [
+      {
+        "action": "run_command",
+        "target": "swift build --package-path /Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli 2>&1",
+        "expect": "Build complete!, Swift 6.3 concurrency 에러 없음"
+      },
+      {
+        "action": "run_command",
+        "target": "grep -n 'Sendable\\|@OptionGroup\\|buildArguments' /Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli/Sources/OSLogCLI/LogFilter.swift",
+        "expect": "@OptionGroup 선언 존재, buildArguments 메서드 존재, Sendable 준수 확인"
+      },
+      {
+        "action": "run_command",
+        "target": "swift test --package-path /Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli --filter LogFilterTests 2>&1",
+        "expect": "LogFilterTests 전체 통과, 0 failures"
+      },
+      {
+        "action": "code_review",
+        "target": "/Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli/Sources/OSLogCLI/LogFilter.swift",
+        "expect": "buildArguments()가 nil 옵션 제외, --level 5가지(default/info/debug/error/fault) 모두 처리, --predicate 직접 전달, --device 인자 포함 확인. Combine 미사용(async/await 또는 순수 함수). force unwrap(!) 없음"
+      }
+    ],
+    "status": "built",
+    "reference": null,
+    "priority": 2,
+    "scores": null
+  },
+  {
+    "id": "F003",
+    "category": "logic",
+    "description": "OutputFormatter.swift 구현: LogEntry 구조체 (timestamp: String, process: String, subsystem: String?, category: String?, level: String, message: String). parse(line: String) -> LogEntry? 메서드로 log 출력 라인 파싱. format(_ entry: LogEntry, style: OutputStyle) -> String 메서드로 compact/json/verbose 포맷 출력. OutputStyle enum (compact, json, verbose).",
+    "verification": "실제 `log stream` 출력 라인 샘플로 parse() 호출 시 LogEntry 반환. 잘못된 형식 입력 시 nil 반환(크래시 없음). format() 호출 시 compact/json/verbose 각 스타일에 맞는 문자열 반환. json 포맷은 유효한 JSON 파싱 가능. subsystem/category가 nil인 LogEntry도 세 포맷 모두 크래시 없이 처리.",
+    "verification_steps": [
+      {
+        "action": "run_command",
+        "target": "swift build --package-path /Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli 2>&1",
+        "expect": "Build complete!"
+      },
+      {
+        "action": "run_command",
+        "target": "grep -n 'LogEntry\\|OutputStyle\\|func parse\\|func format' /Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli/Sources/OSLogCLI/OutputFormatter.swift",
+        "expect": "LogEntry 구조체, OutputStyle enum(compact/json/verbose), parse(), format() 모두 존재"
+      },
+      {
+        "action": "run_command",
+        "target": "swift test --package-path /Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli --filter OutputFormatterTests 2>&1",
+        "expect": "OutputFormatterTests 전체 통과, 0 failures"
+      },
+      {
+        "action": "code_review",
+        "target": "/Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli/Sources/OSLogCLI/OutputFormatter.swift",
+        "expect": "parse()가 잘못된 형식 입력 시 nil 반환(크래시 없음). format()의 json 스타일이 Encodable/JSONEncoder 또는 수동 직렬화로 유효한 JSON 생성. subsystem/category nil 케이스 방어 처리. force unwrap(!) 없음"
+      }
+    ],
+    "status": "built",
+    "reference": null,
+    "priority": 3,
+    "scores": null
+  },
+  {
+    "id": "F004",
+    "category": "logic",
+    "description": "StreamCommand.swift 구현: `log stream` 명령 래핑. --timeout (기본 30, 단위: 초), --max-lines (기본 100) 옵션 추가. LogFilter @OptionGroup, --format OutputStyle 옵션 포함. Process + Pipe로 비동기 실행, stdout 실시간 출력, timeout/max-lines 초과 시 프로세스 종료 후 ExitCode.success 반환.",
+    "verification": "`swift run OSLogCLI stream --help` 시 --timeout, --max-lines, --subsystem, --format 등 옵션 전체 표시. --timeout 3 --max-lines 5 호출 시 3초 이내 또는 5줄 후 exit 0 반환. --timeout 0 또는 --max-lines 0 입력 시 ValidationError 또는 즉시 종료(크래시 없음). ProcessRunner 프로토콜로 주입 가능하여 Mock 테스트 가능한 구조.",
+    "verification_steps": [
+      {
+        "action": "run_command",
+        "target": "swift run --package-path /Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli OSLogCLI stream --help 2>&1",
+        "expect": "--timeout, --max-lines, --subsystem, --category, --level, --process, --predicate, --device, --format 옵션 목록 모두 출력"
+      },
+      {
+        "action": "run_command",
+        "target": "swift run --package-path /Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli OSLogCLI stream --timeout 3 --max-lines 5; echo \"EXIT:$?\"",
+        "expect": "3초 이내 종료, EXIT:0 출력"
+      },
+      {
+        "action": "code_review",
+        "target": "/Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli/Sources/OSLogCLI/StreamCommand.swift",
+        "expect": "ProcessRunner 프로토콜 주입 구조 존재 (테스트 가능). timeout 초과 시 process.terminate() 호출. max-lines 초과 시 프로세스 종료. force unwrap(!) 없음. Swift 6.3 actor isolation 또는 @Sendable 준수"
+      },
+      {
+        "action": "run_command",
+        "target": "grep -n 'ProcessRunner\\|protocol\\|terminate' /Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli/Sources/OSLogCLI/StreamCommand.swift",
+        "expect": "ProcessRunner 프로토콜 참조 또는 정의 존재, terminate 호출 존재"
+      }
+    ],
+    "status": "built",
+    "reference": null,
+    "priority": 4,
+    "scores": null
+  },
+  {
+    "id": "F005",
+    "category": "logic",
+    "description": "ShowCommand.swift 구현: `log show` 명령 래핑. --last (기간, 예: '1h', '30m', '2d') 또는 --start/--end (ISO8601 날짜 문자열) 시간 범위 옵션. LogFilter @OptionGroup, --format OutputStyle 옵션. --last와 --start/--end 동시 사용 시 ValidationError 발생. Process로 동기 실행 후 전체 출력 반환.",
+    "verification": "`swift run OSLogCLI show --help` 시 --last, --start, --end 옵션 표시. --last 1h 호출 시 `log show --last 1h` 형태로 실행됨. --last와 --start 동시 사용 시 에러 메시지 출력 후 비정상 종료(non-zero exit). --start만 제공하고 --end 생략 시 동작 정의(에러 또는 현재 시각까지) 확인.",
+    "verification_steps": [
+      {
+        "action": "run_command",
+        "target": "swift run --package-path /Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli OSLogCLI show --help 2>&1",
+        "expect": "--last, --start, --end, --format, --subsystem 등 옵션 목록 출력"
+      },
+      {
+        "action": "run_command",
+        "target": "swift run --package-path /Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli OSLogCLI show --last 1m --max-lines 3 2>&1; echo \"EXIT:$?\"",
+        "expect": "정상 실행 또는 빈 출력 (EXIT:0)"
+      },
+      {
+        "action": "run_command",
+        "target": "swift run --package-path /Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli OSLogCLI show --last 1h --start '2024-01-01T00:00:00' 2>&1; echo \"EXIT:$?\"",
+        "expect": "에러 메시지 출력, EXIT:1 (non-zero) — --last와 --start 동시 사용 ValidationError"
+      },
+      {
+        "action": "code_review",
+        "target": "/Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli/Sources/OSLogCLI/ShowCommand.swift",
+        "expect": "validate() 메서드에서 --last와 --start/--end 상호 배제 검사. ProcessRunner 프로토콜 주입 구조(테스트 가능). --max-lines 미지원 시 description에 명시 또는 지원 여부 확인. force unwrap(!) 없음"
+      }
+    ],
+    "status": "built",
+    "reference": null,
+    "priority": 5,
+    "scores": null
+  },
+  {
+    "id": "F006",
+    "category": "logic",
+    "description": "DevicesCommand.swift 구현: `xcrun simctl list devices --json` 파싱으로 부팅된 iOS/watchOS 시뮬레이터 목록, `xcrun devicectl list devices` 파싱으로 USB 연결 실제 디바이스 목록. DeviceInfo 구조체 (udid, name, type: simulator|device, os, status). --json 플래그로 JSON 배열 출력, 기본은 테이블 형식.",
+    "verification": "`swift run OSLogCLI devices` 실행 시 시뮬레이터 항목 출력 또는 'No devices found' 메시지. devicectl 미설치 시 graceful degradation(시뮬레이터만 출력, 에러 없음). `--json` 플래그 시 유효한 JSON 배열 출력(빈 배열 []도 유효). xcrun 명령 실패 시 stderr에 에러 메시지 출력 후 exit 0(비크래시).",
+    "verification_steps": [
+      {
+        "action": "run_command",
+        "target": "swift run --package-path /Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli OSLogCLI devices --help 2>&1",
+        "expect": "--json 옵션 및 커맨드 설명 출력"
+      },
+      {
+        "action": "run_command",
+        "target": "swift run --package-path /Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli OSLogCLI devices 2>&1; echo \"EXIT:$?\"",
+        "expect": "시뮬레이터 목록 또는 'No devices found', EXIT:0 (크래시/비정상 종료 없음)"
+      },
+      {
+        "action": "run_command",
+        "target": "swift run --package-path /Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli OSLogCLI devices --json 2>&1 | python3 -c 'import sys,json; data=json.load(sys.stdin); print(\"VALID_JSON:\", type(data))'",
+        "expect": "VALID_JSON: <class 'list'> 출력 — 유효한 JSON 배열 확인"
+      },
+      {
+        "action": "code_review",
+        "target": "/Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli/Sources/OSLogCLI/DevicesCommand.swift",
+        "expect": "DeviceInfo 구조체(udid, name, type, os, status) 존재. simctl JSON 파싱 실패 시 빈 배열 반환(throw 없음). devicectl 미설치 graceful 처리. 파싱 로직이 순수 함수 또는 별도 타입으로 분리되어 테스트 가능한 구조. force unwrap(!) 없음"
+      }
+    ],
+    "status": "built",
+    "reference": null,
+    "priority": 6,
+    "scores": null
+  },
+  {
+    "id": "F007",
+    "category": "logic",
+    "description": "OSLogCLI.swift @main 루트 커맨드 구현: `@main struct OSLogCLI: ParsableCommand`. commandName = 'os-log', abstract 설명, subcommands: [StreamCommand.self, ShowCommand.self, DevicesCommand.self]. 버전 정보 (--version 플래그). 서브커맨드 없이 호출 시 help 출력.",
+    "verification": "`swift run OSLogCLI --help` 시 stream, show, devices 세 서브커맨드 목록 출력. `swift run OSLogCLI --version` 시 버전 문자열 출력(예: 1.0.0). 알 수 없는 서브커맨드 호출 시 에러 메시지 + usage 출력 후 non-zero exit. 서브커맨드 없이 호출 시 help 자동 출력(helpCommand 또는 defaultSubcommand 없음).",
+    "verification_steps": [
+      {
+        "action": "run_command",
+        "target": "swift run --package-path /Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli OSLogCLI --help 2>&1",
+        "expect": "USAGE, SUBCOMMANDS 섹션에 stream, show, devices 모두 포함"
+      },
+      {
+        "action": "run_command",
+        "target": "swift run --package-path /Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli OSLogCLI --version 2>&1",
+        "expect": "버전 문자열 출력 (예: 1.0.0, 빈 문자열 불허)"
+      },
+      {
+        "action": "run_command",
+        "target": "swift run --package-path /Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli OSLogCLI unknown-subcommand 2>&1; echo \"EXIT:$?\"",
+        "expect": "에러 메시지 출력, EXIT:1 (non-zero)"
+      },
+      {
+        "action": "run_command",
+        "target": "swift run --package-path /Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli OSLogCLI 2>&1",
+        "expect": "help 텍스트 출력 (서브커맨드 없이 호출 시 도움말 표시)"
+      }
+    ],
+    "status": "built",
+    "reference": null,
+    "priority": 7,
+    "scores": null
+  },
+  {
+    "id": "F008",
+    "category": "test",
+    "description": "LogFilterTests: LogFilter의 buildArguments() 메서드 유닛 테스트. 커버 시나리오: (1) 모든 옵션 nil → 빈 배열, (2) --subsystem만 설정 → ['--predicate', 'subsystem == ...'] 형태, (3) --category + --level 조합 → 올바른 인자 순서, (4) --predicate 직접 설정 시 그대로 전달, (5) --device 설정 시 인자 포함. Swift Testing @Test 사용, #expect로 배열 동등성 검증.",
+    "verification": "`swift test --filter LogFilterTests` 모든 테스트 통과. LogFilter.swift 라인 커버리지 100%. @Test 매크로 사용(XCTest 혼용 금지). 5가지 시나리오 모두 별도 @Test 함수로 존재. --level 5종(default/info/debug/error/fault) 각각 올바른 인자 생성 확인.",
+    "verification_steps": [
+      {
+        "action": "run_command",
+        "target": "swift test --package-path /Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli --filter LogFilterTests 2>&1",
+        "expect": "Test Suite 'LogFilterTests' 또는 LogFilterTests 관련 라인 출력, 0 failures / 0 errors"
+      },
+      {
+        "action": "run_command",
+        "target": "grep -c '@Test' /Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli/Tests/OSLogCLITests/LogFilterTests.swift 2>/dev/null || echo 'FILE_NOT_FOUND'",
+        "expect": "5 이상 (5가지 시나리오 각각 @Test 함수 존재), FILE_NOT_FOUND 불허"
+      },
+      {
+        "action": "run_command",
+        "target": "grep -n 'XCTestCase\\|XCTAssert' /Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli/Tests/OSLogCLITests/LogFilterTests.swift 2>/dev/null | wc -l | tr -d ' '",
+        "expect": "0 — XCTest 혼용 없음, 순수 Swift Testing만 사용"
+      },
+      {
+        "action": "run_command",
+        "target": "swift test --package-path /Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli --enable-code-coverage 2>&1 | grep -i 'logfilter\\|LogFilter' | head -5",
+        "expect": "LogFilter 관련 커버리지 데이터 출력 (0% 불허)"
+      }
+    ],
+    "status": "built",
+    "reference": null,
+    "priority": 8,
+    "scores": null
+  },
+  {
+    "id": "F009",
+    "category": "test",
+    "description": "OutputFormatterTests: OutputFormatter의 parse()와 format() 메서드 유닛 테스트. 커버 시나리오: (1) 정상 log 라인 파싱 → LogEntry 반환, (2) 잘못된 형식 → nil 반환, (3) compact 포맷 출력 형식 검증, (4) verbose 포맷 출력 형식 검증, (5) json 포맷 → 유효한 JSON 문자열, (6) subsystem/category nil인 경우 처리. Swift Testing 사용.",
+    "verification": "`swift test --filter OutputFormatterTests` 모든 테스트 통과. OutputFormatter.swift 라인 커버리지 100%. compact/json/verbose 세 가지 스타일 모두 별도 @Test 함수로 검증. json 포맷 테스트에서 실제 JSON 파싱 검증(문자열 포함 여부만이 아닌 구조적 검증). 빈 문자열 입력 시 nil 반환 확인.",
+    "verification_steps": [
+      {
+        "action": "run_command",
+        "target": "swift test --package-path /Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli --filter OutputFormatterTests 2>&1",
+        "expect": "OutputFormatterTests 관련 결과 출력, 0 failures"
+      },
+      {
+        "action": "run_command",
+        "target": "grep -c '@Test' /Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli/Tests/OSLogCLITests/OutputFormatterTests.swift 2>/dev/null || echo 'FILE_NOT_FOUND'",
+        "expect": "6 이상 (6가지 시나리오), FILE_NOT_FOUND 불허"
+      },
+      {
+        "action": "code_review",
+        "target": "/Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli/Tests/OSLogCLITests/OutputFormatterTests.swift",
+        "expect": "compact/json/verbose 세 가지 스타일 모두 테스트 케이스 존재. json 스타일 테스트에서 JSONSerialization 또는 Codable로 파싱 유효성 검증. nil 반환 케이스(잘못된 형식, 빈 문자열) 테스트 존재. #expect(entry == nil) 형태 존재"
+      },
+      {
+        "action": "run_command",
+        "target": "grep -n 'XCTestCase\\|XCTAssert' /Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli/Tests/OSLogCLITests/OutputFormatterTests.swift 2>/dev/null | wc -l | tr -d ' '",
+        "expect": "0 — 순수 Swift Testing만 사용"
+      }
+    ],
+    "status": "built",
+    "reference": null,
+    "priority": 9,
+    "scores": null
+  },
+  {
+    "id": "F010",
+    "category": "test",
+    "description": "DevicesCommandTests: DevicesCommand의 simctl/devicectl 출력 파싱 로직 유닛 테스트. 커버 시나리오: (1) simctl JSON 샘플 파싱 → DeviceInfo 배열, (2) Booted 상태 필터링, (3) devicectl 텍스트 출력 파싱 → DeviceInfo, (4) simctl JSON 파싱 실패 시 빈 배열 반환, (5) --json 플래그 출력 형식 검증. 파싱 로직을 testable한 순수 함수로 분리 필요.",
+    "verification": "`swift test --filter DevicesCommandTests` 모든 테스트 통과. 파싱 로직 라인 커버리지 100%. simctl JSON 픽스처 문자열이 인라인으로 존재하거나 별도 파일로 관리. Booted 필터링 테스트에서 Shutdown 상태 디바이스가 결과에서 제외되는지 명시적 검증. 빈 JSON('{}', '[]') 입력 시 빈 배열 반환 확인.",
+    "verification_steps": [
+      {
+        "action": "run_command",
+        "target": "swift test --package-path /Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli --filter DevicesCommandTests 2>&1",
+        "expect": "DevicesCommandTests 관련 결과 출력, 0 failures"
+      },
+      {
+        "action": "code_review",
+        "target": "/Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli/Tests/OSLogCLITests/DevicesCommandTests.swift",
+        "expect": "simctl JSON 픽스처 문자열 존재(실제 xcrun 실행 없음). Booted/Shutdown 필터링 테스트 분리. devicectl 파싱 테스트 존재. 빈 JSON 입력 방어 테스트. #expect(devices.isEmpty) 또는 #expect(devices.count == N) 형태 검증"
+      },
+      {
+        "action": "run_command",
+        "target": "grep -n 'xcrun\\|Process(' /Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli/Tests/OSLogCLITests/DevicesCommandTests.swift 2>/dev/null | wc -l | tr -d ' '",
+        "expect": "0 — 테스트에서 실제 xcrun/Process 실행 없음 (순수 파싱 유닛 테스트)"
+      },
+      {
+        "action": "run_command",
+        "target": "grep -c '@Test' /Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli/Tests/OSLogCLITests/DevicesCommandTests.swift 2>/dev/null || echo 'FILE_NOT_FOUND'",
+        "expect": "5 이상, FILE_NOT_FOUND 불허"
+      }
+    ],
+    "status": "built",
+    "reference": null,
+    "priority": 10,
+    "scores": null
+  },
+  {
+    "id": "F011",
+    "category": "test",
+    "description": "StreamCommand + ShowCommand 유닛 테스트: ProcessRunner 프로토콜을 도입하여 실제 Process 실행을 Mock으로 대체. MockProcessRunner로 미리 정의된 출력 주입. 커버 시나리오: (1) stream --timeout 3 → 3초 후 종료 확인, (2) stream --max-lines 5 → 5줄 수집 후 종료, (3) show --last 1h → 올바른 log 인자 전달, (4) show --start/--end 검증, (5) --last와 --start 동시 사용 시 ValidationError. StreamCommand.swift/ShowCommand.swift 각각 커버리지 100%.",
+    "verification": "`swift test --filter StreamCommandTests` 및 `swift test --filter ShowCommandTests` 모두 통과. ProcessRunner 프로토콜이 Sources/에 정의되어 있음. MockProcessRunner가 Tests/에 정의되어 있음. 실제 Process 실행 없이 미리 정의된 출력으로 테스트. timeout 시나리오는 실제 3초 대기 없이 MockProcessRunner로 즉시 시뮬레이션. 5가지 시나리오 각각 @Test 함수로 존재.",
+    "verification_steps": [
+      {
+        "action": "run_command",
+        "target": "swift test --package-path /Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli --filter StreamCommandTests 2>&1",
+        "expect": "StreamCommandTests 관련 결과 출력, 0 failures"
+      },
+      {
+        "action": "run_command",
+        "target": "swift test --package-path /Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli --filter ShowCommandTests 2>&1",
+        "expect": "ShowCommandTests 관련 결과 출력, 0 failures"
+      },
+      {
+        "action": "run_command",
+        "target": "grep -rn 'protocol ProcessRunner\\|struct MockProcessRunner\\|class MockProcessRunner' /Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli/ 2>/dev/null",
+        "expect": "Sources/에서 ProcessRunner 프로토콜 정의, Tests/에서 MockProcessRunner 구현 각각 발견"
+      },
+      {
+        "action": "run_command",
+        "target": "grep -rn 'Process(' /Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli/Tests/ 2>/dev/null | grep -v 'MockProcess\\|testable' | wc -l | tr -d ' '",
+        "expect": "0 — 테스트 코드에서 직접 Process() 생성 없음 (Mock으로 대체)"
+      },
+      {
+        "action": "code_review",
+        "target": "/Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli/Tests/OSLogCLITests/StreamCommandTests.swift",
+        "expect": "timeout 시나리오가 실제 대기 없이 Mock으로 즉시 종료 시뮬레이션. max-lines 5줄 초과 시 종료 검증. ValidationError 케이스 #expect(throws:) 사용"
+      }
+    ],
+    "status": "built",
+    "reference": null,
+    "priority": 11,
+    "scores": null
+  },
+  {
+    "id": "F012",
+    "category": "test",
+    "description": "통합 테스트 (IntegrationTests): 실제 macOS `log` 명령을 실행하는 end-to-end 테스트. 커버 시나리오: (1) `log show --last 1m` 실제 실행 후 출력 파싱 검증, (2) `log stream --timeout 2` 실행 후 정상 종료 확인, (3) 잘못된 --predicate 구문 시 stderr 에러 메시지 캡처. 테스트는 macOS 전용으로 `#if os(macOS)` 조건부 컴파일. 실행 환경에서 /usr/bin/log 존재 여부 선행 확인.",
+    "verification": "`swift test --filter IntegrationTests` 통과. #if os(macOS) 조건부 컴파일 존재. /usr/bin/log 존재 확인 후 실행하는 guard 또는 withKnownIssue 처리. log stream --timeout 2 테스트가 실제로 ~2초 내 종료. 잘못된 predicate 에러 케이스에서 stderr 내용 캡처 검증.",
+    "verification_steps": [
+      {
+        "action": "run_command",
+        "target": "swift test --package-path /Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli --filter IntegrationTests 2>&1",
+        "expect": "IntegrationTests 관련 결과 출력, 0 failures (macOS 환경에서 /usr/bin/log 실행 성공)"
+      },
+      {
+        "action": "run_command",
+        "target": "grep -n '#if os(macOS)\\|#endif' /Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli/Tests/OSLogCLITests/IntegrationTests.swift 2>/dev/null",
+        "expect": "#if os(macOS) 와 #endif 쌍 존재"
+      },
+      {
+        "action": "code_review",
+        "target": "/Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli/Tests/OSLogCLITests/IntegrationTests.swift",
+        "expect": "/usr/bin/log 존재 확인 로직 존재. log show --last 1m 실행 후 출력 파싱 검증(빈 문자열도 허용, 크래시 불허). stderr 캡처 테스트에서 잘못된 predicate 에러 메시지 검증. 실행 시간이 테스트당 합리적(stream 테스트 최대 5초 이내)"
+      },
+      {
+        "action": "run_command",
+        "target": "ls -la /usr/bin/log",
+        "expect": "/usr/bin/log 파일 존재 확인 (통합 테스트 실행 가능 환경)"
+      }
+    ],
+    "status": "built",
+    "reference": null,
+    "priority": 12,
+    "scores": null
+  },
+  {
+    "id": "F013",
+    "category": "test",
+    "description": "전체 코드 커버리지 100% 검증 및 커버리지 리포트 생성: `swift test --enable-code-coverage` 실행 후 `xcrun llvm-cov report`로 각 소스 파일별 라인 커버리지 확인. 미커버 라인 발견 시 추가 테스트 케이스 작성. 커버리지 리포트를 .harness/os-log-cli/coverage-report.txt에 저장.",
+    "verification": "모든 Sources/ 파일의 라인 커버리지 100%. coverage-report.txt 파일 존재 및 내용 있음. 개별 파일(LogFilter.swift, OutputFormatter.swift, StreamCommand.swift, ShowCommand.swift, DevicesCommand.swift, OSLogCLI.swift) 각각 100% 달성. TOTAL 행 100% 확인.",
+    "verification_steps": [
+      {
+        "action": "run_command",
+        "target": "swift test --package-path /Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli --enable-code-coverage 2>&1 | tail -3",
+        "expect": "Test Suite 통과 메시지, 에러 없음"
+      },
+      {
+        "action": "run_command",
+        "target": "xcrun llvm-cov report $(find /Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli/.build/debug -name 'OSLogCLIPackageTests' -not -name '*.o' 2>/dev/null | head -1) -instr-profile $(find /Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/scripts/os-log-cli/.build/debug/codecov -name 'default.profdata' 2>/dev/null | head -1) 2>/dev/null | grep -E 'LogFilter|OutputFormatter|StreamCommand|ShowCommand|DevicesCommand|TOTAL'",
+        "expect": "각 소스 파일 라인 커버리지 100.00%, TOTAL 100.00%"
+      },
+      {
+        "action": "run_command",
+        "target": "ls -la /Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/.harness/os-log-cli/coverage-report.txt 2>/dev/null || echo 'FILE_MISSING'",
+        "expect": "파일 존재 (FILE_MISSING 불허), 파일 크기 > 0"
+      },
+      {
+        "action": "run_command",
+        "target": "grep 'TOTAL' /Volumes/eyedisk/develop/oozoofrog/oozoofrog-plugins/plugins/app-automation/.harness/os-log-cli/coverage-report.txt 2>/dev/null | head -1",
+        "expect": "TOTAL 행에 100.00% 또는 99.x% 이상 커버리지 수치 포함"
+      }
+    ],
+    "status": "built",
+    "reference": null,
+    "priority": 13,
+    "scores": null
+  }
+]
