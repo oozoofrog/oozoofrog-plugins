@@ -1,0 +1,140 @@
+import Testing
+import Foundation
+import ArgumentParser
+@testable import OSLogCLICore
+
+@Suite("ShowCommand 유닛 테스트")
+struct ShowCommandTests {
+
+    // MARK: - 시나리오 3: show --last 1h → 올바른 log 인자 전달
+
+    @Test("--last 1h 설정 시 log show --last 1h 인자 전달")
+    func lastOptionPassedToLogShow() throws {
+        let mock = MockProcessRunner()
+        mock.runResult = ProcessResult(output: "", error: "", exitCode: 0)
+
+        var command = ShowCommand()
+        command.last = "1h"
+        try command.runWithRunner(mock)
+
+        #expect(mock.lastRunExecutable == "/usr/bin/log")
+        #expect(mock.lastRunArguments.contains("show"))
+        #expect(mock.lastRunArguments.contains("--last"))
+        let idx = mock.lastRunArguments.firstIndex(of: "--last")
+        if let idx {
+            #expect(mock.lastRunArguments[mock.lastRunArguments.index(after: idx)] == "1h")
+        }
+    }
+
+    // MARK: - 시나리오 4: show --start/--end 검증
+
+    @Test("--start와 --end 설정 시 올바른 인자 전달")
+    func startEndOptionsPassedToLogShow() throws {
+        let mock = MockProcessRunner()
+        mock.runResult = ProcessResult(output: "", error: "", exitCode: 0)
+
+        var command = ShowCommand()
+        command.start = "2024-01-01T00:00:00"
+        command.end = "2024-01-01T01:00:00"
+        try command.runWithRunner(mock)
+
+        #expect(mock.lastRunArguments.contains("--start"))
+        #expect(mock.lastRunArguments.contains("--end"))
+
+        let startIdx = mock.lastRunArguments.firstIndex(of: "--start")
+        if let startIdx {
+            #expect(mock.lastRunArguments[mock.lastRunArguments.index(after: startIdx)] == "2024-01-01T00:00:00")
+        }
+
+        let endIdx = mock.lastRunArguments.firstIndex(of: "--end")
+        if let endIdx {
+            #expect(mock.lastRunArguments[mock.lastRunArguments.index(after: endIdx)] == "2024-01-01T01:00:00")
+        }
+    }
+
+    @Test("--start만 설정 시 --end 없이 인자 전달")
+    func startOnlyWithoutEnd() throws {
+        let mock = MockProcessRunner()
+        mock.runResult = ProcessResult(output: "", error: "", exitCode: 0)
+
+        var command = ShowCommand()
+        command.start = "2024-01-01T00:00:00"
+        try command.runWithRunner(mock)
+
+        #expect(mock.lastRunArguments.contains("--start"))
+        #expect(!mock.lastRunArguments.contains("--end"))
+    }
+
+    // MARK: - 시나리오 5: --last와 --start 동시 사용 시 ValidationError
+
+    @Test("--last와 --start 동시 사용 시 ValidationError")
+    func lastAndStartMutuallyExclusiveThrowsError() {
+        var command = ShowCommand()
+        command.last = "1h"
+        command.start = "2024-01-01T00:00:00"
+
+        #expect(throws: (any Error).self) {
+            try command.validate()
+        }
+    }
+
+    @Test("--last와 --end 동시 사용 시 ValidationError")
+    func lastAndEndMutuallyExclusiveThrowsError() {
+        var command = ShowCommand()
+        command.last = "30m"
+        command.end = "2024-01-01T01:00:00"
+
+        #expect(throws: (any Error).self) {
+            try command.validate()
+        }
+    }
+
+    @Test("--last만 설정 시 ValidationError 없음")
+    func lastOnlyNoValidationError() throws {
+        var command = ShowCommand()
+        command.last = "2h"
+        try command.validate()
+    }
+
+    @Test("--start와 --end만 설정 시 ValidationError 없음")
+    func startEndOnlyNoValidationError() throws {
+        var command = ShowCommand()
+        command.start = "2024-01-01T00:00:00"
+        command.end = "2024-01-01T01:00:00"
+        try command.validate()
+    }
+
+    @Test("모든 옵션 nil 시 ValidationError 없음")
+    func allOptionsNilNoValidationError() throws {
+        var command = ShowCommand()
+        try command.validate()
+    }
+
+    // MARK: - 기타 검증
+
+    @Test("show 명령이 /usr/bin/log를 실행함")
+    func showCommandUsesCorrectExecutable() throws {
+        let mock = MockProcessRunner()
+        mock.runResult = ProcessResult(output: "", error: "", exitCode: 0)
+
+        var command = ShowCommand()
+        try command.runWithRunner(mock)
+
+        #expect(mock.lastRunExecutable == "/usr/bin/log")
+        #expect(mock.lastRunArguments.first == "show")
+    }
+
+    @Test("출력 라인 파싱 및 포맷 처리")
+    func outputLinesAreParsedAndFormatted() throws {
+        let mockOutput = """
+        2024-01-15 10:23:45.000000+0900 MyApp[1234:5678] <Warning>: test message
+        """
+        let mock = MockProcessRunner()
+        mock.runResult = ProcessResult(output: mockOutput, error: "", exitCode: 0)
+
+        var command = ShowCommand()
+        command.format = .compact
+        // 에러 없이 실행되면 성공
+        try command.runWithRunner(mock)
+    }
+}
