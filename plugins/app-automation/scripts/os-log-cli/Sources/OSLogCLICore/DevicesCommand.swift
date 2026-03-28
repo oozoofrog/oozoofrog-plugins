@@ -204,17 +204,28 @@ struct DevicesCommand: ParsableCommand {
     }
 
     private func printTable(_ devices: [DeviceInfo]) {
-        let header = String(format: "%-40s %-30s %-10s %-15s %-10s",
-            "UDID", "Name", "Type", "OS", "Status")
+        // Swift String 패딩 (String(format:"%s") 사용 시 segfault 가능 — 직접 padding 처리)
+        func pad(_ s: String, to width: Int) -> String {
+            if s.count >= width { return s }
+            return s + String(repeating: " ", count: width - s.count)
+        }
+        let header = [
+            pad("UDID", to: 40),
+            pad("Name", to: 30),
+            pad("Type", to: 10),
+            pad("OS", to: 15),
+            "Status"
+        ].joined(separator: " ")
         print(header)
         print(String(repeating: "-", count: 110))
         for device in devices {
-            let row = String(format: "%-40s %-30s %-10s %-15s %-10s",
-                device.udid,
-                device.name,
-                device.type.rawValue,
-                device.os,
-                device.status)
+            let row = [
+                pad(device.udid, to: 40),
+                pad(device.name, to: 30),
+                pad(device.type.rawValue, to: 10),
+                pad(device.os, to: 15),
+                device.status
+            ].joined(separator: " ")
             print(row)
         }
     }
