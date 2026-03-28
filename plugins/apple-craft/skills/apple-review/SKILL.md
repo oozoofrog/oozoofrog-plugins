@@ -74,6 +74,35 @@ Agent: harness-reviewer
 
 ---
 
+## Phase R1.5: 에이전트 검증 요약 검토
+
+harness-reviewer가 반환한 결과를 오케스트레이터가 **회의적 관점**으로 검토한다.
+
+1. `.claude/review/review-findings.json` 읽기
+2. **수정 완전성 검증**:
+   - action="fixed" 항목의 `revalidated` 필드 확인
+   - `revalidated: false`인 수정이 있으면 경고 표시
+   - `revalidated` 필드 자체가 없는 fixed 항목 → 재검증 미실행 경고
+3. **분류 일관성 검증**:
+   - severity=critical인데 action=report-only → 에이전트 판단 오류 가능성, 재확인
+   - severity=suggestion인데 action=issue → 과도한 이슈 생성 가능성, 재확인
+4. **누락 가능성 검사**:
+   - 로드된 참조 문서 목록 vs 실제 탐지 카테고리: 주요 참조 문서에서 발견 0건이면 경고
+5. 검토 결과를 review-report.md 상단에 요약 추가:
+   ```markdown
+   ## 에이전트 검증 요약
+   - 총 발견: {N}건
+   - 자동 수정: {N}건 (재검증 통과: {N}건, 미통과: {N}건)
+   - 재검증에서 추가 발견: {N}건
+   - 분류 일관성 경고: {N}건
+   ```
+
+검토 결과 심각한 문제(revalidated:false 다수, 분류 불일치 다수)가 있으면:
+- harness-reviewer를 해당 항목에 대해 재디스패치 고려
+- 또는 사용자에게 "재검증 실패 항목이 있습니다" 안내 후 Phase R2 진행
+
+---
+
 ## Phase R2: 트리아지
 
 review-findings.json을 읽고 action별 처리:
