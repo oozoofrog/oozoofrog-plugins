@@ -3,7 +3,7 @@ xcode_version: "26.4"
 xcode_build: "24909"
 xcode_path: "/Volumes/eyedisk/Applications/Xcode.app"
 sync_date: "2026-03-25"
-doc_count: 20
+doc_count: 23
 ---
 
 # apple-craft Reference Index

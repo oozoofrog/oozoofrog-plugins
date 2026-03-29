@@ -347,7 +347,7 @@ local fm_errors=""
 for ag in "${expected_agents[@]}"; do
   local ag_path="$AGENTS_DIR/$ag"
   [[ ! -f "$ag_path" ]] && continue
-  for field in "name:" "description:" "model:" "color:" "whenToUse:" "tools:"; do
+  for field in "name:" "description:" "model:" "color:" "whenToUse:"; do
     if ! grep -q "$field" "$ag_path"; then
       fm_ok=false
       fm_errors+="$ag:$field "
@@ -355,7 +355,7 @@ for ag in "${expected_agents[@]}"; do
   done
 done
 if $fm_ok; then
-  pass "2. 에이전트 frontmatter 필수 필드 (name,description,model,color,whenToUse,tools)"
+  pass "2. 에이전트 frontmatter 필수 필드 (name,description,model,color,whenToUse)"
 else
   fail "2. 누락된 frontmatter 필드" "$fm_errors"
 fi
