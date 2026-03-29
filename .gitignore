@@ -16,5 +16,8 @@ firebase-debug.log
 # Superpowers docs (specs, plans)
 docs/superpowers/
 
+# Test Fixtures
+.test-fixtures/
+
 # Git Worktrees
 .worktrees/
