@@ -331,7 +331,7 @@ git commit -m "feat(hey-codex): codex-research.py Python runner 추가"
 
 - [ ] **Step 1: loop-contract.md 참조 문서 작성**
 
-기존 goal-research-loop의 loop-contract.md를 간소화하여 포팅. 핵심 15개 필드 설명 + 예시.
+기존 goal-research-loop의 loop-contract.md를 간소화하여 포팅. 핵심 13개 필드 설명 + 예시.
 
 - [ ] **Step 2: SKILL.md 작성**
 

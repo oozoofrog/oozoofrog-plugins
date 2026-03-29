@@ -66,11 +66,14 @@ case "$subcommand" in
 
   run)
     shift
-    workspace="${1:-$PWD}"
-    if [[ $# -gt 0 && "$1" != --* ]]; then
-      shift
-    else
-      workspace="$PWD"
+    workspace="$PWD"
+    if [[ $# -gt 0 ]]; then
+      if [[ "$1" == --* ]]; then
+        echo "경고: workspace 인자 '$1' 가 옵션처럼 보여 현재 디렉터리($PWD)를 사용합니다." >&2
+      else
+        workspace="$1"
+        shift
+      fi
     fi
     exec "$PYTHON_BIN" "$RUNNER" run --workspace "$workspace" "$@"
     ;;

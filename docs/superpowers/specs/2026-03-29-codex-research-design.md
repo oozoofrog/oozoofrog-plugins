@@ -47,7 +47,7 @@ plugins/hey-codex/
 │   ├── preflight.sh                 ← 기존 (공유)
 │   ├── process-output.sh            ← 기존 (공유)
 │   ├── codex-research.sh            ← shell wrapper (init/status/run)
-│   └── codex-research.py            ← Python runner (~400줄)
+│   └── codex-research.py            ← Python runner (~800줄)
 └── templates/
     └── codex-research/
         ├── program.md
@@ -97,11 +97,11 @@ codex-research.sh run <workspace> [options]
 | --search | false | Codex --search (웹 검색) |
 | --full-auto | false | Codex --full-auto |
 | --model | - | Codex 모델 |
-| --sandbox | - | read-only / workspace-write |
+| --sandbox | - | read-only / workspace-write / danger-full-access |
 | --add-dir | - | 추가 참조 디렉토리 (반복 가능) |
-| --timeout | 1800 | 라운드당 타임아웃 (초) |
+| --timeout-seconds | 1800 | 라운드당 타임아웃 (초) |
 | --allow-dirty | false | git dirty tree 허용 |
-| --no-commit | false | keep 시 자동 commit 비활성화 |
+| --no-commit-on-keep | false | keep 시 자동 commit 비활성화 |
 
 ## Codex 프롬프트 구조
 
@@ -169,13 +169,15 @@ codex-research.sh run <workspace> [options]
 ├── contract.md
 ├── state_snapshot.md
 ├── ledger.tsv
+├── runtime/
 └── rounds/
-    ├── round-001/
+    ├── round-000/
     │   ├── prompt.md
     │   ├── last-message.json
     │   ├── response.json
+    │   ├── codex-events.jsonl
     │   └── evidence.md
-    └── round-002/...
+    └── round-001/...
 ```
 
 ## Git 관리
@@ -197,10 +199,10 @@ codex-research.sh run <workspace> [options]
 
 ## 기존 대비 간소화
 
-| 항목 | goal-research-loop (842줄) | codex-research (~400줄) |
+| 항목 | goal-research-loop (842줄) | codex-research (~800줄) |
 |------|--------------------------|------------------------|
 | prompt_profile | standard + lightweight | standard만 |
-| references | 10개 | 1개 (loop-contract.md) |
+| references | 10개 | 2개 (SKILL.md + loop-contract.md) |
 | --extra-instruction | 있음 | 제거 (contract.md에 통합) |
 | --dangerously-bypass | 있음 | 제거 |
 | schema 필드 | 18개 | 14개 |

@@ -14,6 +14,11 @@ from pathlib import Path
 from string import Template
 from typing import Iterable
 
+try:
+    import fcntl
+except ImportError:  # pragma: no cover - Windows fallback
+    fcntl = None
+
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
@@ -22,10 +27,17 @@ ROOT = Path(__file__).resolve().parents[1]  # hey-codex plugin root
 TEMPLATES_DIR = ROOT / "templates" / "codex-research"
 SCHEMA_PATH = TEMPLATES_DIR / "round-result.schema.json"
 DEFAULT_STATE_DIR_NAME = ".codex-research"
+VALID_EXPERIMENT_STATUSES = {"keep", "discard", "crash"}
+VALID_CONTROL_ACTIONS = {"pass", "refine", "pivot", "rescope", "escalate", "stop"}
 LEDGER_HEADER = (
     "round\thypothesis\tchange\thard_gates\tmetric\tevidence\t"
     "experiment_status\tcontrol_action\tnext_step\tnotes\n"
 )
+
+
+class JsonParseError(Exception):
+    """JSON 응답 파일 해석 실패."""
+
 
 # ---------------------------------------------------------------------------
 # Utility helpers
@@ -52,17 +64,41 @@ def resolve_state_dir(workspace: Path, override: str | None) -> Path:
 
 
 def read_text(path: Path) -> str:
-    return path.read_text(encoding="utf-8")
+    try:
+        return path.read_text(encoding="utf-8")
+    except FileNotFoundError as exc:
+        raise SystemExit(f"파일을 찾을 수 없습니다: {path}") from exc
+    except PermissionError as exc:
+        raise SystemExit(f"파일을 읽을 권한이 없습니다: {path}") from exc
+    except UnicodeDecodeError as exc:
+        raise SystemExit(f"UTF-8로 파일을 읽을 수 없습니다: {path}\n{exc}") from exc
+    except OSError as exc:
+        raise SystemExit(f"파일을 읽는 중 오류가 발생했습니다: {path}\n{exc}") from exc
 
 
 def write_text(path: Path, content: str) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(content, encoding="utf-8")
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+    except OSError as exc:
+        raise SystemExit(f"디렉터리를 생성할 수 없습니다: {path.parent}\n{exc}") from exc
+    try:
+        path.write_text(content, encoding="utf-8")
+    except OSError as exc:
+        raise SystemExit(f"파일을 쓸 수 없습니다: {path}\n{exc}") from exc
 
 
 def render_template(name: str, context: dict[str, str]) -> str:
-    template = Template(read_text(TEMPLATES_DIR / name))
-    return template.safe_substitute(context)
+    template_path = TEMPLATES_DIR / name
+    template = Template(read_text(template_path))
+    try:
+        return template.substitute(context)
+    except KeyError as exc:
+        missing_key = exc.args[0] if exc.args else "unknown"
+        raise SystemExit(
+            f"템플릿 치환 변수 `{missing_key}` 가 누락되었습니다: {template_path}"
+        ) from exc
+    except ValueError as exc:
+        raise SystemExit(f"템플릿 형식이 잘못되었습니다: {template_path}\n{exc}") from exc
 
 
 def ensure_codex_exists(codex_bin: str) -> None:
@@ -79,6 +115,10 @@ def collapse_ws(value: str) -> str:
 
 def tsv_escape(value: object) -> str:
     return collapse_ws(str(value)).replace("\n", " / ")
+
+
+def warn(message: str) -> None:
+    print(f"경고: {message}", file=sys.stderr)
 
 
 # ---------------------------------------------------------------------------
@@ -149,8 +189,19 @@ def append_ledger_row(
         tsv_escape(response.get("next_step", "")),
         notes,
     ]
-    with ledger_path.open("a", encoding="utf-8") as handle:
-        handle.write("\t".join(row) + "\n")
+    try:
+        with ledger_path.open("a+", encoding="utf-8") as handle:
+            if fcntl is not None:
+                fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+            handle.seek(0, 2)
+            if handle.tell() == 0:
+                handle.write(LEDGER_HEADER)
+            handle.write("\t".join(row) + "\n")
+            handle.flush()
+            if fcntl is not None:
+                fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+    except OSError as exc:
+        raise SystemExit(f"ledger.tsv에 결과를 기록할 수 없습니다: {ledger_path}\n{exc}") from exc
 
 
 # ---------------------------------------------------------------------------
@@ -209,6 +260,9 @@ def _sanitize_status_lines(lines: Iterable[str], state_dir_rel: Path | None) -> 
     for raw in lines:
         line = raw.rstrip("\n")
         if not line:
+            continue
+        if len(line) <= 3:
+            filtered.append(line)
             continue
         path_text = line[3:]
         if " -> " in path_text:
@@ -296,7 +350,12 @@ def ensure_clean_git_tree(workspace: Path, state_dir_rel: Path | None) -> None:
     if filtered:
         preview = "\n".join(filtered[:20])
         raise SystemExit(
-            "git 작업 트리가 깨끗하지 않습니다. 먼저 정리하거나 --allow-dirty를 사용하세요.\n"
+            "git 작업 트리가 깨끗하지 않습니다.\n"
+            "해결 방법:\n"
+            "  1. 변경을 유지하려면: git add -A && git commit -m \"...\"\n"
+            "  2. 변경을 버리려면: git restore --source=HEAD --staged --worktree . && git clean -fd\n"
+            "  3. dirty tree에서도 실행하려면: --allow-dirty 사용\n"
+            "감지된 변경:\n"
             f"{preview}"
         )
 
@@ -409,6 +468,21 @@ def build_round_prompt(
     round_num: int,
     head_ref: str | None,
 ) -> str:
+    if not program_path.exists():
+        raise SystemExit(
+            f"program.md 파일이 없습니다: {program_path}\n"
+            "먼저 init을 다시 실행하거나 program.md를 생성하세요."
+        )
+    if not program_path.is_file():
+        raise SystemExit(f"program.md 경로가 파일이 아닙니다: {program_path}")
+    if not contract_path.exists():
+        raise SystemExit(
+            f"contract.md 파일이 없습니다: {contract_path}\n"
+            "먼저 init을 다시 실행하거나 contract.md를 생성하세요."
+        )
+    if not contract_path.is_file():
+        raise SystemExit(f"contract.md 경로가 파일이 아닙니다: {contract_path}")
+
     program_text = read_text(program_path).strip()
     contract_text = read_text(contract_path).strip()
     snapshot_text = read_text(snapshot_path).strip() if snapshot_path.exists() else "(state snapshot 없음)"
@@ -547,11 +621,17 @@ def build_codex_command(
 
 
 def read_json_file(path: Path) -> dict[str, object]:
-    raw = read_text(path).strip()
     try:
-        return json.loads(raw)
+        raw = read_text(path).strip()
+    except SystemExit as exc:
+        raise JsonParseError(str(exc)) from exc
+    try:
+        data = json.loads(raw)
     except json.JSONDecodeError as exc:
-        raise SystemExit(f"JSON 파싱 실패: {path}\n{exc}\n---\n{raw}") from exc
+        raise JsonParseError(f"JSON 파싱 실패: {path}\n{exc}\n---\n{raw}") from exc
+    if not isinstance(data, dict):
+        raise JsonParseError(f"JSON 최상위 구조는 object여야 합니다: {path}")
+    return data
 
 
 def fallback_response(round_num: int, message: str) -> dict[str, object]:
@@ -571,6 +651,57 @@ def fallback_response(round_num: int, message: str) -> dict[str, object]:
         "updated_files": [],
         "evidence_files": [],
     }
+
+
+def validate_response_schema_basics(
+    response: dict[str, object], *, response_path: Path
+) -> dict[str, object]:
+    required_fields = ("experiment_status", "control_action", "hypothesis")
+    missing_fields = [field for field in required_fields if field not in response]
+    if missing_fields:
+        warn(
+            "응답 JSON에 필수 필드가 없습니다 "
+            f"({', '.join(missing_fields)}): {response_path}"
+        )
+
+    hypothesis = collapse_ws(str(response.get("hypothesis", "")).strip())
+    if not hypothesis:
+        warn(f"`hypothesis` 가 비어 있습니다: {response_path}")
+        response["hypothesis"] = "(가설 없음)"
+    else:
+        response["hypothesis"] = hypothesis
+
+    experiment_status = collapse_ws(str(response.get("experiment_status", "")).strip())
+    if not experiment_status:
+        warn(
+            f"`experiment_status` 가 비어 있어 기본값 `crash` 를 사용합니다: {response_path}"
+        )
+        response["experiment_status"] = "crash"
+    elif experiment_status not in VALID_EXPERIMENT_STATUSES:
+        warn(
+            "`experiment_status` 값이 유효하지 않아 기본값 `crash` 를 사용합니다 "
+            f"({experiment_status}): {response_path}"
+        )
+        response["experiment_status"] = "crash"
+    else:
+        response["experiment_status"] = experiment_status
+
+    control_action = collapse_ws(str(response.get("control_action", "")).strip())
+    if not control_action:
+        warn(
+            f"`control_action` 이 비어 있어 기본값 `escalate` 를 사용합니다: {response_path}"
+        )
+        response["control_action"] = "escalate"
+    elif control_action not in VALID_CONTROL_ACTIONS:
+        warn(
+            "`control_action` 값이 유효하지 않아 기본값 `escalate` 를 사용합니다 "
+            f"({control_action}): {response_path}"
+        )
+        response["control_action"] = "escalate"
+    else:
+        response["control_action"] = control_action
+
+    return response
 
 
 def summarize_response(round_num: int, response: dict[str, object]) -> str:
@@ -691,7 +822,7 @@ def cmd_run(args: argparse.Namespace) -> int:
                 if completed_returncode != 0:
                     response = fallback_response(
                         round_num,
-                        f"codex exec failed with exit code {completed.returncode}; see {stdout_path}",
+                        f"codex exec failed with exit code {completed_returncode}; see {stdout_path}",
                     )
                 elif not last_message_path.exists():
                     response = fallback_response(
@@ -701,8 +832,10 @@ def cmd_run(args: argparse.Namespace) -> int:
                 else:
                     try:
                         response = read_json_file(last_message_path)
-                    except SystemExit as exc:
+                    except JsonParseError as exc:
                         response = fallback_response(round_num, str(exc))
+
+        response = validate_response_schema_basics(response, response_path=last_message_path)
 
         write_text(response_path, json.dumps(response, ensure_ascii=False, indent=2) + "\n")
 

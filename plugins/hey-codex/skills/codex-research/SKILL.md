@@ -135,19 +135,33 @@ bash "${CLAUDE_PLUGIN_ROOT}/scripts/codex-research.sh" status <workspace>
 bash "${CLAUDE_PLUGIN_ROOT}/scripts/codex-research.sh" run <workspace> --max-rounds N --search --full-auto
 ```
 
+> shell wrapper는 `<workspace>` 위치 인자를 내부적으로 `--workspace <path>`로 변환합니다. 필요하면 Python runner를 직접 호출해 `--workspace`, `--state-dir` 같은 옵션을 명시할 수 있습니다.
+
 ### run 옵션
 
 | 옵션 | 기본값 | 설명 |
 |------|--------|------|
+| --workspace | `.` | 연구를 수행할 workspace 디렉터리 (shell wrapper에서는 위치 인자와 동일) |
+| --state-dir | `<workspace>/.codex-research` | 상태 파일 디렉터리 override |
+| --codex-bin | `codex` | 사용할 Codex CLI 실행 파일 |
+| --sandbox | - | `read-only` / `workspace-write` / `danger-full-access` |
 | --max-rounds | 3 | 최대 라운드 수 |
 | --loop-forever | false | 무한 실행 (autonomous-loop 전용) |
 | --search | false | Codex --search (웹 검색) |
 | --full-auto | false | Codex --full-auto |
 | --model | - | Codex 모델 지정 |
 | --timeout-seconds | 1800 | 라운드당 타임아웃 (초) |
+| --skip-git-repo-check | false | Codex의 git repo 체크를 건너뜀 (non-git workspace용) |
+| --commit-on-keep | auto | keep 결과 자동 commit 강제 |
 | --no-commit-on-keep | false | keep 시 자동 commit 비활성화 |
 | --allow-dirty | false | git dirty tree에서도 실행 허용 |
 | --add-dir | - | Codex에 추가 참조 디렉토리 (반복 가능) |
+
+### keep 시 commit 동작 (tri-state)
+
+- **옵션 생략**: git repo면 자동 commit, non-git workspace면 commit 없이 진행
+- **`--commit-on-keep`**: keep 결과를 항상 자동 commit 시도
+- **`--no-commit-on-keep`**: keep 결과를 자동 commit 하지 않음. 이때 `--allow-dirty`가 없으면 다음 라운드 자동 진행이 중단될 수 있음
 
 ## 상태 디렉토리 (.codex-research/)
 
