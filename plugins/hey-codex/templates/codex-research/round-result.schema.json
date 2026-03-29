@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "round",
+    "objective",
+    "hypothesis",
+    "change_summary",
+    "hard_gates",
+    "metric",
+    "evidence_summary",
+    "experiment_status",
+    "control_action",
+    "best_state_summary",
+    "next_step",
+    "notes",
+    "updated_files",
+    "evidence_files"
+  ],
+  "properties": {
+    "round": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "objective": {
+      "type": "string"
+    },
+    "hypothesis": {
+      "type": "string"
+    },
+    "change_summary": {
+      "type": "string"
+    },
+    "hard_gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "result",
+        "details"
+      ],
+      "properties": {
+        "result": {
+          "type": "string",
+          "enum": [
+            "pass",
+            "fail"
+          ]
+        },
+        "details": {
+          "type": "string"
+        }
+      }
+    },
+    "metric": {
+      "type": "string"
+    },
+    "evidence_summary": {
+      "type": "string"
+    },
+    "experiment_status": {
+      "type": "string",
+      "enum": [
+        "keep",
+        "discard",
+        "crash"
+      ]
+    },
+    "control_action": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "refine",
+        "pivot",
+        "rescope",
+        "escalate",
+        "stop"
+      ]
+    },
+    "best_state_summary": {
+      "type": "string"
+    },
+    "next_step": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "updated_files": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "evidence_files": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}
