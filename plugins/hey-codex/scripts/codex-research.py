@@ -198,8 +198,7 @@ def append_ledger_row(
                 handle.write(LEDGER_HEADER)
             handle.write("\t".join(row) + "\n")
             handle.flush()
-            if fcntl is not None:
-                fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+            # flock은 file handle close 시 자동 해제됨 (with 블록 종료)
     except OSError as exc:
         raise SystemExit(f"ledger.tsv에 결과를 기록할 수 없습니다: {ledger_path}\n{exc}") from exc
 
@@ -767,6 +766,7 @@ def cmd_run(args: argparse.Namespace) -> int:
         last_message_path = round_dir / "last-message.json"
         response_path = round_dir / "response.json"
         stdout_path = round_dir / "codex-events.jsonl"
+        stderr_path = round_dir / "codex-stderr.log"
         evidence_path = round_dir / "evidence.md"
 
         prompt = build_round_prompt(
@@ -799,13 +799,14 @@ def cmd_run(args: argparse.Namespace) -> int:
 
         print(f"== round {round_num:03d} ==")
         print("command:", " ".join(cmd))
-        with stdout_path.open("w", encoding="utf-8") as stdout_handle:
+        with stdout_path.open("w", encoding="utf-8") as stdout_handle, \
+             stderr_path.open("w", encoding="utf-8") as stderr_handle:
             proc = subprocess.Popen(
                 cmd,
                 cwd=str(workspace),
                 stdin=subprocess.PIPE,
                 stdout=stdout_handle,
-                stderr=subprocess.STDOUT,
+                stderr=stderr_handle,
                 text=True,
             )
             try:
@@ -822,7 +823,7 @@ def cmd_run(args: argparse.Namespace) -> int:
                 if completed_returncode != 0:
                     response = fallback_response(
                         round_num,
-                        f"codex exec failed with exit code {completed_returncode}; see {stdout_path}",
+                        f"codex exec failed with exit code {completed_returncode}; see {stdout_path} and {stderr_path}",
                     )
                 elif not last_message_path.exists():
                     response = fallback_response(
@@ -855,6 +856,10 @@ def cmd_run(args: argparse.Namespace) -> int:
                         str(response.get("hypothesis", "")),
                     )
                     notes_suffix = f"(commit={commit_ref})"
+                    if commit_ref.startswith(("stage-failed", "commit-failed")):
+                        warn(f"git commit 실패: {commit_ref}")
+                        if not args.allow_dirty:
+                            keep_without_commit = True
                 else:
                     notes_suffix = "(keep without auto-commit)"
                     if not args.allow_dirty:
@@ -862,8 +867,14 @@ def cmd_run(args: argparse.Namespace) -> int:
             elif experiment_status in {"discard", "crash"} and workspace_changes_exist(
                 workspace, state_dir_rel
             ):
-                restore_workspace(workspace, state_dir_rel)
-                notes_suffix = "(workspace reverted to HEAD)"
+                restored = restore_workspace(workspace, state_dir_rel)
+                if restored:
+                    notes_suffix = "(workspace reverted to HEAD)"
+                else:
+                    notes_suffix = "(workspace restore FAILED; dirty state possible)"
+                    if not args.allow_dirty:
+                        warn("workspace 복원 실패. --allow-dirty 없이 다음 라운드를 진행할 수 없습니다.")
+                        keep_without_commit = True
 
         append_ledger_row(
             ledger_path,
