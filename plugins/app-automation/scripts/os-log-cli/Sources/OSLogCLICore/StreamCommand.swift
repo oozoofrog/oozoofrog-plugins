@@ -28,7 +28,12 @@ struct StreamCommand: ParsableCommand {
     }
 
     mutating func run() throws {
-        try runWithRunner(SystemProcessRunner(), filterValues: filter.toValues())
+        try runWith(runner: SystemProcessRunner())
+    }
+
+    /// ProcessRunner를 주입받아 실행 (테스트 가능)
+    func runWith(runner: any ProcessRunner) throws {
+        try runWithRunner(runner, filterValues: filter.toValues())
     }
 
     /// ProcessRunner와 LogFilterValues를 주입받아 실행 (테스트 가능)

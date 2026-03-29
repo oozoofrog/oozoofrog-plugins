@@ -82,6 +82,31 @@ struct IntegrationTests {
         #expect(hasError, "잘못된 predicate는 에러를 발생시켜야 함")
     }
 
+    // MARK: - 시나리오 4: StreamCommand.run() 및 ShowCommand.run() 실제 경로
+
+    @Test("StreamCommand.run() 실제 경로 — parse 후 run 호출")
+    func streamCommandRunActual() throws {
+        guard FileManager.default.fileExists(atPath: Self.logPath) else { return }
+
+        // parse()로 모든 property wrapper 초기화 후 run() 호출
+        var command = try StreamCommand.parse(["--timeout", "1", "--max-lines", "1"])
+        try command.run()
+    }
+
+    @Test("ShowCommand.run() 실제 경로 — parse 후 run 호출")
+    func showCommandRunActual() throws {
+        guard FileManager.default.fileExists(atPath: Self.logPath) else { return }
+
+        var command = try ShowCommand.parse(["--last", "1s"])
+        try command.run()
+    }
+
+    @Test("DevicesCommand.run() 실제 경로 — parse 후 run 호출")
+    func devicesCommandRunActual() throws {
+        var command = try DevicesCommand.parse([])
+        try command.run()
+    }
+
     // MARK: - xcrun simctl 실행 가능 여부 확인
 
     @Test("xcrun simctl 실행 가능 여부")

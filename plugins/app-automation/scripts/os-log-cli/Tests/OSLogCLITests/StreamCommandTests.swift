@@ -103,6 +103,28 @@ struct StreamCommandTests {
 
         try command.validate()
     }
+
+    // MARK: - 미커버 분기: 비공백 비파싱 라인, stderr
+
+    @Test("파싱 불가 비공백 라인은 그대로 출력")
+    func unparsableNonEmptyLinePassedThrough() throws {
+        let mock = MockProcessRunner()
+        mock.streamLines = ["this is not a log format line"]
+
+        let command = StreamCommand.testInstance()
+        try command.runWithRunner(mock, filterValues: LogFilterValues())
+    }
+
+    @Test("stderr 출력이 있으면 에러 스트림에 전달")
+    func stderrOutputForwarded() throws {
+        let mock = MockProcessRunner()
+        mock.streamLines = []
+        mock.streamStderr = "some error output"
+        mock.streamExitCode = 1
+
+        let command = StreamCommand.testInstance()
+        try command.runWithRunner(mock, filterValues: LogFilterValues())
+    }
 }
 
 // MARK: - 테스트 헬퍼

@@ -56,7 +56,6 @@ struct DevicesCommandTests {
     @Test("simctl JSON 파싱 시 DeviceInfo 배열 반환")
     func parsesSimctlJSONToDeviceInfoArray() {
         let devices = DeviceParser.parseSimctlJSON(simctlJSONFixture)
-        // Booted 상태인 것은 iPhone 15 Pro와 Apple Watch — 2개
         #expect(devices.count == 2)
     }
 
@@ -82,7 +81,6 @@ struct DevicesCommandTests {
     func shutdownDevicesExcluded() {
         let devices = DeviceParser.parseSimctlJSON(simctlJSONFixture)
         let names = devices.map { $0.name }
-        // Shutdown 상태인 iPhone SE는 제외되어야 함
         #expect(!names.contains("iPhone SE (3rd generation)"))
     }
 
@@ -99,7 +97,6 @@ struct DevicesCommandTests {
     @Test("devicectl 텍스트 출력 파싱 크래시 없음")
     func parsesDevicectlOutput() {
         let devices = DeviceParser.parseDevicectlOutput(devicectlOutputFixture)
-        // 픽스처의 UDID가 실제 UUID 형식이 아니므로 빈 배열일 수 있지만 크래시 없어야 함
         #expect(devices.count >= 0)
     }
 
@@ -188,5 +185,108 @@ struct DevicesCommandTests {
         let data = try JSONEncoder().encode(devices)
         let string = try #require(String(data: data, encoding: .utf8))
         #expect(string == "[]")
+    }
+
+    // MARK: - 시나리오 6: runWithRunner 통합 경로 (Mock)
+
+    @Test("시뮬레이터 있을 때 printTable 경로 실행")
+    func runWithRunnerPrintTablePath() throws {
+        let mock = MockDevicesProcessRunner()
+        mock.simctlResult = ProcessResult(output: simctlJSONFixture, error: "", exitCode: 0)
+        mock.devicectlResult = ProcessResult(output: "", error: "", exitCode: 1)
+
+        let command = DevicesCommand()
+        try command.runWithRunner(mock, outputJSON: false)
+    }
+
+    @Test("시뮬레이터 있을 때 --json 플래그로 printJSON 경로")
+    func runWithRunnerPrintJSONPath() throws {
+        let mock = MockDevicesProcessRunner()
+        mock.simctlResult = ProcessResult(output: simctlJSONFixture, error: "", exitCode: 0)
+        mock.devicectlResult = ProcessResult(output: "", error: "", exitCode: 1)
+
+        let command = DevicesCommand()
+        try command.runWithRunner(mock, outputJSON: true)
+    }
+
+    @Test("디바이스 없을 때 'No devices found.' 경로")
+    func runWithRunnerNoDevicesFound() throws {
+        let mock = MockDevicesProcessRunner()
+        mock.simctlResult = ProcessResult(output: emptySimctlJSON, error: "", exitCode: 0)
+        mock.devicectlResult = ProcessResult(output: "", error: "", exitCode: 1)
+
+        let command = DevicesCommand()
+        try command.runWithRunner(mock, outputJSON: false)
+    }
+
+    @Test("디바이스 없을 때 --json 빈 배열 출력")
+    func runWithRunnerNoDevicesFoundJSON() throws {
+        let mock = MockDevicesProcessRunner()
+        mock.simctlResult = ProcessResult(output: emptySimctlJSON, error: "", exitCode: 0)
+        mock.devicectlResult = ProcessResult(output: "", error: "", exitCode: 1)
+
+        let command = DevicesCommand()
+        try command.runWithRunner(mock, outputJSON: true)
+    }
+
+    @Test("devicectl exitCode != 0 시 graceful degradation")
+    func runWithRunnerDevicectlFailsGracefully() throws {
+        let mock = MockDevicesProcessRunner()
+        // simctl 성공, devicectl 실패
+        mock.simctlResult = ProcessResult(output: simctlJSONFixture, error: "", exitCode: 0)
+        mock.devicectlResult = ProcessResult(output: "", error: "error", exitCode: 1)
+
+        let command = DevicesCommand()
+        try command.runWithRunner(mock)
+    }
+
+    @Test("devicectl 실행 실패(throw) 시 graceful degradation")
+    func runWithRunnerDevicectlThrowsGracefully() throws {
+        let mock = MockDevicesProcessRunner()
+        mock.simctlResult = ProcessResult(output: simctlJSONFixture, error: "", exitCode: 0)
+        mock.devicectlShouldThrow = true
+
+        let command = DevicesCommand()
+        try command.runWithRunner(mock)
+    }
+
+    @Test("simctl 실행 실패 시 graceful degradation")
+    func runWithRunnerSimctlThrowsGracefully() throws {
+        let mock = MockDevicesProcessRunner()
+        mock.simctlShouldThrow = true
+        mock.devicectlResult = ProcessResult(output: "", error: "", exitCode: 0)
+
+        let command = DevicesCommand()
+        try command.runWithRunner(mock)
+    }
+}
+
+/// DevicesCommand 전용 Mock — simctl과 devicectl을 구분하여 응답
+final class MockDevicesProcessRunner: ProcessRunner, @unchecked Sendable {
+    var simctlResult = ProcessResult(output: "", error: "", exitCode: 0)
+    var devicectlResult = ProcessResult(output: "", error: "", exitCode: 0)
+    var simctlShouldThrow = false
+    var devicectlShouldThrow = false
+
+    func run(executable: String, arguments: [String]) throws -> ProcessResult {
+        if arguments.contains("simctl") {
+            if simctlShouldThrow { throw NSError(domain: "test", code: 1) }
+            return simctlResult
+        }
+        if arguments.contains("devicectl") {
+            if devicectlShouldThrow { throw NSError(domain: "test", code: 1) }
+            return devicectlResult
+        }
+        return ProcessResult(output: "", error: "", exitCode: 0)
+    }
+
+    func stream(
+        executable: String,
+        arguments: [String],
+        timeout: TimeInterval,
+        maxLines: Int,
+        onLine: @escaping @Sendable (String) -> Void
+    ) throws -> ProcessResult {
+        ProcessResult(output: "", error: "", exitCode: 0)
     }
 }

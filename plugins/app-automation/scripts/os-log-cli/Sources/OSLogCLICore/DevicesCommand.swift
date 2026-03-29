@@ -138,11 +138,11 @@ struct DevicesCommand: ParsableCommand {
     var json: Bool = false
 
     mutating func run() throws {
-        try runWithRunner(SystemProcessRunner())
+        try runWithRunner(SystemProcessRunner(), outputJSON: json)
     }
 
     /// ProcessRunner를 주입받아 실행 (테스트 가능)
-    mutating func runWithRunner(_ runner: any ProcessRunner) throws {
+    func runWithRunner(_ runner: any ProcessRunner, outputJSON: Bool = false) throws {
         var allDevices: [DeviceInfo] = []
 
         // 1. simctl로 시뮬레이터 목록 조회
@@ -154,7 +154,7 @@ struct DevicesCommand: ParsableCommand {
         allDevices += physicalDevices
 
         if allDevices.isEmpty {
-            if json {
+            if outputJSON {
                 print("[]")
             } else {
                 print("No devices found.")
@@ -162,7 +162,7 @@ struct DevicesCommand: ParsableCommand {
             return
         }
 
-        if json {
+        if outputJSON {
             printJSON(allDevices)
         } else {
             printTable(allDevices)

@@ -127,8 +127,16 @@ struct ShowCommandTests {
         let mock = MockProcessRunner()
         mock.runResult = ProcessResult(output: "", error: "some error", exitCode: 1)
 
-        var command = ShowCommand.testInstance()
-        // 에러가 있어도 크래시 없이 실행
+        let command = ShowCommand.testInstance()
+        try command.runWithRunner(mock, filterValues: LogFilterValues())
+    }
+
+    @Test("파싱 불가 비공백 라인은 그대로 출력")
+    func unparsableNonEmptyLinePassedThrough() throws {
+        let mock = MockProcessRunner()
+        mock.runResult = ProcessResult(output: "not a log line\nanother non-log line", error: "", exitCode: 0)
+
+        let command = ShowCommand.testInstance()
         try command.runWithRunner(mock, filterValues: LogFilterValues())
     }
 }

@@ -12,6 +12,9 @@ final class MockProcessRunner: ProcessRunner, @unchecked Sendable {
     /// stream() 호출 시 반환할 종료 코드
     var streamExitCode: Int32 = 0
 
+    /// stream() 호출 시 반환할 stderr 출력
+    var streamStderr: String = ""
+
     /// 마지막으로 run()에 전달된 인자 기록
     var lastRunExecutable: String = ""
     var lastRunArguments: [String] = []
@@ -51,7 +54,7 @@ final class MockProcessRunner: ProcessRunner, @unchecked Sendable {
 
         return ProcessResult(
             output: linesToSend.joined(separator: "\n"),
-            error: "",
+            error: streamStderr,
             exitCode: streamExitCode
         )
     }
