@@ -11,6 +11,10 @@ firebase-debug.log
 
 # Codex Research state
 .codex-research/
+.codex-research-prev-*/
+
+# Superpowers docs (specs, plans)
+docs/superpowers/
 
 # Git Worktrees
 .worktrees/
