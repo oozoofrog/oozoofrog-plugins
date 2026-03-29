@@ -724,27 +724,52 @@ def decode_json_object(raw: str, *, path: Path) -> dict[str, object]:
     if type_mismatch_detected:
         raise_json_parse_error(path, normalized, errors)
 
-    # --- Phase 3: offset-scan for '{{' (limited to first 10) ---
+    # --- Phase 3: offset-scan for JSON starts ('{' / '['; limited to first 10) ---
     warn(f"JSON 직접 파싱 실패 → offset 스캔 복구 시도: {path}")
     decoder = json.JSONDecoder()
-    brace_positions = [idx for idx, ch in enumerate(normalized) if ch == "{"]
-    if len(brace_positions) > 10:
-        warn(f"'{{' 위치가 {len(brace_positions)}개로 많아 처음 10개만 시도합니다: {path}")
-        brace_positions = brace_positions[:10]
+    candidate_positions = [idx for idx, ch in enumerate(normalized) if ch in "[{"]
+    if len(candidate_positions) > 10:
+        warn(
+            f"JSON 시작 문자 위치가 {len(candidate_positions)}개로 많아 "
+            f"처음 10개만 시도합니다: {path}"
+        )
+        candidate_positions = candidate_positions[:10]
 
-    results: list[dict[str, object]] = []
-    for idx in brace_positions:
-        candidate = normalized[idx:]
+    dict_results: list[tuple[int, int, dict[str, object]]] = []
+    non_dict_spans: list[tuple[int, int, str]] = []
+    for idx in candidate_positions:
         try:
-            data = json.loads(candidate)
+            data, end = decoder.raw_decode(normalized, idx)
         except json.JSONDecodeError:
             try:
-                data, _ = decoder.raw_decode(candidate)
+                data = json.loads(normalized[idx:])
+                end = len(normalized)
             except json.JSONDecodeError as exc:
                 errors.append(f"offset {idx}: {exc}")
                 continue
         if isinstance(data, dict):
-            results.append(data)
+            dict_results.append((idx, end, data))
+            continue
+        kind = json_value_kind(data)
+        errors.append(f"offset {idx}: 최상위 JSON은 object여야 하는데 {kind} 입니다")
+        non_dict_spans.append((idx, end, kind))
+
+    results: list[dict[str, object]] = []
+    for idx, end, data in dict_results:
+        blocker = next(
+            (
+                kind
+                for start, stop, kind in non_dict_spans
+                if start < idx and end <= stop
+            ),
+            None,
+        )
+        if blocker is not None:
+            errors.append(
+                f"offset {idx}: {blocker} 후보 내부 dict는 복구 대상이 아닙니다"
+            )
+            continue
+        results.append(data)
 
     if results:
         best = max(results, key=len)
