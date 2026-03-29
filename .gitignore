@@ -9,5 +9,8 @@ firebase-debug.log
 .claude/settings.local.json
 .claude/ralph-loop.local.md
 
+# Codex Research state
+.codex-research/
+
 # Git Worktrees
 .worktrees/
