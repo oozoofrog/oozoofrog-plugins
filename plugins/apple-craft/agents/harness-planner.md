@@ -30,9 +30,14 @@ whenToUse: |
 1. **환경 스캔** — 현재 세션에서 사용 가능한 도구와 컨텍스트를 파악합니다:
    ```
    a. CLAUDE.md 확인 (프로젝트 규칙, 코딩 컨벤션, 금지 사항)
-   b. Xcode MCP 서버 연결 여부 확인 (mcp__xcode__ 도구 사용 가능 여부)
-      → 연결 시: BuildProject, RenderPreview, RunAllTests/RunSomeTests를 검증 기준에 포함
-      → 미연결 시: 코드 검토 기반 검증으로 대체
+   b. 빌드 도구 탐지 (폴백 체인):
+      1) Xcode MCP 서버 연결 여부 확인 (mcp__xcode__ 도구 사용 가능 여부)
+         → 연결 시: BuildProject, RenderPreview, RunAllTests/RunSomeTests를 검증 기준에 포함
+      2) 미연결 시 xcodebuild CLI 확인:
+         → which xcodebuild + .xcworkspace/.xcodeproj 탐색 + xcodebuild -list -json
+         → xcsift 확인: which xcsift (구조화된 빌드 출력 파싱)
+      3) SPM 확인: Package.swift 존재 여부 (swift build 폴백)
+      4) 모두 없으면: 코드 검토 기반 검증 (static)
    c. 프로젝트 구조 파악 (Glob/Grep으로 Swift 파일, .xcodeproj/.xcworkspace, Package.swift)
    d. git 상태 확인 (git status, git log --oneline -5)
    e. 시뮬레이터 자동화 도구 가용성 (mcp-baepsae / axe-simulator) — 사용 가능하면 스펙의 환경 섹션에 기록
@@ -102,7 +107,11 @@ mkdir -p .claude/harness
 - 참조 문서: <사용할 apple-craft 참조 목록>
 
 ## 환경
-- Xcode MCP: <연결됨/미연결>
+- 빌드 도구: <xcode-mcp | xcodebuild | swift-build | static>
+  - Xcode MCP: <연결됨/미연결>
+  - xcodebuild: <사용 가능 (프로젝트: <name>, 스킴: <scheme>) / 미감지>
+  - xcsift: <사용 가능 (v<version>) / 미설치>
+  - swift build: <사용 가능 (Package.swift 존재) / 해당 없음>
 - 검증 도구: <BuildProject, RenderPreview, RunAllTests/RunSomeTests 사용 가능 여부>
 - 프로젝트 규칙: <CLAUDE.md에서 발견된 핵심 규칙>
 - Git 상태: <clean/dirty, 현재 브랜치>

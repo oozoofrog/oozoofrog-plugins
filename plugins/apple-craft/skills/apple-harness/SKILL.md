@@ -86,12 +86,107 @@ Anthropic의 [Harness Design](https://www.anthropic.com/engineering/harness-desi
 apple-craft 하네스는 Claude Code 환경의 모든 스킬/MCP/도구를 적극 활용합니다.
 하네스가 항상 오케스트레이션을 주도하며, 외부 도구는 하네스의 지휘 하에 동작합니다.
 
-### 핵심 도구 (Evaluator가 최우선 확인)
+### 런타임 검증 도구 (Evaluator가 최우선 확인)
 - **mcp-baepsae** (app-automation 플러그인): iOS Simulator + macOS 앱 런타임 인터랙션
 - **axe-simulator**: iOS Simulator 접근성 기반 자동화
 
-### 빌드/검증 도구
-- **Xcode MCP**: BuildProject, RenderPreview, RunAllTests
+### 빌드/검증 도구 — 폴백 체인
+
+빌드 검증은 다음 우선순위로 사용 가능한 도구를 탐지하여 자동 결정합니다:
+
+```
+BUILD_TOOL 탐지 순서:
+1. Xcode MCP (mcp__xcode__BuildProject)  — 최우선, 가장 풍부한 피드백
+   ↓ 미연결
+2. xcodebuild CLI + xcsift               — CLI 폴백, 구조화된 빌드 검증
+   ↓ xcodebuild 실패 또는 프로젝트 탐지 불가
+3. swift build + xcsift                   — SPM 프로젝트 전용 폴백
+   ↓ 모두 실패
+4. static                                 — 코드 검토만 (built_unverified)
+```
+
+| BUILD_TOOL | 탐지 방법 | 빌드 명령 | status |
+|------------|----------|----------|--------|
+| `xcode-mcp` | `mcp__xcode__BuildProject` 호출 성공 | BuildProject MCP 도구 | `built` |
+| `xcodebuild` | `which xcodebuild` + `.xcworkspace`/`.xcodeproj` 존재 | `xcodebuild build ... 2>&1 \| xcsift -E` | `built` |
+| `swift-build` | `Package.swift` 존재 | `swift build 2>&1 \| xcsift -E` | `built` |
+| `static` | 위 모두 실패 | 없음 (코드 리뷰만) | `built_unverified` |
+
+#### xcodebuild 핵심 옵션 (하네스에서 사용)
+
+**프로젝트 탐지 순서:**
+```bash
+# 1. workspace 우선 (.xcworkspace)
+xcodebuild -workspace <name>.xcworkspace -scheme <scheme> build 2>&1 | xcsift -E
+
+# 2. project (.xcodeproj)
+xcodebuild -project <name>.xcodeproj -scheme <scheme> build 2>&1 | xcsift -E
+
+# 3. scheme 자동 탐지
+xcodebuild -list [-workspace <name> | -project <name>] -json
+```
+
+**빌드 옵션:**
+| 옵션 | 용도 | 예시 |
+|------|------|------|
+| `-workspace NAME` | 워크스페이스 지정 | `-workspace App.xcworkspace` |
+| `-project NAME` | 프로젝트 지정 | `-project App.xcodeproj` |
+| `-scheme NAME` | 스킴 지정 (필수) | `-scheme MyApp` |
+| `-configuration NAME` | 빌드 구성 | `-configuration Debug` |
+| `-destination SPEC` | 빌드 대상 디바이스 | `-destination 'platform=iOS Simulator,name=iPhone 16'` |
+| `-sdk SDK` | SDK 지정 | `-sdk iphonesimulator` |
+| `-quiet` | 경고/에러만 출력 | 단독 사용 시 |
+| `-parallelizeTargets` | 병렬 빌드 | 빌드 속도 향상 |
+| `-derivedDataPath PATH` | 빌드 산출물 경로 | 격리된 빌드 |
+| `-showBuildTimingSummary` | 빌드 타이밍 리포트 | 성능 분석 |
+
+**테스트 옵션:**
+| 옵션 | 용도 | 예시 |
+|------|------|------|
+| `test` (build action) | 테스트 실행 | `xcodebuild test -scheme ...` |
+| `-enableCodeCoverage YES` | 코드 커버리지 | `xcodebuild test -enableCodeCoverage YES` |
+| `-parallel-testing-enabled YES` | 병렬 테스트 | 테스트 속도 향상 |
+| `-only-testing:TARGET/CLASS/METHOD` | 특정 테스트만 | 타겟 테스트 |
+
+#### xcsift 옵션 (빌드 출력 파싱)
+
+xcsift는 xcodebuild/swift build 출력을 구조화된 JSON으로 변환합니다.
+
+**필수 패턴:** `xcodebuild ... 2>&1 | xcsift [옵션]` (항상 `2>&1`로 stderr 리다이렉트)
+
+| 옵션 | 축약 | 용도 | 하네스 활용 |
+|------|------|------|-----------|
+| `--exit-on-failure` | `-E` | 빌드 실패 시 exit code 반환 | **필수** — 빌드 성공/실패 판정 |
+| `--warnings` | `-w` | 경고 상세 목록 표시 | Evaluator 코드품질 축 |
+| `--Werror` | `-W` | 경고를 에러로 처리 | 엄격 모드 |
+| `--quiet` | `-q` | 성공 시 출력 억제 | 빌드 루프 간소화 |
+| `--coverage` | `-c` | 코드 커버리지 데이터 | 테스트 검증 |
+| `--coverage-details` | — | 파일별 상세 커버리지 | 심층 테스트 분석 |
+| `--executable` | `-e` | 생성된 실행 파일 경로 | 시뮬레이터 배포 |
+| `--build-info` | — | 타겟별 빌드 단계/타이밍 | 빌드 성능 분석 |
+| `--slow-threshold N` | — | 느린 테스트 탐지 (초) | 테스트 품질 |
+| `--format json` | `-f json` | JSON 출력 (기본값) | LLM 파싱용 |
+| `--format toon` | `-f toon` | TOON 출력 (토큰 30-60% 절약) | 컨텍스트 절약 |
+
+**xcsift JSON 출력 구조 (빌드):**
+```json
+{
+  "result": "success" | "failure",
+  "errors": [{"file": "...", "line": 42, "message": "..."}],
+  "warnings": [{"file": "...", "line": 10, "message": "..."}],
+  "errorCount": 0,
+  "warningCount": 2
+}
+```
+
+#### swift build 핵심 옵션 (SPM 프로젝트)
+
+| 옵션 | 용도 |
+|------|------|
+| `--package-path PATH` | 패키지 경로 지정 |
+| `-c debug\|release` | 빌드 구성 |
+| `--verbose` / `-v` | 상세 출력 |
+| `--quiet` / `-q` | 에러만 출력 |
 
 ### 보조 도구 (있으면 활용)
 - safe-design-advisor, code-review, swift-master 등 환경의 기타 스킬
@@ -371,8 +466,8 @@ Builder 재실행 시 프롬프트에 반드시 포함:
 
 **상태 전이:**
 ```
-pending → built (Builder 완료, Xcode MCP 연결)
-pending → built_unverified (Builder 완료, Xcode MCP 미연결)
+pending → built (Builder 완료, 빌드 검증 성공 — Xcode MCP 또는 xcodebuild+xcsift 또는 swift build+xcsift)
+pending → built_unverified (Builder 완료, 빌드 도구 없음 — static 모드)
 built → verified (Evaluator PASS)
 built → partial (Evaluator PARTIAL — 소폭 수정 필요)
 built → failed (Evaluator FAIL — 재구현 필요)
@@ -449,7 +544,7 @@ Phase 1: PLAN 시작 — Planner 에이전트가 스펙을 작성합니다...
 
 ## Limitations
 
-1. **Xcode MCP 권장**: Builder의 빌드 검증과 Evaluator의 품질 검증에 Xcode MCP 도구가 필요합니다. 미연결 시 코드는 `built_unverified` 상태로 마킹되며, 검증 신뢰도가 낮아집니다. 가능하면 Xcode MCP 서버를 연결하세요.
+1. **빌드 검증 도구**: Xcode MCP가 가장 풍부한 빌드 피드백을 제공합니다. 미연결 시 `xcodebuild` CLI + `xcsift`로 폴백하여 빌드 검증을 수행합니다. SPM 프로젝트는 `swift build` + `xcsift`도 지원합니다. 모든 빌드 도구가 없을 때만 `built_unverified`로 마킹됩니다. `xcsift` 설치: `brew install xcsift`.
 
 2. **비용**: 3 라운드 × 3 에이전트 = 최대 9개 에이전트 호출. 간단한 작업은 기존 `apple-craft` implement 모드가 효율적입니다.
 
@@ -484,12 +579,12 @@ apple-harness 실행 흐름
 │   ├─ {HARNESS_DIR}/design-spec.md 생성 (토큰 매핑 + 화면 구조)
 │   └─ Phase 3으로 진행
 ├─ Phase 3: BUILD (harness-builder)
-│   ├─ Step 0: 환경 도구 탐색
+│   ├─ Step 0: 빌드 도구 탐지 (Xcode MCP → xcodebuild+xcsift → swift build+xcsift → static)
 │   ├─ {HARNESS_DIR}/features.json에서 pending/failed 기능 선택
 │   ├─ 참조 문서 Read
 │   ├─ Swift 코드 작성 ({HARNESS_DIR}/design-spec.md 참조)
-│   ├─ 빌드 검증 (내부 3회 재시도)
-│   ├─ {HARNESS_DIR}/features.json status → built
+│   ├─ 빌드 검증 (BUILD_TOOL에 따른 폴백 체인, 내부 3회 재시도)
+│   ├─ {HARNESS_DIR}/features.json status → built (검증 성공) 또는 built_unverified (static)
 │   └─ git commit
 ├─ Phase 4: EVALUATE (harness-evaluator)
 │   ├─ Step 0: baepsae/axe 최우선 탐지 + Pencil + 보조 도구 탐색

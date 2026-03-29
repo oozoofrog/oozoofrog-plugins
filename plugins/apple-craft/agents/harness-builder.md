@@ -25,6 +25,57 @@ whenToUse: |
 
 ## 절차
 
+### Step 0: 빌드 도구 탐지
+
+빌드 검증에 사용할 도구를 우선순위로 탐지합니다.
+
+#### 0-A. Xcode MCP 확인 (최우선)
+`mcp__xcode__BuildProject` 도구 사용 가능 여부 확인 (ToolSearch 또는 직접 호출 시도)
+→ 성공: **BUILD_TOOL = "xcode-mcp"**
+→ 실패 ↓
+
+#### 0-B. xcodebuild CLI 확인
+```bash
+which xcodebuild
+```
+→ 성공 + 프로젝트 탐지 ↓
+
+**프로젝트 탐지 순서:**
+```bash
+# 1. .xcworkspace 탐색 (CocoaPods, 멀티프로젝트)
+Glob: **/*.xcworkspace (Pods, .build 제외)
+
+# 2. .xcodeproj 탐색
+Glob: **/*.xcodeproj
+
+# 3. 스킴 자동 탐지
+xcodebuild -list [-workspace <name> | -project <name>] -json
+```
+→ 프로젝트 + 스킴 탐지 성공: **BUILD_TOOL = "xcodebuild"**
+
+**xcsift 확인:**
+```bash
+which xcsift
+```
+→ 있으면 **XCSIFT = true** (구조화된 빌드 출력)
+→ 없으면 **XCSIFT = false** (xcodebuild 원시 출력 사용)
+→ 프로젝트 탐지 실패 ↓
+
+#### 0-C. swift build 확인 (SPM 프로젝트)
+```bash
+# Package.swift 존재 확인
+Glob: Package.swift
+```
+→ 존재: **BUILD_TOOL = "swift-build"**
+→ 미존재 ↓
+
+#### 0-D. static 모드
+**BUILD_TOOL = "static"** (코드 리뷰 기반, 빌드 검증 없음)
+
+#### 탐지 결과 기록
+탐지된 BUILD_TOOL, 프로젝트 경로, 스킴, XCSIFT 가용성을 기록합니다.
+이 정보는 Step 5 빌드 검증에서 사용됩니다.
+
 ### Step 1: 상태 파악
 
 1. `{HARNESS_DIR}/harness-spec.md` 읽기 — 전체 맥락 파악
@@ -82,9 +133,11 @@ Read: ${CLAUDE_PLUGIN_ROOT}/skills/apple-craft/references/<doc>.md
 
 Write/Edit 도구로 코드 파일을 작성합니다.
 
-### Step 5: 빌드 검증 (Xcode MCP 연결 시)
+### Step 5: 빌드 검증 (BUILD_TOOL별 폴백 체인)
 
-빌드 내부 루프 (최대 3회):
+빌드 내부 루프 (최대 3회), BUILD_TOOL에 따라 분기:
+
+#### BUILD_TOOL = "xcode-mcp" (Xcode MCP 연결)
 
 ```
 1. XcodeRefreshCodeIssuesInFile — 수정한 파일의 빠른 진단 (2초)
@@ -94,17 +147,69 @@ Write/Edit 도구로 코드 파일을 작성합니다.
 5. 빌드 성공 → Step 6으로
 ```
 
-**빌드 성공 후 시뮬레이터 배포 (선택적):**
+#### BUILD_TOOL = "xcodebuild" (xcodebuild CLI + xcsift 폴백)
+
+```
+1. 프로젝트/스킴 정보 사용 (Step 0에서 탐지)
+2. xcodebuild 실행:
+   XCSIFT = true 일 때:
+     xcodebuild build -workspace <name>.xcworkspace -scheme <scheme> \
+       -destination 'platform=iOS Simulator,name=iPhone 16' \
+       -configuration Debug 2>&1 | xcsift -E -f json
+   XCSIFT = false 일 때:
+     xcodebuild build -workspace <name>.xcworkspace -scheme <scheme> \
+       -destination 'platform=iOS Simulator,name=iPhone 16' \
+       -configuration Debug -quiet 2>&1
+3. 결과 분석:
+   - xcsift JSON의 "result" 필드 확인 ("success" / "failure")
+   - "errors" 배열에서 파일:라인:메시지 추출
+   - xcsift 미사용 시 원시 출력에서 "error:" 패턴 파싱
+4. 에러 있으면 → 에러 메시지 기반 수정 → 다시 2
+5. 빌드 성공 → Step 6으로
+```
+
+**xcodebuild 옵션 선택 가이드:**
+- `.xcworkspace` 있으면 `-workspace` 사용, 없으면 `-project` 사용
+- `-destination`: harness-spec.md의 대상 플랫폼에 따라 결정
+  - iOS: `'platform=iOS Simulator,name=iPhone 16'`
+  - macOS: `'platform=macOS'`
+  - watchOS: `'platform=watchOS Simulator,name=Apple Watch Series 10 (46mm)'`
+  - visionOS: `'platform=visionOS Simulator,name=Apple Vision Pro'`
+- `-configuration Debug`: 빌드 시간 단축을 위해 Debug 사용
+- 경고 분석이 필요하면 xcsift `-w` 옵션 추가
+
+#### BUILD_TOOL = "swift-build" (SPM 프로젝트 폴백)
+
+```
+1. swift build 실행:
+   XCSIFT = true 일 때:
+     swift build 2>&1 | xcsift -E -f json
+   XCSIFT = false 일 때:
+     swift build 2>&1
+2. 결과 분석 (xcodebuild와 동일)
+3. 에러 있으면 → 수정 → 다시 1
+4. 빌드 성공 → Step 6으로
+```
+
+#### BUILD_TOOL = "static" (빌드 도구 없음)
+
+- 코드의 문법적 정확성을 참조 문서 기반으로 최대한 검증
+- {HARNESS_DIR}/features.json status를 **"built_unverified"**로 설정 ("built" 대신)
+- "빌드 도구(Xcode MCP, xcodebuild, swift build)가 모두 감지되지 않았습니다. 수동으로 빌드를 확인해주세요."라고 안내
+
+#### 빌드 성공 후 시뮬레이터 배포 (선택적)
+
 시뮬레이터 자동화 도구(mcp-baepsae)가 사용 가능하면, 빌드 성공 후 앱을 시뮬레이터에 설치/실행하여 Evaluator가 바로 런타임 테스트할 수 있도록 준비할 수 있습니다:
 ```
 install_app → launch_app
 ```
 이 단계는 선택적이며, Builder의 주 책임은 코드 작성 + 빌드입니다.
 
-Xcode MCP가 연결되지 않은 경우:
-- 코드의 문법적 정확성을 참조 문서 기반으로 최대한 검증
-- {HARNESS_DIR}/features.json status를 **"built_unverified"**로 설정 ("built" 대신)
-- "Xcode에서 빌드하여 확인해주세요"라고 안내
+BUILD_TOOL = "xcodebuild"인 경우, `-executable` 옵션과 xcsift를 활용하여 생성된 바이너리 경로를 얻은 뒤 시뮬레이터에 수동 설치할 수도 있습니다:
+```bash
+xcodebuild build ... 2>&1 | xcsift -E -e
+# JSON 출력의 "executables" 필드에서 .app 경로 확인
+```
 
 ### Step 6: 기능 완료 처리
 

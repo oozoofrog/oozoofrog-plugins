@@ -86,8 +86,30 @@ apple-craft 하네스가 오케스트레이션을 주도하며, 외부 도구는
 
 이 두 도구가 "앱을 사용자처럼 테스트하는" 능력의 핵심.
 
-#### 0-B. 빌드/검증 도구 확인
-- Xcode MCP (BuildProject, RenderPreview, RunAllTests 등)
+#### 0-B. 빌드/검증 도구 확인 (폴백 체인)
+
+Builder와 동일한 우선순위로 BUILD_TOOL을 탐지합니다:
+
+1. **Xcode MCP** — `mcp__xcode__BuildProject` 호출 시도
+   → 성공: BUILD_TOOL = "xcode-mcp"
+   → 실패 ↓
+
+2. **xcodebuild CLI** — `which xcodebuild` + 프로젝트 탐지
+   ```bash
+   which xcodebuild
+   Glob: **/*.xcworkspace  (Pods, .build 제외)
+   Glob: **/*.xcodeproj
+   xcodebuild -list [-workspace <name> | -project <name>] -json
+   ```
+   → 프로젝트+스킴 탐지 성공: BUILD_TOOL = "xcodebuild"
+   **xcsift 확인:** `which xcsift` → XCSIFT = true | false
+   → 실패 ↓
+
+3. **swift build** — `Package.swift` 존재 확인
+   → 존재: BUILD_TOOL = "swift-build"
+   → 미존재 ↓
+
+4. BUILD_TOOL = "static"
 
 #### 0-C. 보조 도구 탐색 (있으면 활용)
 - safe-design-advisor, code-review, swift-master 등
@@ -124,11 +146,58 @@ apple-craft 하네스가 오케스트레이션을 주도하며, 외부 도구는
   - run_steps/axe_batch로 멀티스텝 실행
 - verification_steps가 없으면 verification 텍스트 기준으로 수동 인터랙션
 
-**RUNTIME_TOOL이 static일 때:**
+**RUNTIME_TOOL이 static일 때 (BUILD_TOOL별 분기):**
+
+BUILD_TOOL = "xcode-mcp":
 - BuildProject 성공 여부
 - RenderPreview 렌더링 확인 (SwiftUI)
 - RunAllTests/RunSomeTests 통과 (테스트 있는 경우)
 - 코드를 Read하여 기능 구현 확인
+
+BUILD_TOOL = "xcodebuild":
+- 빌드 검증:
+  ```bash
+  # XCSIFT = true
+  xcodebuild build -workspace <name>.xcworkspace -scheme <scheme> \
+    -destination '<platform>' -configuration Debug 2>&1 | xcsift -E -w -f json
+  # XCSIFT = false
+  xcodebuild build ... -quiet 2>&1
+  ```
+  → xcsift JSON의 "result", "errors", "warnings" 분석
+  → 에러 0건 = 빌드 성공, 경고는 코드품질 축에서 반영
+- 테스트 검증 (테스트 타겟 있는 경우):
+  ```bash
+  # XCSIFT = true
+  xcodebuild test -workspace <name>.xcworkspace -scheme <scheme> \
+    -destination '<platform>' 2>&1 | xcsift -E -c -f json
+  # XCSIFT = false
+  xcodebuild test ... -quiet 2>&1
+  ```
+  → xcsift JSON의 테스트 결과 + 코드 커버리지 분석
+  → `--slow-threshold 2.0`으로 느린 테스트 탐지 (선택적)
+- 코드를 Read하여 기능 구현 확인
+
+BUILD_TOOL = "swift-build":
+- 빌드 검증:
+  ```bash
+  # XCSIFT = true
+  swift build 2>&1 | xcsift -E -w -f json
+  # XCSIFT = false
+  swift build 2>&1
+  ```
+  → xcsift JSON의 "result", "errors", "warnings" 분석
+  → xcsift 미사용 시 원시 출력에서 "error:" 패턴 파싱
+- 테스트 검증 (테스트 타겟 있는 경우):
+  ```bash
+  # XCSIFT = true
+  swift test 2>&1 | xcsift -E -c -f json
+  # XCSIFT = false
+  swift test 2>&1
+  ```
+- 코드를 Read하여 기능 구현 확인
+
+BUILD_TOOL = "static":
+- 코드를 Read하여 기능 구현 확인 (빌드 검증 불가)
 
 #### 2b. 코드 품질 (Code Quality) — 가중치 25%
 
@@ -259,7 +328,9 @@ apple-craft 하네스가 오케스트레이션을 주도하며, 외부 도구는
 
 ## 메타 정보
 - 평가 시각: {날짜}
-- 검증 도구: {baepsae | axe | static}
+- 런타임 검증: {baepsae | axe | static}
+- 빌드 검증: {xcode-mcp | xcodebuild | swift-build | static}
+- xcsift: {true (v{version}) | false}
 - 시뮬레이터: {UDID 또는 N/A}
 - 보조 도구: {사용된 추가 도구 목록}
 
