@@ -31,21 +31,21 @@ _cleanup() { rm -f "${_CLEANUP_FILES[@]}"; }
 trap _cleanup EXIT
 
 take_snapshot() {
-    local find_err
+    local find_err snapshot_rows
     find_err="$(mktemp "${SNAPSHOT_ROOT}/codex-snapshot-find-err.XXXXXX")"
-    _CLEANUP_FILES+=("$find_err")
-    find "$DIR" -type f -not -path '*/\.*' -print0 2>"$find_err" \
-        | while IFS= read -r -d '' path; do
-            local mtime
-            mtime="$(stat -f '%m' "$path" 2>/dev/null)" || { echo "경고: stat 실패 — $path" >&2; continue; }
-            printf '%s\t%s\n' "$mtime" "$path"
-        done \
-        | LC_ALL=C sort -t $'\t' -k2,2
+    snapshot_rows="$(mktemp "${SNAPSHOT_ROOT}/codex-snapshot-rows.XXXXXX")"
+    _CLEANUP_FILES+=("$find_err" "$snapshot_rows")
+    while IFS= read -r -d '' path; do
+        local mtime
+        mtime="$(stat -f '%m' "$path" 2>/dev/null)" || { echo "경고: stat 실패 — $path" >&2; continue; }
+        printf '%s\t%s\n' "$mtime" "$path" >> "$snapshot_rows"
+    done < <(find "$DIR" -type f -not -path '*/\.*' -print0 2>"$find_err")
+    LC_ALL=C sort -t $'\t' -k2,2 "$snapshot_rows"
     if [[ -s "$find_err" ]]; then
         echo "경고: find 실행 중 오류 발생:" >&2
         head -5 "$find_err" >&2
     fi
-    rm -f "$find_err"
+    rm -f "$find_err" "$snapshot_rows"
 }
 
 print_prefixed_lines() {
