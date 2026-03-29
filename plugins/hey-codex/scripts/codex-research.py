@@ -8,7 +8,6 @@ import json
 import shutil
 import subprocess
 import sys
-import textwrap
 from datetime import datetime
 from pathlib import Path
 from string import Template
@@ -125,6 +124,12 @@ def preview_text(value: str, limit: int = 400) -> str:
     if len(value) <= limit:
         return value
     return value[:limit] + "\n...(truncated)..."
+
+
+def fenced_block(content: str, info: str = "") -> str:
+    body = content.rstrip() or "(empty)"
+    fence = f"~~~{info}" if info else "~~~"
+    return f"{fence}\n{body}\n~~~"
 
 
 # ---------------------------------------------------------------------------
@@ -507,63 +512,76 @@ def build_round_prompt(
         else "이미 이전 라운드가 있으므로, best-known state를 기준으로 다음 가설 하나만 실행하세요."
     )
 
-    return textwrap.dedent(
-        f"""
-        # Codex Research Round {round_num}
-
-        당신은 host-managed Codex CLI 연구 루프의 **한 라운드만** 수행합니다.
-        이번 호출은 `codex-research` 스킬 운영 규칙을 따릅니다.
-
-        ## 먼저 읽을 스킬 파일
-        {refs_text}
-
-        ## 이번 호출의 운영 규칙
-        - 한 라운드 = 가설 1개만 실행합니다.
-        - git commit, branch 조작, push는 하지 마세요. keep/revert/optional commit은 host runner가 처리합니다.
-        - 반드시 `hard gates`, `experiment status`, `control action`을 분리해 판단하세요.
-        - `control action`은 `pass | refine | pivot | rescope | escalate | stop` 중 하나여야 합니다.
-        - `experiment status`는 `keep | discard | crash` 중 하나여야 합니다.
-        - 근거는 `{evidence_path}`에 Markdown으로 남기고, `{snapshot_path}`를 최신 상태로 갱신하세요.
-        - `{program_path}`와 `{contract_path}`를 source of truth로 다루세요.
-        - {baseline_note}
-
-        ## 작업 위치
-        - workspace: {workspace}
-        - state dir: {state_dir}
-        - program: {program_path}
-        - contract: {contract_path}
-        - state snapshot: {snapshot_path}
-        - ledger: {ledger_path}
-        - round directory: {round_dir}
-        - current HEAD: {head_ref or "non-git / unavailable"}
-
-        ## 사용자/운영자 program
-        {program_text}
-
-        ## research contract
-        {contract_text}
-
-        ## current state snapshot
-        {snapshot_text}
-
-        ## recent ledger excerpt
-        {ledger_excerpt}
-
-        ## 반드시 수행할 일
-        1. 현재 contract가 실행 가능한지 판단합니다.
-        2. 이번 라운드의 단일 가설을 선택합니다.
-        3. 필요하면 workspace 파일을 작은 변경으로 수정하고 검증합니다.
-        4. `{evidence_path}`에 이번 실험의 가설, 실행, 근거, 판정을 남깁니다.
-        5. `{snapshot_path}`를 최신 best-known state, 최근 판정, 다음 후보로 갱신합니다.
-        6. 마지막 응답은 JSON schema에 맞는 JSON만 반환합니다.
-
-        ## JSON 응답 제약
-        - `round`는 {round_num}이어야 합니다.
-        - `updated_files`에는 실제로 바뀐 workspace/state 파일 경로를 넣으세요.
-        - `evidence_files`에는 최소 `{evidence_path}`를 포함하세요.
-        - 근거가 부족하면 과장하지 말고 `rescope` 또는 `escalate`를 사용하세요.
-        """
-    ).strip() + "\n"
+    lines = [
+        f"# Codex Research Round {round_num}",
+        "",
+        "당신은 host-managed Codex CLI 연구 루프의 **한 라운드만** 수행합니다.",
+        "이번 호출은 `codex-research` 스킬 운영 규칙을 따릅니다.",
+        "",
+        "## 먼저 읽을 스킬 파일",
+        *[f"- {ref}" for ref in refs],
+        "",
+        "## 이번 호출의 운영 규칙",
+        "- 한 라운드 = 가설 1개만 실행합니다.",
+        "- git commit, branch 조작, push는 하지 마세요. keep/revert/optional commit은 host runner가 처리합니다.",
+        "- 반드시 `hard gates`, `experiment status`, `control action`을 분리해 판단하세요.",
+        "- `hard_gates.result` 는 `pass | fail` 중 하나여야 합니다.",
+        "- `experiment_status`는 `keep | discard | crash` 중 하나여야 합니다.",
+        "- `control_action`은 `pass | refine | pivot | rescope | escalate | stop` 중 하나여야 합니다.",
+        f"- 근거는 `{evidence_path}`에 Markdown으로 남기고, `{snapshot_path}`를 최신 상태로 갱신하세요.",
+        f"- `{program_path}`와 `{contract_path}`를 source of truth로 다루세요.",
+        f"- {baseline_note}",
+        "",
+        "## 3-Layer decision rubric",
+        "- `hard_gates.result`: 최소 통과선입니다. hard gate가 하나라도 깨지면 `fail` 입니다.",
+        "- `experiment_status`: 이번 라운드 결과를 best-known state에 반영할지 결정합니다.",
+        "- `control_action`: 다음 라운드 운영 방향을 결정합니다.",
+        "- 혼동 방지 규칙:",
+        "  - `hard_gates.result=pass` 와 `control_action=pass` 는 서로 다른 의미입니다.",
+        "  - `experiment_status` 에는 `pass/fail` 을 넣지 않습니다.",
+        "  - `control_action` 에는 `keep/discard/crash` 를 넣지 않습니다.",
+        "  - 세 필드는 각각 별도 근거를 가져야 하며, 한 줄 요약으로 합치지 않습니다.",
+        "",
+        "## 작업 위치",
+        f"- workspace: {workspace}",
+        f"- state dir: {state_dir}",
+        f"- program: {program_path}",
+        f"- contract: {contract_path}",
+        f"- state snapshot: {snapshot_path}",
+        f"- ledger: {ledger_path}",
+        f"- round directory: {round_dir}",
+        f"- current HEAD: {head_ref or 'non-git / unavailable'}",
+        "",
+        "## Source of truth 문서 (verbatim)",
+        "",
+        "### 사용자/운영자 program",
+        fenced_block(program_text, "md"),
+        "",
+        "### research contract",
+        fenced_block(contract_text, "md"),
+        "",
+        "### current state snapshot",
+        fenced_block(snapshot_text, "md"),
+        "",
+        "### recent ledger excerpt",
+        fenced_block(ledger_excerpt, "tsv"),
+        "",
+        "## 반드시 수행할 일",
+        "1. 현재 contract가 실행 가능한지 판단합니다.",
+        "2. 이번 라운드의 단일 가설을 선택합니다.",
+        "3. 필요하면 workspace 파일을 작은 변경으로 수정하고 검증합니다.",
+        f"4. `{evidence_path}`에 이번 실험의 가설, 실행, 근거, 판정을 남깁니다.",
+        f"5. `{snapshot_path}`를 최신 best-known state, 최근 판정, 다음 후보로 갱신합니다.",
+        "6. 마지막 응답은 JSON schema에 맞는 JSON만 반환합니다.",
+        "",
+        "## JSON 응답 제약",
+        f"- `round`는 {round_num}이어야 합니다.",
+        "- `hard_gates.result`, `experiment_status`, `control_action`을 모두 채우세요.",
+        "- `updated_files`에는 실제로 바뀐 workspace/state 파일 경로를 넣으세요.",
+        f"- `evidence_files`에는 최소 `{evidence_path}`를 포함하세요.",
+        "- 근거가 부족하면 과장하지 말고 `rescope` 또는 `escalate`를 사용하세요.",
+    ]
+    return "\n".join(lines) + "\n"
 
 
 def build_codex_command(
