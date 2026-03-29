@@ -121,6 +121,12 @@ def warn(message: str) -> None:
     print(f"경고: {message}", file=sys.stderr)
 
 
+def preview_text(value: str, limit: int = 400) -> str:
+    if len(value) <= limit:
+        return value
+    return value[:limit] + "\n...(truncated)..."
+
+
 # ---------------------------------------------------------------------------
 # Ledger helpers
 # ---------------------------------------------------------------------------
@@ -619,18 +625,57 @@ def build_codex_command(
 # ---------------------------------------------------------------------------
 
 
+def extract_fenced_json(raw: str) -> str | None:
+    stripped = raw.strip()
+    if not stripped.startswith("```"):
+        return None
+    lines = stripped.splitlines()
+    if len(lines) < 3:
+        return None
+    if not lines[0].lstrip().startswith("```") or lines[-1].strip() != "```":
+        return None
+    return "\n".join(lines[1:-1]).strip()
+
+
+def decode_json_object(raw: str, *, path: Path) -> dict[str, object]:
+    normalized = raw.lstrip("\ufeff").strip()
+    if not normalized:
+        raise JsonParseError(f"JSON 응답 파일이 비어 있습니다: {path}")
+
+    decoder = json.JSONDecoder()
+    candidates: list[str] = [normalized]
+    fenced = extract_fenced_json(normalized)
+    if fenced:
+        candidates.append(fenced)
+    candidates.extend(normalized[idx:] for idx, ch in enumerate(normalized) if ch == "{")
+
+    seen: set[str] = set()
+    for candidate in candidates:
+        candidate = candidate.strip()
+        if not candidate or candidate in seen:
+            continue
+        seen.add(candidate)
+        try:
+            data = json.loads(candidate)
+        except json.JSONDecodeError:
+            try:
+                data, _ = decoder.raw_decode(candidate)
+            except json.JSONDecodeError:
+                continue
+        if isinstance(data, dict):
+            return data
+
+    raise JsonParseError(
+        f"JSON 파싱 실패: {path}\n--- preview ---\n{preview_text(normalized)}"
+    )
+
+
 def read_json_file(path: Path) -> dict[str, object]:
     try:
-        raw = read_text(path).strip()
+        raw = read_text(path)
     except SystemExit as exc:
         raise JsonParseError(str(exc)) from exc
-    try:
-        data = json.loads(raw)
-    except json.JSONDecodeError as exc:
-        raise JsonParseError(f"JSON 파싱 실패: {path}\n{exc}\n---\n{raw}") from exc
-    if not isinstance(data, dict):
-        raise JsonParseError(f"JSON 최상위 구조는 object여야 합니다: {path}")
-    return data
+    return decode_json_object(raw, path=path)
 
 
 def fallback_response(round_num: int, message: str) -> dict[str, object]:
