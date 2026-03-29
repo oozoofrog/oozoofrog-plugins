@@ -1,6 +1,6 @@
 # Apple HIG 조회 패턴 가이드
 
-> harness-designer가 Apple HIG를 참조할 때 사용하는 가이드.
+> harness-design-architect / harness-design-implementer가 Apple HIG를 참조할 때 사용하는 가이드.
 > 이 문서는 HIG 원문이 아닌 **조회 전략 + 즉시 참조용 핵심 규칙**입니다.
 
 ## HIG 3대 원칙
