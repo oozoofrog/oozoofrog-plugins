@@ -873,7 +873,7 @@ def summarize_response(round_num: int, response: dict[str, object]) -> str:
 
 
 def should_stop(
-    control_action: str, loop_forever: bool, rounds_done: int, max_rounds: int | None
+    control_action: str, rounds_done: int, max_rounds: int | None
 ) -> bool:
     if max_rounds is not None and rounds_done >= max_rounds:
         return True
@@ -1054,7 +1054,7 @@ def cmd_run(args: argparse.Namespace) -> int:
                 "--commit-on-keep 또는 --allow-dirty를 사용하면 이어서 진행할 수 있습니다."
             )
             break
-        if should_stop(control_action, args.loop_forever, rounds_done, max_rounds):
+        if should_stop(control_action, rounds_done, max_rounds):
             break
 
         if git_root and not args.allow_dirty:

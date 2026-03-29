@@ -90,8 +90,7 @@ report_diff() {
     if [[ ! -s "$added_file" && ! -s "$deleted_file" && ! -s "$modified_file" ]]; then
         echo "변경 없음"
     fi
-
-    rm -f "$pre_files" "$post_files" "$added_file" "$deleted_file" "$modified_file"
+    # temp files are cleaned up by the EXIT trap via _CLEANUP_FILES
 }
 
 case "$MODE" in
