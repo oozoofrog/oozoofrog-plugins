@@ -15,7 +15,7 @@ Claude Code 플러그인 마켓플레이스 리포지토리.
 | agent-context | ctx-guide, ctx-init, ctx-verify, ctx-audit | context-validator | SessionStart |
 | gpt-research | gpt-research | — | — |
 | hey-codex | hey-codex | — | — |
-| app-automation | app-automation, os-log | — | — (.mcp.json: baepsae) |
+| app-automation | app-automation, os-log | ui-verifier | — (.mcp.json: baepsae) |
 | apple-craft | apple-craft, apple-harness, apple-review | harness-planner, harness-builder, harness-designer, harness-evaluator, harness-reviewer | — |
 | plugin-doctor | fixer | — | — |
 
