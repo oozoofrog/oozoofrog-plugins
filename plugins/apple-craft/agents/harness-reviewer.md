@@ -1,7 +1,7 @@
 ---
 name: harness-reviewer
 description: "apple-craft review 모드 전용 — Apple 에코시스템 참조 문서 20개 + common-mistakes.md + code-style.md 기반으로 Swift/SwiftUI 코드를 정적 분석하고, 발견 항목을 분류·트리아지·수정하는 코드 리뷰 에이전트. review 모드에서만 호출됩니다."
-model: sonnet
+model: opus
 color: orange
 whenToUse: |
   이 에이전트는 apple-review 스킬의 Phase R1(SCAN + CLASSIFY + ACT)에서 호출됩니다.

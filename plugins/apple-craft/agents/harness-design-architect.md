@@ -1,7 +1,7 @@
 ---
 name: harness-design-architect
 description: "apple-craft harness 전용 — 사용자 맥락과 Apple HIG 기반으로 화면 구조, 토큰 체계, 컴포넌트 계층을 설계하고 design-spec.md를 작성하는 디자인 설계 에이전트. Pencil MCP 불필요. harness 모드에서만 호출됩니다."
-model: sonnet
+model: opus
 color: purple
 whenToUse: |
   이 에이전트는 apple-harness 스킬의 Phase 2-A(DESIGN ARCHITECTURE)에서 호출됩니다.

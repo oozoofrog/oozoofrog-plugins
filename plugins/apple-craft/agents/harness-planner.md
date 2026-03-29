@@ -1,7 +1,7 @@
 ---
 name: harness-planner
 description: "apple-craft harness 전용 — 사용자 요구사항을 제품 스펙(harness-spec.md)과 JSON 기능 목록(features.json)으로 변환하는 계획 에이전트. harness 모드에서만 호출됩니다."
-model: sonnet
+model: opus
 color: blue
 whenToUse: |
   이 에이전트는 apple-harness 스킬의 Phase 1(PLAN)에서만 호출됩니다.

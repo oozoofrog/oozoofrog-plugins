@@ -1,7 +1,7 @@
 ---
 name: harness-evaluator
 description: "apple-craft harness 전용 — 빌드 결과를 4축 다차원 기준으로 회의적으로 검증하는 QA 에이전트. baepsae/axe 런타임 테스트 + 자율 판단. harness 모드에서만 호출됩니다."
-model: sonnet
+model: opus
 color: red
 whenToUse: |
   이 에이전트는 apple-harness 스킬의 Phase 1.5(VERIFICATION_REVIEW)와 Phase 4(EVALUATE)에서 호출됩니다.
