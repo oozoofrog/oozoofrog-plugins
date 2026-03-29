@@ -31,9 +31,14 @@
   - `batches/01-apple-family.md`
 - 측정 템플릿:
   - `batches/01-apple-family-baseline-template.md`
+- 실행 파일:
+  - `batches/01-apple-family-baseline-2026-03-29.md`
+  - `batches/01-apple-family-postpatch-2026-03-29.md`
 - 현재 상태:
   - 정적 wording 분석 완료
-  - 아직 실제 라우팅 실험/수정 적용 전
+  - wording 패치 적용 완료
+  - baseline/post-patch 기록 파일 생성 완료
+  - 실제 라우팅 측정값 입력 전
 
 ### Batch 2 — agent-context family action verb 정리
 
