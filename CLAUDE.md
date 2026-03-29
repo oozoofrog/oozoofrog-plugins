@@ -7,7 +7,7 @@ Claude Code 플러그인 마켓플레이스 리포지토리.
 - `.claude-plugin/marketplace.json` — 마켓플레이스 매니페스트 (버전, 플러그인 목록)
 - `plugins/{name}/` — 각 플러그인 독립 디렉토리
 
-## 플러그인 목록 (7개)
+## 플러그인 목록 (8개)
 
 | 플러그인 | 스킬 | 에이전트 | 훅 |
 |----------|------|---------|-----|
@@ -18,6 +18,7 @@ Claude Code 플러그인 마켓플레이스 리포지토리.
 | app-automation | app-automation, os-log | ui-verifier | — (.mcp.json: baepsae) |
 | apple-craft | apple-craft, apple-harness, apple-review | harness-planner, harness-builder, harness-design-architect, harness-design-implementer, harness-evaluator, harness-reviewer | — |
 | plugin-doctor | fixer | — | — |
+| api-learn | api-learn, api-scan | — | — |
 
 ## 플러그인 개발 규칙
 
