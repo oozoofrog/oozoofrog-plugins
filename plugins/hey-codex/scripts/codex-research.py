@@ -126,6 +126,31 @@ def preview_text(value: str, limit: int = 400) -> str:
     return value[:limit] + "\n...(truncated)..."
 
 
+def json_value_kind(value: object) -> str:
+    if value is None:
+        return "null"
+    if isinstance(value, bool):
+        return "boolean"
+    if isinstance(value, (int, float)):
+        return "number"
+    if isinstance(value, str):
+        return "string"
+    if isinstance(value, list):
+        return "array"
+    if isinstance(value, dict):
+        return "object"
+    return type(value).__name__
+
+
+def raise_json_parse_error(path: Path, normalized: str, errors: list[str]) -> "NoReturn":
+    error_detail = "\n".join(f"  - {e}" for e in errors[:10]) if errors else "  (상세 오류 없음)"
+    raise JsonParseError(
+        f"JSON 파싱 실패: {path}\n"
+        f"--- 시도한 복구 경로 오류 ---\n{error_detail}\n"
+        f"--- preview ---\n{preview_text(normalized)}"
+    )
+
+
 def fenced_block(content: str, info: str = "") -> str:
     body = content.rstrip() or "(empty)"
     fence = "~~~"
@@ -666,26 +691,38 @@ def decode_json_object(raw: str, *, path: Path) -> dict[str, object]:
     if not normalized:
         raise JsonParseError(f"JSON 응답 파일이 비어 있습니다: {path}")
 
+    errors: list[str] = []
+    type_mismatch_detected = False
+
     # --- Phase 1: direct parse (happy path) ---
     try:
         data = json.loads(normalized)
         if isinstance(data, dict):
             return data
-    except json.JSONDecodeError:
-        pass
-
-    errors: list[str] = []
+        errors.append(
+            f"direct: 최상위 JSON은 object여야 하는데 {json_value_kind(data)} 입니다"
+        )
+        type_mismatch_detected = True
+    except json.JSONDecodeError as exc:
+        errors.append(f"direct: {exc}")
 
     # --- Phase 2: fenced code block extraction ---
     fenced = extract_fenced_json(normalized)
-    if fenced:
+    if fenced and not type_mismatch_detected:
         try:
             data = json.loads(fenced)
             if isinstance(data, dict):
                 warn(f"JSON 직접 파싱 실패 → 코드펜스 추출로 복구: {path}")
                 return data
+            errors.append(
+                f"fenced: 최상위 JSON은 object여야 하는데 {json_value_kind(data)} 입니다"
+            )
+            type_mismatch_detected = True
         except json.JSONDecodeError as exc:
             errors.append(f"fenced: {exc}")
+
+    if type_mismatch_detected:
+        raise_json_parse_error(path, normalized, errors)
 
     # --- Phase 3: offset-scan for '{{' (limited to first 10) ---
     warn(f"JSON 직접 파싱 실패 → offset 스캔 복구 시도: {path}")
@@ -717,12 +754,7 @@ def decode_json_object(raw: str, *, path: Path) -> dict[str, object]:
         return best
 
     # --- All recovery paths failed ---
-    error_detail = "\n".join(f"  - {e}" for e in errors[:10]) if errors else "  (상세 오류 없음)"
-    raise JsonParseError(
-        f"JSON 파싱 실패: {path}\n"
-        f"--- 시도한 복구 경로 오류 ---\n{error_detail}\n"
-        f"--- preview ---\n{preview_text(normalized)}"
-    )
+    raise_json_parse_error(path, normalized, errors)
 
 
 def read_json_file(path: Path) -> dict[str, object]:
