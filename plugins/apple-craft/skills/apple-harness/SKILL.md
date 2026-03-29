@@ -52,9 +52,16 @@ Anthropic의 [Harness Design](https://www.anthropic.com/engineering/harness-desi
          │
          ▼
 ┌─────────────────────────────────┐
-│  Phase 2: DESIGN (선택적)       │  harness-designer 에이전트
-│  기존 .pen 읽기 또는 새로 생성  │  Apple HIG + 스타일 가이드
-│  디자인 토큰 + {HARNESS_DIR}/design-spec.md │  Pencil 미연결→자동 스킵 / 연결→유저 선택
+│  Phase 2-A: DESIGN ARCHITECTURE │  harness-design-architect 에이전트
+│  (항상 실행)                    │  Apple HIG + 토큰 체계 설계
+│  {HARNESS_DIR}/design-spec.md 작성 (pending 필드) │  Pencil 불필요
+└────────┬────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────┐
+│  Phase 2-B: DESIGN IMPLEMENTATION │  harness-design-implementer 에이전트
+│  (선택적, Pencil 연결 시)       │  .pen 생성 + backfill
+│  design-spec.md pending→완성    │  Pencil 미연결→자동 스킵
 └────────┬────────────────────────┘
          │
          ▼
@@ -290,60 +297,91 @@ Agent 도구 호출:
 - 수정된 {HARNESS_DIR}/features.json의 변경 사항만 간략히 보고
 - 사용자 확인 없이 Phase 2로 자동 진행
 
-### Phase 2: DESIGN (선택적)
+### Phase 2-A: DESIGN ARCHITECTURE (항상 실행)
 
-Pencil MCP 사용 가능 여부와 작업 맥락에 따라 실행 여부를 결정합니다.
+Phase 1에서 충분한 맥락을 수집했으므로, 이 단계는 **사용자 확인 없이 자율 진행**합니다.
 
-**Step 1: Pencil 탐지** — get_editor_state 호출 시도
-- 실패 → Phase 2 자동 스킵, Phase 3(BUILD)로 직행 (사용자 알림만)
-
-**Step 2: 맥락 기반 자동 선택 권장** — Pencil 연결 시, 작업 맥락을 분석하여 권장 옵션을 결정:
-
-| 맥락 신호 | 권장 |
-|----------|------|
-| UI/화면/레이아웃/디자인 관련 키워드 포함 | Design 진행 권장 |
-| 기존 .pen 파일이 프로젝트에 존재 | Design 진행 권장 |
-| features.json에 category:"ui" 기능이 50% 이상 | Design 진행 권장 |
-| 로직/데이터/API/백엔드 중심 작업 | Design 스킵 권장 |
-| 리팩토링/성능 최적화 작업 | Design 스킵 권장 |
-
-**Step 3: 사용자 선택** — AskUserQuestion으로 확인:
-
-```
-AskUserQuestion:
-  question: "Phase 2 디자인 과정을 진행할까요?"
-  header: "Design"
-  options:
-    - label: "디자인 진행 (권장)"  # 또는 "디자인 스킵 (권장)" — 맥락에 따라 권장 옵션 변경
-      description: "Pencil MCP로 Apple HIG 기반 UI 디자인을 생성하고, 디자인 토큰을 코드에 반영합니다."
-    - label: "디자인 스킵"
-      description: "디자인 없이 코드 기반으로 직접 구현합니다. 로직/데이터 중심 작업에 적합합니다."
-```
-
-**사용자 선택 결과:**
-- "디자인 진행" → harness-designer 에이전트 호출
-- "디자인 스킵" → Phase 3(BUILD)로 직행
+harness-design-architect 에이전트를 호출합니다:
 
 ```
 Agent 도구 호출:
-  description: "harness-designer: Apple HIG 디자인 생성"
-  subagent_type: "apple-craft:harness-designer"
+  description: "harness-design-architect: 디자인 설계"
+  subagent_type: "apple-craft:harness-design-architect"
   prompt: |
     HARNESS_DIR: {HARNESS_DIR}
     제품 스펙: {HARNESS_DIR}/harness-spec.md
     기능 목록: {HARNESS_DIR}/features.json
 
-    기존 .pen 파일이 있으면 읽어서 활용하고,
-    없으면 Apple HIG 기반으로 새로 생성하세요.
+    Apple HIG 기반으로 화면 구조, 토큰 체계를 설계하고
     {HARNESS_DIR}/design-spec.md를 작성하세요.
+    .pen 관련 필드는 "pending"으로 표기하세요.
 ```
 
-**Phase 2 완료 처리:**
-- {HARNESS_DIR}/design-spec.md 존재 확인
-- {HARNESS_DIR}/features.json의 design 필드 업데이트 확인 (optional)
+**Phase 2-A 완료 검증 (필수):**
+1. `{HARNESS_DIR}/design-spec.md` 파일이 존재하는지 Read로 확인
+2. 토큰 매핑 테이블과 화면별 구조가 포함되어 있는지 확인
+**검증 실패 시**: 사용자에게 보고하고 Phase 3으로 진행 (graceful degradation).
+
+**다운스트림 소비자:**
+- `design-spec.md`는 Phase 2-B(design-implementer), Phase 3(Builder), Phase 4(Evaluator)가 모두 소비
+- Pencil 미연결이어도 Builder/Evaluator에게 토큰 매핑 + 화면 구조 + HIG 체크리스트를 제공
+
+**Agent 실패 처리**: 에러 시 "디자인 설계 실패"로 보고하고 Phase 3으로 진행.
+
+### Phase 2-B: DESIGN IMPLEMENTATION (선택적)
+
+Pencil MCP 사용 가능 여부와 작업 맥락에 따라 실행 여부를 결정합니다.
+
+**Step 1: Pencil 탐지** — get_editor_state 호출 시도
+- 실패 → Phase 2-B 자동 스킵, Phase 3(BUILD)로 직행 (architect 산출물 보존, 사용자 알림만)
+
+**Step 2: 맥락 기반 자동 선택 권장** — Pencil 연결 시, 작업 맥락을 분석하여 권장 옵션을 결정:
+
+| 맥락 신호 | 권장 |
+|----------|------|
+| UI/화면/레이아웃/디자인 관련 키워드 포함 | Design 구현 진행 권장 |
+| 기존 .pen 파일이 프로젝트에 존재 | Design 구현 진행 권장 |
+| features.json에 category:"ui" 기능이 50% 이상 | Design 구현 진행 권장 |
+| 로직/데이터/API/백엔드 중심 작업 | Design 구현 스킵 권장 |
+| 리팩토링/성능 최적화 작업 | Design 구현 스킵 권장 |
+
+**Step 3: 사용자 선택** — AskUserQuestion으로 확인:
+
+```
+AskUserQuestion:
+  question: "Phase 2-B 디자인 구현을 진행할까요?"
+  header: "Design Implementation"
+  options:
+    - label: "디자인 구현 진행 (권장)"
+      description: "Pencil MCP로 .pen 파일을 생성하고, design-spec.md의 pending 필드를 채웁니다."
+    - label: "디자인 구현 스킵"
+      description: "architect의 design-spec.md만으로 Phase 3에 진입합니다."
+```
+
+**사용자 선택 결과:**
+- "디자인 구현 진행" → harness-design-implementer 에이전트 호출
+- "디자인 구현 스킵" → Phase 3(BUILD)로 직행
+
+```
+Agent 도구 호출:
+  description: "harness-design-implementer: .pen 생성 + backfill"
+  subagent_type: "apple-craft:harness-design-implementer"
+  prompt: |
+    HARNESS_DIR: {HARNESS_DIR}
+    제품 스펙: {HARNESS_DIR}/harness-spec.md
+    기능 목록: {HARNESS_DIR}/features.json
+    디자인 명세: {HARNESS_DIR}/design-spec.md
+
+    design-spec.md를 참조하여 .pen 파일을 생성/수정하고,
+    pending 필드를 채우세요.
+```
+
+**Phase 2-B 완료 처리:**
+- {HARNESS_DIR}/design-spec.md에서 pending 필드가 채워졌는지 확인
+- {HARNESS_DIR}/features.json의 design 필드 업데이트 확인
 - Phase 3(BUILD)로 자동 진행
 
-**Agent 실패 처리**: Designer 에이전트가 오류로 종료되면, "디자인 생성 실패, 코드 기반으로 진행합니다"라고 보고하고 Phase 3으로 진행합니다 (graceful degradation).
+**Agent 실패 처리**: "디자인 구현 실패, architect 산출물만으로 진행합니다"로 보고하고 Phase 3 진행 (graceful degradation).
 
 ### Phase 3: BUILD
 
@@ -554,7 +592,7 @@ Phase 1: PLAN 시작 — Planner 에이전트가 스펙을 작성합니다...
 
 5. **자기평가 한계**: Evaluator도 LLM이므로 완벽한 QA는 아닙니다. 최종 결과는 반드시 사람이 검토해야 합니다.
 
-6. **Pencil MCP 선택적**: 디자인 단계(Phase 2)는 Pencil MCP 연결 시에만 실행됩니다. 미연결 시 기존 코드 기반 방식으로 진행합니다. Pencil이 SwiftUI 코드를 직접 생성하지 않으므로, 디자인→코드 변환은 Builder가 수행합니다.
+6. **Pencil MCP 선택적**: Phase 2-A(디자인 설계)는 Pencil 없이도 항상 실행되어 Builder/Evaluator에게 토큰 매핑과 화면 구조를 제공합니다. Phase 2-B(디자인 구현)만 Pencil MCP 연결 시 실행됩니다. Pencil이 SwiftUI 코드를 직접 생성하지 않으므로, 디자인→코드 변환은 Builder가 수행합니다.
 
 ## Quick Reference
 
@@ -570,13 +608,15 @@ apple-harness 실행 흐름
 │   ├─ verification 필드 검토/보강
 │   ├─ verification_steps 작성
 │   └─ 자동 진행 (사용자 확인 없음)
-├─ Phase 2: DESIGN (harness-designer, 선택적)
-│   ├─ Pencil MCP 탐지 (미연결 → 자동 스킵)
+├─ Phase 2-A: DESIGN ARCHITECTURE (harness-design-architect, 항상 실행)
+│   ├─ HIG/사용자 맥락 조사 + 토큰 체계 정의
+│   ├─ {HARNESS_DIR}/design-spec.md 작성 (토큰 매핑 + 화면 구조 + HIG 체크리스트, .pen 필드 pending)
+│   └─ 다운스트림 소비자: design-implementer, Builder, Evaluator
+├─ Phase 2-B: DESIGN IMPLEMENTATION (harness-design-implementer, 선택적)
+│   ├─ Pencil MCP 탐지 (미연결 → 자동 스킵, architect 산출물 보존)
 │   ├─ 맥락 분석 → 자동 선택 권장 (UI 작업→권장, 로직 작업→스킵 권장)
 │   ├─ AskUserQuestion으로 사용자 선택 확인
-│   ├─ 기존 .pen 읽기 또는 새 디자인 생성
-│   ├─ 디자인 토큰 정의 (Apple HIG 기반)
-│   ├─ {HARNESS_DIR}/design-spec.md 생성 (토큰 매핑 + 화면 구조)
+│   ├─ 기존 .pen 읽기 또는 새 디자인 생성 + design-spec.md pending backfill
 │   └─ Phase 3으로 진행
 ├─ Phase 3: BUILD (harness-builder)
 │   ├─ Step 0: 빌드 도구 탐지 (Xcode MCP → xcodebuild+xcsift → swift build+xcsift → static)
