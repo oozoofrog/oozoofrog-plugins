@@ -25,12 +25,27 @@ SNAPSHOT_KEY="$(printf '%s\t%s\n' "$DIR" "$SNAPSHOT_TOKEN" | shasum -a 256 | awk
 PRE_SNAP="$SNAPSHOT_ROOT/codex-snapshot-${SNAPSHOT_KEY}.pre.tsv"
 POST_SNAP="$SNAPSHOT_ROOT/codex-snapshot-${SNAPSHOT_KEY}.post.tsv"
 
+# Script-level cleanup for temp files (bash 3.2 compatible)
+_CLEANUP_FILES=()
+_cleanup() { rm -f "${_CLEANUP_FILES[@]}"; }
+trap _cleanup EXIT
+
 take_snapshot() {
-    find "$DIR" -type f -not -path '*/\.*' -print0 2>/dev/null \
+    local find_err
+    find_err="$(mktemp "${SNAPSHOT_ROOT}/codex-snapshot-find-err.XXXXXX")"
+    _CLEANUP_FILES+=("$find_err")
+    find "$DIR" -type f -not -path '*/\.*' -print0 2>"$find_err" \
         | while IFS= read -r -d '' path; do
-            printf '%s\t%s\n' "$(stat -f '%m' "$path")" "$path"
+            local mtime
+            mtime="$(stat -f '%m' "$path" 2>/dev/null)" || { echo "경고: stat 실패 — $path" >&2; continue; }
+            printf '%s\t%s\n' "$mtime" "$path"
         done \
         | LC_ALL=C sort -t $'\t' -k2,2
+    if [[ -s "$find_err" ]]; then
+        echo "경고: find 실행 중 오류 발생:" >&2
+        head -5 "$find_err" >&2
+    fi
+    rm -f "$find_err"
 }
 
 print_prefixed_lines() {
@@ -49,13 +64,15 @@ report_diff() {
     added_file="$(mktemp "$SNAPSHOT_ROOT/codex-snapshot-added.XXXXXX")"
     deleted_file="$(mktemp "$SNAPSHOT_ROOT/codex-snapshot-deleted.XXXXXX")"
     modified_file="$(mktemp "$SNAPSHOT_ROOT/codex-snapshot-modified.XXXXXX")"
+    _CLEANUP_FILES+=("$pre_files" "$post_files" "$added_file" "$deleted_file" "$modified_file")
 
     cut -f2- "$PRE_SNAP" > "$pre_files"
     cut -f2- "$POST_SNAP" > "$post_files"
 
     LC_ALL=C comm -13 "$pre_files" "$post_files" > "$added_file"
     LC_ALL=C comm -23 "$pre_files" "$post_files" > "$deleted_file"
-    join -t $'\t' -1 2 -2 2 -o 1.2,1.1,2.1 "$PRE_SNAP" "$POST_SNAP" \
+    # join requires same sort order as take_snapshot (LC_ALL=C, sorted by field 2)
+    LC_ALL=C join -t $'\t' -1 2 -2 2 -o 1.2,1.1,2.1 "$PRE_SNAP" "$POST_SNAP" \
         | awk -F $'\t' '$2 != $3 {print $1}' > "$modified_file"
 
     if [[ -s "$added_file" ]]; then
@@ -88,6 +105,9 @@ case "$MODE" in
             exit 1
         fi
         take_snapshot > "$POST_SNAP"
+        if [[ ! -s "$POST_SNAP" ]]; then
+            echo "경고: post 스냅샷이 비어 있습니다. 디렉터리에 파일이 없거나 스냅샷에 실패했을 수 있습니다." >&2
+        fi
         report_diff
         rm -f "$PRE_SNAP" "$POST_SNAP"
         ;;

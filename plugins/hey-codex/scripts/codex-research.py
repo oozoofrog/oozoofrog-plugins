@@ -128,8 +128,11 @@ def preview_text(value: str, limit: int = 400) -> str:
 
 def fenced_block(content: str, info: str = "") -> str:
     body = content.rstrip() or "(empty)"
-    fence = f"~~~{info}" if info else "~~~"
-    return f"{fence}\n{body}\n~~~"
+    fence = "~~~"
+    while fence in body:
+        fence += "~"
+    opener = f"{fence}{info}" if info else fence
+    return f"{opener}\n{body}\n{fence}"
 
 
 # ---------------------------------------------------------------------------
@@ -504,8 +507,6 @@ def build_round_prompt(
         str(skill_dir / "skills" / "codex-research" / "SKILL.md"),
         str(skill_dir / "skills" / "codex-research" / "references" / "loop-contract.md"),
     ]
-    refs_text = "\n".join(f"- {ref}" for ref in refs)
-
     baseline_note = (
         "현재 ledger에 완료된 라운드가 없으므로, 이번 라운드는 baseline 확립 또는 contract 보정부터 시작해도 됩니다."
         if next_round_number(ledger_path) == 0
@@ -644,15 +645,20 @@ def build_codex_command(
 
 
 def extract_fenced_json(raw: str) -> str | None:
-    stripped = raw.strip()
-    if not stripped.startswith("```"):
+    """Extract JSON from a fenced code block anywhere in the input."""
+    lines = raw.strip().splitlines()
+    start = None
+    for i, line in enumerate(lines):
+        if line.lstrip().startswith("```"):
+            start = i
+            break
+    if start is None or start >= len(lines) - 2:
         return None
-    lines = stripped.splitlines()
-    if len(lines) < 3:
-        return None
-    if not lines[0].lstrip().startswith("```") or lines[-1].strip() != "```":
-        return None
-    return "\n".join(lines[1:-1]).strip()
+    for end in range(len(lines) - 1, start, -1):
+        if lines[end].strip() == "```":
+            inner = "\n".join(lines[start + 1 : end]).strip()
+            return inner if inner else None
+    return None
 
 
 def decode_json_object(raw: str, *, path: Path) -> dict[str, object]:
@@ -660,31 +666,62 @@ def decode_json_object(raw: str, *, path: Path) -> dict[str, object]:
     if not normalized:
         raise JsonParseError(f"JSON 응답 파일이 비어 있습니다: {path}")
 
-    decoder = json.JSONDecoder()
-    candidates: list[str] = [normalized]
+    # --- Phase 1: direct parse (happy path) ---
+    try:
+        data = json.loads(normalized)
+        if isinstance(data, dict):
+            return data
+    except json.JSONDecodeError:
+        pass
+
+    errors: list[str] = []
+
+    # --- Phase 2: fenced code block extraction ---
     fenced = extract_fenced_json(normalized)
     if fenced:
-        candidates.append(fenced)
-    candidates.extend(normalized[idx:] for idx, ch in enumerate(normalized) if ch == "{")
+        try:
+            data = json.loads(fenced)
+            if isinstance(data, dict):
+                warn(f"JSON 직접 파싱 실패 → 코드펜스 추출로 복구: {path}")
+                return data
+        except json.JSONDecodeError as exc:
+            errors.append(f"fenced: {exc}")
 
-    seen: set[str] = set()
-    for candidate in candidates:
-        candidate = candidate.strip()
-        if not candidate or candidate in seen:
-            continue
-        seen.add(candidate)
+    # --- Phase 3: offset-scan for '{{' (limited to first 10) ---
+    warn(f"JSON 직접 파싱 실패 → offset 스캔 복구 시도: {path}")
+    decoder = json.JSONDecoder()
+    brace_positions = [idx for idx, ch in enumerate(normalized) if ch == "{"]
+    if len(brace_positions) > 10:
+        warn(f"'{{' 위치가 {len(brace_positions)}개로 많아 처음 10개만 시도합니다: {path}")
+        brace_positions = brace_positions[:10]
+
+    results: list[dict[str, object]] = []
+    for idx in brace_positions:
+        candidate = normalized[idx:]
         try:
             data = json.loads(candidate)
         except json.JSONDecodeError:
             try:
                 data, _ = decoder.raw_decode(candidate)
-            except json.JSONDecodeError:
+            except json.JSONDecodeError as exc:
+                errors.append(f"offset {idx}: {exc}")
                 continue
         if isinstance(data, dict):
-            return data
+            results.append(data)
 
+    if results:
+        best = max(results, key=len)
+        warn(
+            f"offset 스캔 복구 성공 (후보 {len(results)}개 중 최대 dict 선택): {path}"
+        )
+        return best
+
+    # --- All recovery paths failed ---
+    error_detail = "\n".join(f"  - {e}" for e in errors[:10]) if errors else "  (상세 오류 없음)"
     raise JsonParseError(
-        f"JSON 파싱 실패: {path}\n--- preview ---\n{preview_text(normalized)}"
+        f"JSON 파싱 실패: {path}\n"
+        f"--- 시도한 복구 경로 오류 ---\n{error_detail}\n"
+        f"--- preview ---\n{preview_text(normalized)}"
     )
 
 
@@ -715,6 +752,27 @@ def fallback_response(round_num: int, message: str) -> dict[str, object]:
     }
 
 
+def _validate_enum_field(
+    response: dict[str, object],
+    field: str,
+    valid_set: set[str],
+    default: str,
+    response_path: Path,
+) -> None:
+    raw = collapse_ws(str(response.get(field, "")).strip())
+    if not raw:
+        warn(f"`{field}` 가 비어 있어 기본값 `{default}` 를 사용합니다: {response_path}")
+        response[field] = default
+    elif raw not in valid_set:
+        warn(
+            f"`{field}` 값이 유효하지 않아 기본값 `{default}` 를 사용합니다 "
+            f"({raw}): {response_path}"
+        )
+        response[field] = default
+    else:
+        response[field] = raw
+
+
 def validate_response_schema_basics(
     response: dict[str, object], *, response_path: Path
 ) -> dict[str, object]:
@@ -733,35 +791,14 @@ def validate_response_schema_basics(
     else:
         response["hypothesis"] = hypothesis
 
-    experiment_status = collapse_ws(str(response.get("experiment_status", "")).strip())
-    if not experiment_status:
-        warn(
-            f"`experiment_status` 가 비어 있어 기본값 `crash` 를 사용합니다: {response_path}"
-        )
-        response["experiment_status"] = "crash"
-    elif experiment_status not in VALID_EXPERIMENT_STATUSES:
-        warn(
-            "`experiment_status` 값이 유효하지 않아 기본값 `crash` 를 사용합니다 "
-            f"({experiment_status}): {response_path}"
-        )
-        response["experiment_status"] = "crash"
-    else:
-        response["experiment_status"] = experiment_status
-
-    control_action = collapse_ws(str(response.get("control_action", "")).strip())
-    if not control_action:
-        warn(
-            f"`control_action` 이 비어 있어 기본값 `escalate` 를 사용합니다: {response_path}"
-        )
-        response["control_action"] = "escalate"
-    elif control_action not in VALID_CONTROL_ACTIONS:
-        warn(
-            "`control_action` 값이 유효하지 않아 기본값 `escalate` 를 사용합니다 "
-            f"({control_action}): {response_path}"
-        )
-        response["control_action"] = "escalate"
-    else:
-        response["control_action"] = control_action
+    _validate_enum_field(
+        response, "experiment_status",
+        VALID_EXPERIMENT_STATUSES, "crash", response_path,
+    )
+    _validate_enum_field(
+        response, "control_action",
+        VALID_CONTROL_ACTIONS, "escalate", response_path,
+    )
 
     return response
 
@@ -785,8 +822,6 @@ def should_stop(
         return True
     if control_action in {"pass", "stop", "rescope", "escalate"}:
         return True
-    if loop_forever:
-        return False
     return False
 
 
