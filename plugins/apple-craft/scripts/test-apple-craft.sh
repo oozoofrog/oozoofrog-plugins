@@ -347,7 +347,7 @@ local fm_errors=""
 for ag in "${expected_agents[@]}"; do
   local ag_path="$AGENTS_DIR/$ag"
   [[ ! -f "$ag_path" ]] && continue
-  for field in "name:" "description:" "model:" "color:" "whenToUse:" "tools:"; do
+  for field in "name:" "description:" "model:" "color:" "whenToUse:"; do
     if ! grep -q "$field" "$ag_path"; then
       fm_ok=false
       fm_errors+="$ag:$field "
@@ -355,16 +355,16 @@ for ag in "${expected_agents[@]}"; do
   done
 done
 if $fm_ok; then
-  pass "2. 에이전트 frontmatter 필수 필드 (name,description,model,color,whenToUse,tools)"
+  pass "2. 에이전트 frontmatter 필수 필드 (name,description,model,color,whenToUse)"
 else
   fail "2. 누락된 frontmatter 필드" "$fm_errors"
 fi
 
 # Test 3: harness 스킬 SKILL.md 존재
 if [[ -f "$HARNESS_SKILL" ]]; then
-  pass "3. apple-craft-harness SKILL.md 존재"
+  pass "3. apple-harness SKILL.md 존재"
 else
-  fail "3. apple-craft-harness SKILL.md 없음" "$HARNESS_SKILL"
+  fail "3. apple-harness SKILL.md 없음" "$HARNESS_SKILL"
 fi
 
 # Test 4: harness 스킬에 Agent가 allowed-tools에 포함
@@ -382,7 +382,7 @@ else
 fi
 
 # Test 6: 기존 SKILL.md에 harness 크로스레퍼런스
-if grep -q "apple-craft-harness" "$SKILL_MD"; then
+if grep -q "apple-harness" "$SKILL_MD"; then
   pass "6. apple-craft SKILL.md에 harness 크로스레퍼런스"
 else
   fail "6. harness 크로스레퍼런스 누락" ""

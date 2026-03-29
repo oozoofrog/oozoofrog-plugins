@@ -1,6 +1,6 @@
 # Walkthrough: Liquid Glass 설정 화면 구현
 
-apple-craft-harness의 Plan→Build→Evaluate 루프를 사용하여 SwiftUI 설정 화면에
+apple-harness의 Plan→Build→Evaluate 루프를 사용하여 SwiftUI 설정 화면에
 Liquid Glass 디자인을 적용하는 전체 과정입니다. 10개 기능(기본 5 + 차별화 5)을
 4축 다차원 평가로 검증하는 개선된 하네스 흐름을 시연합니다.
 
