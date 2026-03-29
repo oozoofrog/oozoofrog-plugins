@@ -26,10 +26,17 @@
         "expect": "Sources/ 와 Tests/ 디렉토리 모두 존재"
       }
     ],
-    "status": "built",
+    "status": "verified",
     "reference": null,
     "priority": 1,
-    "scores": null
+    "scores": {
+      "functionality": 8,
+      "codeQuality": 9,
+      "designQuality": 9,
+      "interactionQuality": null,
+      "weightedAverage": 8.7,
+      "verdict": "PASS"
+    }
   },
   {
     "id": "F002",
@@ -58,10 +65,17 @@
         "expect": "buildArguments()가 nil 옵션 제외, --level 5가지(default/info/debug/error/fault) 모두 처리, --predicate 직접 전달, --device 인자 포함 확인. Combine 미사용(async/await 또는 순수 함수). force unwrap(!) 없음"
       }
     ],
-    "status": "built",
+    "status": "verified",
     "reference": null,
     "priority": 2,
-    "scores": null
+    "scores": {
+      "functionality": 9,
+      "codeQuality": 9,
+      "designQuality": 8,
+      "interactionQuality": null,
+      "weightedAverage": 8.7,
+      "verdict": "PASS"
+    }
   },
   {
     "id": "F003",
@@ -90,10 +104,17 @@
         "expect": "parse()가 잘못된 형식 입력 시 nil 반환(크래시 없음). format()의 json 스타일이 Encodable/JSONEncoder 또는 수동 직렬화로 유효한 JSON 생성. subsystem/category nil 케이스 방어 처리. force unwrap(!) 없음"
       }
     ],
-    "status": "built",
+    "status": "verified",
     "reference": null,
     "priority": 3,
-    "scores": null
+    "scores": {
+      "functionality": 9,
+      "codeQuality": 9,
+      "designQuality": 9,
+      "interactionQuality": null,
+      "weightedAverage": 9.0,
+      "verdict": "PASS"
+    }
   },
   {
     "id": "F004",
@@ -122,10 +143,17 @@
         "expect": "ProcessRunner 프로토콜 참조 또는 정의 존재, terminate 호출 존재"
       }
     ],
-    "status": "built",
+    "status": "verified",
     "reference": null,
     "priority": 4,
-    "scores": null
+    "scores": {
+      "functionality": 9,
+      "codeQuality": 8,
+      "designQuality": 8,
+      "interactionQuality": null,
+      "weightedAverage": 8.3,
+      "verdict": "PASS"
+    }
   },
   {
     "id": "F005",
@@ -154,10 +182,17 @@
         "expect": "validate() 메서드에서 --last와 --start/--end 상호 배제 검사. ProcessRunner 프로토콜 주입 구조(테스트 가능). --max-lines 미지원 시 description에 명시 또는 지원 여부 확인. force unwrap(!) 없음"
       }
     ],
-    "status": "built",
+    "status": "verified",
     "reference": null,
     "priority": 5,
-    "scores": null
+    "scores": {
+      "functionality": 9,
+      "codeQuality": 8,
+      "designQuality": 8,
+      "interactionQuality": null,
+      "weightedAverage": 8.3,
+      "verdict": "PASS"
+    }
   },
   {
     "id": "F006",
@@ -186,10 +221,17 @@
         "expect": "DeviceInfo 구조체(udid, name, type, os, status) 존재. simctl JSON 파싱 실패 시 빈 배열 반환(throw 없음). devicectl 미설치 graceful 처리. 파싱 로직이 순수 함수 또는 별도 타입으로 분리되어 테스트 가능한 구조. force unwrap(!) 없음"
       }
     ],
-    "status": "built",
+    "status": "verified",
     "reference": null,
     "priority": 6,
-    "scores": null
+    "scores": {
+      "functionality": 8,
+      "codeQuality": 8,
+      "designQuality": 7,
+      "interactionQuality": null,
+      "weightedAverage": 7.7,
+      "verdict": "PASS"
+    }
   },
   {
     "id": "F007",
@@ -218,10 +260,17 @@
         "expect": "help 텍스트 출력 (서브커맨드 없이 호출 시 도움말 표시)"
       }
     ],
-    "status": "built",
+    "status": "verified",
     "reference": null,
     "priority": 7,
-    "scores": null
+    "scores": {
+      "functionality": 9,
+      "codeQuality": 8,
+      "designQuality": 8,
+      "interactionQuality": null,
+      "weightedAverage": 8.3,
+      "verdict": "PASS"
+    }
   },
   {
     "id": "F008",
@@ -250,10 +299,17 @@
         "expect": "LogFilter 관련 커버리지 데이터 출력 (0% 불허)"
       }
     ],
-    "status": "built",
+    "status": "verified",
     "reference": null,
     "priority": 8,
-    "scores": null
+    "scores": {
+      "functionality": 9,
+      "codeQuality": 8,
+      "designQuality": 8,
+      "interactionQuality": null,
+      "weightedAverage": 8.3,
+      "verdict": "PASS"
+    }
   },
   {
     "id": "F009",
@@ -282,10 +338,17 @@
         "expect": "0 — 순수 Swift Testing만 사용"
       }
     ],
-    "status": "built",
+    "status": "verified",
     "reference": null,
     "priority": 9,
-    "scores": null
+    "scores": {
+      "functionality": 9,
+      "codeQuality": 9,
+      "designQuality": 9,
+      "interactionQuality": null,
+      "weightedAverage": 9.0,
+      "verdict": "PASS"
+    }
   },
   {
     "id": "F010",
@@ -314,10 +377,17 @@
         "expect": "5 이상, FILE_NOT_FOUND 불허"
       }
     ],
-    "status": "built",
+    "status": "verified",
     "reference": null,
     "priority": 10,
-    "scores": null
+    "scores": {
+      "functionality": 9,
+      "codeQuality": 8,
+      "designQuality": 8,
+      "interactionQuality": null,
+      "weightedAverage": 8.3,
+      "verdict": "PASS"
+    }
   },
   {
     "id": "F011",
@@ -351,10 +421,17 @@
         "expect": "timeout 시나리오가 실제 대기 없이 Mock으로 즉시 종료 시뮬레이션. max-lines 5줄 초과 시 종료 검증. ValidationError 케이스 #expect(throws:) 사용"
       }
     ],
-    "status": "built",
+    "status": "verified",
     "reference": null,
     "priority": 11,
-    "scores": null
+    "scores": {
+      "functionality": 8,
+      "codeQuality": 6,
+      "designQuality": 8,
+      "interactionQuality": null,
+      "weightedAverage": 7.3,
+      "verdict": "PASS"
+    }
   },
   {
     "id": "F012",
@@ -383,10 +460,17 @@
         "expect": "/usr/bin/log 파일 존재 확인 (통합 테스트 실행 가능 환경)"
       }
     ],
-    "status": "built",
+    "status": "verified",
     "reference": null,
     "priority": 12,
-    "scores": null
+    "scores": {
+      "functionality": 9,
+      "codeQuality": 8,
+      "designQuality": 8,
+      "interactionQuality": null,
+      "weightedAverage": 8.3,
+      "verdict": "PASS"
+    }
   },
   {
     "id": "F013",
@@ -415,9 +499,16 @@
         "expect": "TOTAL 행에 100.00% 또는 99.x% 이상 커버리지 수치 포함"
       }
     ],
-    "status": "built",
+    "status": "partial",
     "reference": null,
     "priority": 13,
-    "scores": null
+    "scores": {
+      "functionality": 6,
+      "codeQuality": 6,
+      "designQuality": 6,
+      "interactionQuality": null,
+      "weightedAverage": 6.0,
+      "verdict": "PARTIAL"
+    }
   }
 ]
