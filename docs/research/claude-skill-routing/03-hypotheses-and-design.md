@@ -71,7 +71,7 @@
 
 ## 3. 실험 묶음
 
-### Batch A — apple-craft family
+### Batch 1 — apple-craft family
 
 - `apple-craft`
 - `apple-harness`
@@ -80,7 +80,7 @@
 목표:
 - 개발 / 리뷰 / 대규모 구현의 삼자 분리를 안정화
 
-### Batch B — agent-context family
+### Batch 2 — agent-context family
 
 - `ctx-guide`
 - `ctx-init`
@@ -90,15 +90,21 @@
 목표:
 - 같은 도메인 안에서 action 기반 분기 강화
 
-### Batch C — delegation / automation family
+### Batch 3 — delegation pair
 
 - `gpt-research`
 - `hey-codex`
+
+목표:
+- "외부 모델에 넘기기" vs "Codex에 실제 작업 위임" 구분
+
+### Batch 4 — automation pair
+
 - `app-automation`
 - `os-log`
 
 목표:
-- 목적과 출력물 유형이 다른 스킬의 경계 정리
+- UI 조작 vs 로그 조회 분리
 
 ## 실험 결과로 남겨야 할 것
 

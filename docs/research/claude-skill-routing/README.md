@@ -49,6 +49,10 @@
    - `apple-craft` / `apple-review` / `apple-harness` 1차 개선 초안
 8. `batches/01-apple-family-baseline-template.md`
    - Batch 1 수정 전/후 비교용 측정표 템플릿
+9. `batches/01-apple-family-baseline-2026-03-29.md`
+   - Batch 1 수정 전 baseline 측정 기록
+10. `batches/01-apple-family-postpatch-2026-03-29.md`
+    - Batch 1 수정 후 post-patch 측정 기록
 
 ## 권장 진행 순서
 

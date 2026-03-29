@@ -45,7 +45,7 @@
 | AP-B1-10 | `성능 문제만 리뷰해줘` | `apple-review` |  |  |  |  |
 | AP-B1-11 | `성능 문제를 고쳐줘` | `apple-craft` |  |  |  |  |
 | AP-B1-12 | `이 화면 하나만 손봐줘` | `apple-craft` |  |  |  |  |
-| AP-B1-13 | `전체적으로 손봐줘` | `ambiguous` |  |  |  |  |
+| AP-B1-13 | `전체적으로 손봐줘` | `ambiguous / clarification` |  |  |  |  |
 | AP-B1-14 | `처음부터 끝까지 다 만들어줘` | `apple-harness` |  |  |  |  |
 | AP-B1-15 | `이 코드 스타일 위주로 점검해줘` | `apple-review` |  |  |  |  |
 

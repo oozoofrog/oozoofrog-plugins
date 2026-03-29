@@ -34,11 +34,10 @@
 - 실행 파일:
   - `batches/01-apple-family-baseline-2026-03-29.md`
   - `batches/01-apple-family-postpatch-2026-03-29.md`
-- 현재 상태:
-  - 정적 wording 분석 완료
-  - wording 패치 적용 완료
-  - baseline/post-patch 기록 파일 생성 완료
-  - 실제 라우팅 측정값 입력 전
+- 현재 상태: **PATCHED** — 측정 대기
+- 설계 노트:
+  - apple-craft Mode Selection 테이블의 review/harness 행은 **의도적 handoff 메커니즘**으로 유지 (review example은 제거, 키워드 라우팅 행은 보존)
+  - apple-review description에 `코드 리뷰`, `확인해`, `체크`, `살펴` 복원하여 직접 활성화 recall 확보
 
 ### Batch 2 — agent-context family action verb 정리
 

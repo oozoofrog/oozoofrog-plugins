@@ -24,7 +24,7 @@ user: "이 앱 전체 구조를 TCA로 전면 리팩토링해줘"
 assistant: "harness 모드로 앱 전반의 구조 전환 스펙을 작성하고, 단계별 빌드/검증 루프로 진행하겠습니다."
 </example>
 
-# apple-craft-harness
+# apple-harness
 
 Anthropic의 [Harness Design](https://www.anthropic.com/engineering/harness-design-long-running-apps) V2 간소화 패턴 기반.
 4개 에이전트(Planner→Designer→Builder→Evaluator)로 장기 Apple 플랫폼 개발 작업을 자동화합니다.
@@ -464,7 +464,7 @@ Phase 1: PLAN 시작 — Planner 에이전트가 스펙을 작성합니다...
 ## Quick Reference
 
 ```
-apple-craft-harness 실행 흐름
+apple-harness 실행 흐름
 ├─ Phase 1: PLAN (harness-planner)
 │   ├─ 참조 문서 식별 + harness-design-principles.md 숙지
 │   ├─ AskUserQuestion으로 맥락 수집

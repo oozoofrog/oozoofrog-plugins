@@ -1,6 +1,6 @@
 ---
 name: apple-review
-description: apple-craft 리뷰 전용 스킬 — Swift/SwiftUI/UIKit/AppKit 코드, 파일, 디렉토리, PR의 문제점·위험·개선점을 점검합니다. "리뷰", "검토", "점검", "PR 리뷰", "코드 봐줘", "문제 있는지 확인해줘", "blocking issue 찾아줘", "코드 점검", "review", "check", "inspect", "analyze" 같은 요청에 사용합니다. 실제 구현/수정/작성 요청은 apple-craft, 처음부터/전체 구현은 apple-harness가 더 적합합니다.
+description: apple-craft 리뷰 전용 스킬 — Swift/SwiftUI/UIKit/AppKit 코드, 파일, 디렉토리, PR의 문제점·위험·개선점을 점검합니다. "리뷰", "코드 리뷰", "검토", "점검", "PR 리뷰", "코드 봐줘", "문제 있는지 확인해줘", "blocking issue 찾아줘", "코드 점검", "확인해", "체크", "살펴", "review", "check", "inspect", "analyze", "audit" 같은 요청에 사용합니다. 실제 구현/수정/작성 요청은 apple-craft, 처음부터/전체 구현은 apple-harness가 더 적합합니다.
 argument-hint: "[file, directory, or PR number]"
 ---
 

@@ -87,7 +87,7 @@ Xcode 26 참조 문서(20개 주제) 내장으로 최신 API도 정확하게 지
 | **explore** | 알려줘, 설명, 뭐가 바뀌었어, 차이, 어떻게, 비교, 추천, what, how, explain, diff, compare | API/코드 설명 + 코드 예시. `DocumentationSearch`로 공식 문서 검색 |
 | **troubleshoot** | 에러, 오류, 안돼, 크래시, 빌드 실패, 느려, 성능, 메모리, error, crash, fix, debug, slow | 빌드 로그/코드 분석 + 수정. `GetBuildLog`, `XcodeListNavigatorIssues` 활용 |
 | **review** | 리뷰, 코드 리뷰, review, 검토, 점검, PR 리뷰, audit, 봐줘, 확인해, 체크, 살펴, 분석, check, analyze, inspect | → `apple-review` 스킬로 전환 |
-| **harness** | 처음부터, 전체, 기능 개발, 대규모, 전면 리팩토링, harness | → `apple-craft-harness` 스킬로 전환 |
+| **harness** | 처음부터, 전체, 기능 개발, 대규모, 전면 리팩토링, harness | → `apple-harness` 스킬로 전환 |
 
 **자동 선택**: 키워드가 불명확하면 사용자 의도를 추론합니다. 코드 파일이 언급되면 implement, 질문형이면 explore, 에러 메시지가 포함되면 troubleshoot, 기존 코드에 대한 평가/의견 요청이면 review.
 
