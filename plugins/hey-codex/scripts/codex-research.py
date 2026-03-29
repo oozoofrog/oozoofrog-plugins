@@ -181,7 +181,10 @@ def detect_git_root(workspace: Path) -> Path | None:
 
 
 def current_head(workspace: Path) -> str:
-    return git(workspace, "rev-parse", "--short", "HEAD").stdout.strip()
+    result = git(workspace, "rev-parse", "--short", "HEAD", check=False)
+    if result.returncode != 0:
+        return "unknown"
+    return result.stdout.strip() or "unknown"
 
 
 def _is_relative_to(path: Path, base: Path) -> bool:
@@ -229,13 +232,31 @@ def workspace_changes_exist(workspace: Path, state_dir_rel: Path | None) -> bool
     return bool(filtered)
 
 
-def restore_workspace(workspace: Path, state_dir_rel: Path | None) -> None:
-    if workspace_has_tracked_files(workspace):
-        git(workspace, "restore", "--source=HEAD", "--staged", "--worktree", ".")
+def restore_workspace(workspace: Path, state_dir_rel: Path | None) -> bool:
+    """workspace를 HEAD로 복원. 성공 시 True, 실패 시 False."""
+    try:
+        if workspace_has_tracked_files(workspace):
+            git(workspace, "restore", "--source=HEAD", "--staged", "--worktree", ".")
+    except subprocess.CalledProcessError as exc:
+        print(
+            f"경고: git restore 실패 (exit {exc.returncode}). "
+            "workspace가 불완전한 상태일 수 있습니다.",
+            file=sys.stderr,
+        )
+        return False
     clean_cmd = ["git", "clean", "-fd"]
     if state_dir_rel is not None:
         clean_cmd.extend(["-e", state_dir_rel.as_posix().rstrip("/") + "/"])
-    subprocess.run(clean_cmd, cwd=str(workspace), check=True, capture_output=True, text=True)
+    try:
+        subprocess.run(clean_cmd, cwd=str(workspace), check=True, capture_output=True, text=True)
+    except subprocess.CalledProcessError as exc:
+        print(
+            f"경고: git clean 실패 (exit {exc.returncode}). "
+            "untracked 파일이 남아 있을 수 있습니다.",
+            file=sys.stderr,
+        )
+        return False
+    return True
 
 
 def stage_workspace(workspace: Path, state_dir_rel: Path | None) -> None:
@@ -252,12 +273,20 @@ def commit_keep_result(
 ) -> str:
     if not workspace_changes_exist(workspace, state_dir_rel):
         return current_head(workspace)
-    stage_workspace(workspace, state_dir_rel)
+    try:
+        stage_workspace(workspace, state_dir_rel)
+    except subprocess.CalledProcessError as exc:
+        print(f"경고: git staging 실패 (exit {exc.returncode})", file=sys.stderr)
+        return f"stage-failed(exit={exc.returncode})"
     if not workspace_changes_exist(workspace, state_dir_rel):
         return current_head(workspace)
     short_hypothesis = collapse_ws(hypothesis)[:72] or "keep"
     message = f"codex-research round {round_num:03d}: {short_hypothesis}"
-    git(workspace, "commit", "-m", message, capture_output=True)
+    try:
+        git(workspace, "commit", "-m", message, capture_output=True)
+    except subprocess.CalledProcessError as exc:
+        print(f"경고: git commit 실패 (exit {exc.returncode})", file=sys.stderr)
+        return f"commit-failed(exit={exc.returncode})"
     return current_head(workspace)
 
 
@@ -640,23 +669,26 @@ def cmd_run(args: argparse.Namespace) -> int:
         print(f"== round {round_num:03d} ==")
         print("command:", " ".join(cmd))
         with stdout_path.open("w", encoding="utf-8") as stdout_handle:
+            proc = subprocess.Popen(
+                cmd,
+                cwd=str(workspace),
+                stdin=subprocess.PIPE,
+                stdout=stdout_handle,
+                stderr=subprocess.STDOUT,
+                text=True,
+            )
             try:
-                completed = subprocess.run(
-                    cmd,
-                    cwd=str(workspace),
-                    input=prompt,
-                    text=True,
-                    stdout=stdout_handle,
-                    stderr=subprocess.STDOUT,
-                    timeout=args.timeout_seconds or None,
-                )
+                proc.communicate(input=prompt, timeout=args.timeout_seconds or None)
             except subprocess.TimeoutExpired:
+                proc.kill()
+                proc.wait()
                 response = fallback_response(
                     round_num,
-                    f"codex exec timed out after {args.timeout_seconds} seconds",
+                    f"codex exec timed out after {args.timeout_seconds} seconds (process killed)",
                 )
             else:
-                if completed.returncode != 0:
+                completed_returncode = proc.returncode
+                if completed_returncode != 0:
                     response = fallback_response(
                         round_num,
                         f"codex exec failed with exit code {completed.returncode}; see {stdout_path}",

@@ -157,6 +157,7 @@ bash "${CLAUDE_PLUGIN_ROOT}/scripts/codex-research.sh" run <workspace> --max-rou
 ├── contract.md           # 평가 계약 (loop-contract.md 형식)
 ├── state_snapshot.md     # baseline, best state, 다음 후보
 ├── ledger.tsv            # 라운드별 결과 기록
+├── runtime/              # Codex 실행 중 임시 파일
 └── rounds/
     ├── round-000/
     │   ├── prompt.md
@@ -164,8 +165,7 @@ bash "${CLAUDE_PLUGIN_ROOT}/scripts/codex-research.sh" run <workspace> --max-rou
     │   ├── response.json
     │   ├── codex-events.jsonl
     │   └── evidence.md
-    ├── round-001/...
-    └── runtime/
+    └── round-001/...
 ```
 
 ## 규칙
