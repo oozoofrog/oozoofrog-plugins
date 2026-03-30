@@ -16,7 +16,7 @@ Claude Code 플러그인 마켓플레이스 리포지토리.
 | gpt-research | gpt-research | — | — |
 | hey-codex | hey-codex, codex-research | — | — |
 | app-automation | app-automation, os-log | ui-verifier | — (.mcp.json: baepsae) |
-| apple-craft | apple-craft, apple-harness, apple-review | harness-planner, harness-builder, harness-design-architect, harness-design-implementer, harness-evaluator, harness-reviewer | — |
+| apple-craft | apple-craft, apple-harness, apple-review, pen-craft | harness-planner, harness-builder, harness-design-architect, harness-design-implementer, harness-evaluator, harness-reviewer, design-coder | — |
 | plugin-doctor | fixer | — | — |
 | api-learn | api-learn, api-scan | — | — |
 
