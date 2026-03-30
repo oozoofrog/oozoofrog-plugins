@@ -43,9 +43,10 @@ private let emptySimctlJSON = """
 
 private let devicectlOutputFixture = """
 Listing devices:
-Name                    UDID                              Status       Platform     OS
-──────────────────────  ────────────────────────────────  ───────────  ───────────  ──────
-My iPhone               00000000-0000000000000000         connected    iPhone       17.0
+Name                 Hostname                              Identifier                             State                Model
+-----------------    ----------------------------------    ------------------------------------   ------------------   -------------------------------------------
+eyephone             eyephone.coredevice.local             6198787F-2780-55F0-B3C4-2756280A1A74   connected            iPhone 14 Pro (iPhone15,2)
+My Apple Watch       watch.coredevice.local                C8C1FD6D-8ED8-5B16-81EF-7657982F4CBA   available (paired)   Apple Watch Series 8 (Watch6,14)
 """
 
 @Suite("DevicesCommand 파싱 유닛 테스트")
@@ -94,15 +95,50 @@ struct DevicesCommandTests {
 
     // MARK: - 시나리오 3: devicectl 텍스트 출력 파싱 → DeviceInfo
 
-    @Test("devicectl 텍스트 출력 파싱 크래시 없음")
+    @Test("devicectl 텍스트 출력 파싱 시 DeviceInfo 배열 반환")
     func parsesDevicectlOutput() {
         let devices = DeviceParser.parseDevicectlOutput(devicectlOutputFixture)
-        #expect(devices.count >= 0)
+        #expect(devices.count == 2)
+    }
+
+    @Test("devicectl 파싱된 디바이스 필드 검증")
+    func parsedPhysicalDeviceFields() {
+        let devices = DeviceParser.parseDevicectlOutput(devicectlOutputFixture)
+        let phone = devices.first { $0.name == "eyephone" }
+        #expect(phone != nil)
+        #expect(phone?.udid == "6198787F-2780-55F0-B3C4-2756280A1A74")
+        #expect(phone?.type == .device)
+        #expect(phone?.status == "connected")
+        #expect(phone?.os.contains("iPhone 14 Pro") == true)
+    }
+
+    @Test("devicectl 파싱 시 multi-word 상태 처리")
+    func parsesMultiWordStatus() {
+        let devices = DeviceParser.parseDevicectlOutput(devicectlOutputFixture)
+        let watch = devices.first { $0.name == "My Apple Watch" }
+        #expect(watch != nil)
+        #expect(watch?.status == "available (paired)")
+        #expect(watch?.udid == "C8C1FD6D-8ED8-5B16-81EF-7657982F4CBA")
+    }
+
+    @Test("devicectl 파싱된 디바이스 타입이 device")
+    func parsedPhysicalDeviceTypeIsDevice() {
+        let devices = DeviceParser.parseDevicectlOutput(devicectlOutputFixture)
+        for device in devices {
+            #expect(device.type == .device)
+        }
     }
 
     @Test("devicectl 빈 출력 시 빈 배열 반환")
     func emptyDevicectlOutputReturnsEmptyArray() {
         let devices = DeviceParser.parseDevicectlOutput("")
+        #expect(devices.isEmpty)
+    }
+
+    @Test("devicectl 구분선 없는 출력 시 빈 배열 반환")
+    func devicectlWithoutSeparatorReturnsEmpty() {
+        let output = "Some random text without separator"
+        let devices = DeviceParser.parseDevicectlOutput(output)
         #expect(devices.isEmpty)
     }
 

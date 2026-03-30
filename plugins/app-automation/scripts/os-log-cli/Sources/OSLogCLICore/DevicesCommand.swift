@@ -55,61 +55,102 @@ enum DeviceParser {
     }
 
     /// `xcrun devicectl list devices` 텍스트 출력에서 실제 디바이스 파싱
+    ///
+    /// 실제 출력 형식:
+    /// ```
+    /// Name               Hostname                           Identifier                             State                Model
+    /// ----------------   --------------------------------   ------------------------------------   ------------------   -------
+    /// eyephone           eyephone.coredevice.local          6198787F-2780-55F0-B3C4-2756280A1A74   connected            iPhone 14 Pro
+    /// ```
     static func parseDevicectlOutput(_ output: String) -> [DeviceInfo] {
-        // devicectl 출력 형식 예시:
-        // Name                UDID                                   Status    Platform      OS
-        // ──────────────────  ─────────────────────────────────────  ────────  ────────────  ──────────
-        // My iPhone           00000000-0000000000000000              connected  iPhone        17.0
         var result: [DeviceInfo] = []
         let lines = output.components(separatedBy: "\n")
 
-        // 헤더/구분선 건너뛰기
         var dataStarted = false
+        var columnMap: [String: Int] = [:]
+
         for line in lines {
             let trimmed = line.trimmingCharacters(in: .whitespaces)
             if trimmed.isEmpty { continue }
 
-            // 구분선 (─ 문자 포함) 감지
-            if trimmed.contains("─") {
-                dataStarted = true
-                continue
-            }
-
-            // 헤더 라인 감지 (UDID, Name, Status 등 키워드)
             if !dataStarted {
-                if trimmed.lowercased().contains("udid") || trimmed.lowercased().contains("name") {
+                // 구분선 감지 (- 또는 ─ 문자와 공백으로만 구성)
+                let dashes = trimmed.filter { $0 != " " }
+                if !dashes.isEmpty && dashes.allSatisfy({ $0 == "-" || $0 == "─" }) {
+                    dataStarted = true
                     continue
+                }
+
+                // 헤더 후보 파싱 (마지막 유효 헤더를 사용)
+                let fields = splitColumns(trimmed)
+                if fields.count >= 3 {
+                    var map: [String: Int] = [:]
+                    for (i, f) in fields.enumerated() {
+                        map[f.lowercased()] = i
+                    }
+                    columnMap = map
                 }
                 continue
             }
 
-            // 공백으로 분리된 컬럼 파싱
-            let parts = trimmed.components(separatedBy: .whitespaces).filter { !$0.isEmpty }
-            guard parts.count >= 4 else { continue }
+            // 데이터 라인 파싱
+            let fields = splitColumns(trimmed)
+            guard fields.count >= 3 else { continue }
 
-            // UDID 패턴 감지 (UUID 형식: 8자리-16자리 hex)
-            let uuidPattern = #"^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{16}$"#
-            let uuidRegex = try? NSRegularExpression(pattern: uuidPattern)
-            guard let uuidIndex = parts.firstIndex(where: { part in
-                let r = NSRange(part.startIndex..., in: part)
-                return uuidRegex?.firstMatch(in: part, range: r) != nil
-            }) else { continue }
+            let nameIdx = columnMap["name"] ?? 0
+            let udidIdx = columnMap["identifier"] ?? columnMap["udid"] ?? min(2, fields.count - 1)
+            let stateIdx = columnMap["state"] ?? columnMap["status"] ?? min(3, fields.count - 1)
+            let modelIdx = columnMap["model"] ?? min(fields.count - 1, 4)
 
-            let udid = parts[uuidIndex]
-            let name = parts[0..<uuidIndex].joined(separator: " ")
-            let status = uuidIndex + 1 < parts.count ? parts[uuidIndex + 1] : "unknown"
-            let platform = uuidIndex + 2 < parts.count ? parts[uuidIndex + 2] : ""
-            let osVersion = uuidIndex + 3 < parts.count ? parts[uuidIndex + 3] : ""
-            let osString = [platform, osVersion].filter { !$0.isEmpty }.joined(separator: " ")
+            let name = nameIdx < fields.count ? fields[nameIdx] : ""
+            let udid = udidIdx < fields.count ? fields[udidIdx] : ""
+            let status = stateIdx < fields.count ? fields[stateIdx] : ""
+            let model = modelIdx < fields.count ? fields[modelIdx] : ""
+
+            guard !udid.isEmpty else { continue }
 
             result.append(DeviceInfo(
                 udid: udid,
                 name: name,
                 type: .device,
-                os: osString,
+                os: model,
                 status: status
             ))
         }
+        return result
+    }
+
+    /// 3개 이상의 연속 공백으로 컬럼을 분리
+    static func splitColumns(_ line: String) -> [String] {
+        let nsLine = line as NSString
+        guard let regex = try? NSRegularExpression(pattern: #"\s{3,}"#) else {
+            return [line]
+        }
+
+        let fullRange = NSRange(location: 0, length: nsLine.length)
+        let matches = regex.matches(in: line, range: fullRange)
+
+        var result: [String] = []
+        var lastEnd = 0
+
+        for match in matches {
+            if match.range.location > lastEnd {
+                let field = nsLine.substring(
+                    with: NSRange(location: lastEnd, length: match.range.location - lastEnd)
+                )
+                result.append(field.trimmingCharacters(in: .whitespaces))
+            }
+            lastEnd = match.range.location + match.range.length
+        }
+
+        if lastEnd < nsLine.length {
+            let field = nsLine.substring(from: lastEnd)
+            let trimmed = field.trimmingCharacters(in: .whitespaces)
+            if !trimmed.isEmpty {
+                result.append(trimmed)
+            }
+        }
+
         return result
     }
 
