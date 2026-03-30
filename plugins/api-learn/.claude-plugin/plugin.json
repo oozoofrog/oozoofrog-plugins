@@ -1,8 +1,8 @@
 {
   "name": "api-learn",
-  "description": "프로젝트 도메인 API 내재화 — 라이브러리/프레임워크 공식 문서 + 예제를 수집하여 프로젝트별 참조 문서로 저장, CLAUDE.md 자동 등록",
+  "description": "프로젝트 도메인 API 내재화 — 라이브러리/프레임워크 공식 문서 + 예제를 수집하여 프로젝트별 참조 문서로 저장, CLAUDE.md 자동 등록. Apple 프레임워크는 Xcode DocumentationSearch + apple-craft 참조 연동",
   "author": {
     "name": "oozoofrog"
   },
-  "version": "1.0.0"
+  "version": "1.1.0"
 }

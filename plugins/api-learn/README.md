@@ -15,6 +15,13 @@
 2. **웹 검색** — 공식 문서 사이트 크롤링 (WebSearch → WebFetch)
 3. **프로젝트 코드 분석** — import/사용 패턴 Grep → 실사용 API 추출
 
+### Apple 프레임워크 추가 수집 (v1.1.0)
+
+Apple 자체 프레임워크(SwiftUI, MapKit, SwiftData 등) 대상 시 2단계가 선행됩니다:
+
+0. **Xcode DocumentationSearch** — `mcp__xcode__DocumentationSearch`로 공식 문서 직접 조회
+0.5. **apple-craft 참조 확인** — curated 참조 문서 + 안티패턴 재활용 (설치 시)
+
 ## 출력 위치
 
 ```

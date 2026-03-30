@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "oozoofrog-plugins",
-  "version": "1.27.0",
+  "version": "1.28.0",
   "description": "oozoofrog의 개인 Claude Code 플러그인 마켓플레이스 — macOS 릴리스 자동화, 컨텍스트 아키텍처, GPT 리서치, Codex CLI 위임, Apple 앱 자동화, Apple 플랫폼 통합 개발 어시스턴트, 플러그인 진단·수정",
   "owner": {
     "name": "oozoofrog",
@@ -80,8 +80,8 @@
     },
     {
       "name": "api-learn",
-      "description": "프로젝트 도메인 API 내재화 — 라이브러리/프레임워크 공식 문서 + 예제를 수집하여 프로젝트별 참조 문서로 저장, CLAUDE.md 자동 등록",
-      "version": "1.0.0",
+      "description": "프로젝트 도메인 API 내재화 — 라이브러리/프레임워크 공식 문서 + 예제를 수집하여 프로젝트별 참조 문서로 저장, CLAUDE.md 자동 등록. Apple 프레임워크는 Xcode DocumentationSearch + apple-craft 참조 연동",
+      "version": "1.1.0",
       "author": {
         "name": "oozoofrog"
       },

@@ -42,6 +42,8 @@ assistant: "프로젝트 의존성을 스캔하고 .claude/references/와 대조
 | `Gemfile` | Ruby | `gem '{name}'` 패턴 |
 | `pubspec.yaml` | Flutter/Dart | `dependencies` 키 |
 
+**Apple 플랫폼 감지:** `Package.swift`, `Podfile`, `*.xcodeproj`, `*.xcworkspace` 중 하나라도 발견되면 Apple 플랫폼 프로젝트로 표시합니다. 리포트에 `🍎 Apple 플랫폼` 태그를 추가합니다.
+
 **복수 파일 발견 시:** 모든 파일을 처리합니다 (예: Node + Python 혼합 프로젝트).
 
 **의존성 파일 미발견 시:** 사용자에게 "프로젝트 루트에서 의존성 파일을 찾지 못했습니다. 의존성 파일 경로를 지정하거나, /api-learn으로 직접 라이브러리를 지정해 주세요."라고 안내.
@@ -79,6 +81,10 @@ assistant: "프로젝트 의존성을 스캔하고 .claude/references/와 대조
   (1) 미내재화 전체 ({N}개)
   (2) 갱신 필요 포함 전체 ({N}개)
   (3) 직접 선택
+
+🍎 Apple 플랫폼 감지됨 (Package.swift / Podfile)
+   Apple 자체 프레임워크의 내재화 시 Xcode DocumentationSearch로
+   공식 문서를 직접 조회하여 더 정확한 수집이 가능합니다.
 ```
 
 ### Phase 4 — 위임
