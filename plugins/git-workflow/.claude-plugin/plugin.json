@@ -1,0 +1,8 @@
+{
+  "name": "git-workflow",
+  "version": "1.0.0",
+  "description": "GitHub 이슈 생성 + 브랜치 + Projects 보드 연동 자동화",
+  "author": {
+    "name": "oozoofrog"
+  }
+}
