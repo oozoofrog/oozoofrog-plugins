@@ -82,6 +82,20 @@ argument-hint: "[stage 번호: 1|2|3|all (기본: all)]"
 | ℹ️ | src/api/CONTEXT.md | "P99 < 100ms" | 자동 검증 불가 |
 ```
 
+### Stage 3.5: Codex Second-Pass Validation (선택적)
+
+Stage 2/3 findings 완료 후, Codex 스킬이 사용 가능하면 `/codex:review`를 second-pass validator로 투입합니다.
+
+1. `/codex:review --wait` 실행 — Stage 1~3에서 검증한 컨텍스트 파일을 대상으로 실행
+2. `/codex:result`로 structured findings 수집
+3. Codex findings 교차 대조:
+   - Stage 1~3에서 놓친 Critical/Warning 항목 → 종합 리포트에 `source: "codex-second-pass"` 추가
+   - 양쪽 모두 발견한 항목 → 기존 finding 유지 (중복 제거)
+   - Codex-only Info 항목 → 무시
+
+> **가드레일**: PASS/PARTIAL/FAIL 판정, 안티패턴 감점, CLEAN 기준은 기존 ctx-verify가 source of truth입니다. Codex는 coverage 보완 역할만 합니다.
+> Codex 스킬 미설치 시 이 단계를 건너뜁니다.
+
 ### Final: 종합 리포트
 
 ```markdown

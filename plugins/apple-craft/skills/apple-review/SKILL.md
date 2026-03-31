@@ -57,6 +57,19 @@ apple-craft 스킬과 동일한 참조 문서를 공유합니다.
 
 ---
 
+## Phase R0.5: Codex Cross-Review (선택적)
+
+Codex 스킬이 사용 가능하면, harness-reviewer와 **병렬로** `/codex:review`를 background 실행하여 cross-model 검증을 수행합니다.
+
+1. `/codex:review --background` 실행 — Phase R1과 동시 진행
+2. Codex 리뷰 결과는 Phase R1.5에서 병합 (R1 완료 후)
+3. `/codex:status`로 진행 상황 확인 가능
+
+> **가드레일**: `/codex:review`는 read-only입니다. severity 판정과 auto-fix 결정 권한은 harness-reviewer가 소유합니다.
+> Codex 스킬 미설치 시 이 단계를 건너뛰고 기존 workflow 그대로 진행합니다.
+
+---
+
 ## Phase R1: 스캔 + 분류 + 수정
 
 harness-reviewer 에이전트를 디스패치합니다:
@@ -76,9 +89,22 @@ Agent: harness-reviewer
 
 ---
 
-## Phase R1.5: 에이전트 검증 요약 검토
+## Phase R1.5: 에이전트 검증 요약 검토 + Codex 교차 대조
 
 harness-reviewer가 반환한 결과를 오케스트레이터가 **회의적 관점**으로 검토한다.
+
+### R1.5-A: Codex findings 병합 (R0.5 실행 시)
+
+Phase R0.5에서 `/codex:review`가 background 실행되었으면:
+
+1. `/codex:result`로 Codex 리뷰 결과 수집
+2. harness-reviewer findings와 **blocking-level만** 교차 대조:
+   - Codex가 발견했으나 harness-reviewer가 놓친 critical/major 항목 → `source: "codex-cross-review"` 추가
+   - 양쪽 모두 발견한 항목 → confidence 보강 (별도 표기)
+   - Codex-only minor/suggestion → 무시 (Apple 에코시스템 전문성은 harness-reviewer가 우선)
+3. 병합 결과를 review-findings.json에 반영
+
+> **원칙**: harness-reviewer가 severity/complexity 분류의 source of truth입니다. Codex는 blind spot 보완 역할만 합니다.
 
 1. `.claude/review/review-findings.json` 읽기
 2. **수정 완전성 검증**:

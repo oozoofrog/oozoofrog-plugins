@@ -176,6 +176,23 @@ Expected Output 섹션에서 GPT-PRO에게 다음 **구조화된 응답 포맷**
 
 상세 전략은 `references/size-limits-and-chunking.md`를 참조하세요.
 
+## Codex Research Sidecar (선택적)
+
+Codex 스킬이 설치되어 있고 사용자가 명시적으로 요청한 경우에만, GPT-PRO 프롬프트 생성과 **병렬로** `/codex:rescue`를 실행할 수 있습니다.
+
+### 사용 조건
+- 사용자가 "codex도 같이 돌려줘", "codex로도 확인해줘" 등 명시적으로 요청
+- 또는 GPT-PRO가 unavailable할 때 fallback으로 제안
+
+### 실행 방식
+1. 기존 프롬프트 생성 (pbcopy) 완료 후
+2. `codex:codex-rescue` 서브에이전트를 background로 디스패치 (read-only, `--write` 없이):
+   - Task: 프롬프트의 Expected Output 요약을 그대로 전달
+3. `/codex:status`로 진행 확인, `/codex:result`로 결과 수집
+4. Codex 결과를 사용자에게 별도 보고 (기존 pbcopy 프롬프트와 혼합하지 않음)
+
+> **가드레일**: 이 스킬의 본질은 GPT-PRO handoff + pbcopy입니다. Codex는 **full replacement가 아닌 sidecar/fallback**으로만 사용합니다. 사용자 명시 요청 없이 자동으로 Codex를 실행하지 마세요.
+
 ## 중요 규칙
 
 - **읽기 전용**: 프로젝트 파일을 수정하지 않습니다. 읽기와 검색만 수행합니다.

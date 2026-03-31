@@ -1,6 +1,6 @@
 {
   "name": "agent-context",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "description": "대규모 프로젝트를 위한 계층적 컨텍스트 아키텍처 자동화 — CLAUDE.md(루트 + 서브디렉토리), .claude/rules/, AGENTS.md 스캐폴딩, 검증, 토큰 효율성 감사",
   "author": {
     "name": "oozoofrog",

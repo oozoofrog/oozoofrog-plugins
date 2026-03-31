@@ -211,6 +211,21 @@ xcodebuild build ... 2>&1 | xcsift -E -e
 # JSON 출력의 "executables" 필드에서 .app 경로 확인
 ```
 
+### Step 5.5: Codex Rescue Fallback (선택적)
+
+Step 5 빌드 내부 루프에서 3회 시도 후에도 빌드 에러가 해결되지 않으면, Codex 스킬이 사용 가능한 경우 `/codex:rescue`로 디버깅을 위임합니다.
+
+1. 빌드 내부 루프 3회 실패 시 트리거
+2. `codex:codex-rescue` 서브에이전트 디스패치 (`--write`):
+   - Task: "다음 빌드 에러를 수정하라: [빌드 에러 메시지]. 대상 파일: [파일 목록]. 프로젝트: [프로젝트 경로]."
+3. `/codex:result`로 Codex 수정 결과 수집
+4. Codex가 수정한 파일에 대해 Step 5 빌드 검증을 **1회 더** 실행
+5. 빌드 성공 → Step 6으로 진행
+6. 여전히 실패 → `features.json` status를 **"stuck"**으로 설정, 다음 feature로 이동
+
+> **가드레일**: `features.json` status 변경, 빌드 성공 판정, Evaluator feedback 루프는 Builder가 소유합니다. Codex는 빌드 에러 디버깅만 위임받습니다.
+> Codex 스킬 미설치 시 또는 빌드 루프 3회 실패 시 기존대로 다음 feature로 이동합니다.
+
 ### Step 6: 기능 완료 처리
 
 1. `{HARNESS_DIR}/features.json`에서 해당 기능의 status를 **"built"**로 업데이트
