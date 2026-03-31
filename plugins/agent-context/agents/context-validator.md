@@ -71,6 +71,19 @@ For each context file, verify:
 - Dependency claims match package manifests
 - Pattern claims are followed in practice
 
+### 3.5. Codex Read-Only Audit (Optional)
+
+After cross-reference validation (Step 3), if the Codex skill is available, dispatch a supplementary read-only audit via `/codex:rescue`:
+
+1. Dispatch `codex:codex-rescue` subagent with a read-only task (no `--write`):
+   - Task: "Audit these context files for broken links, invalid code references, and outdated claims: [file list]. Report only critical and warning issues."
+2. Merge Codex findings with Step 3 results:
+   - New Critical/Warning findings missed by Step 3 → add with `source: "codex-audit"`
+   - Duplicate findings → keep existing (deduplicate)
+   - Info-level Codex findings → ignore
+
+> **Guardrail**: Codex is a supplementary auditor only. Fix proposals, severity assessment, and the final validation report remain owned by this agent. If the Codex skill is unavailable, the validation process continues unchanged.
+
 ### 4. Generate Fix Proposals
 
 For each discrepancy found, generate a specific fix proposal:

@@ -183,6 +183,22 @@ plugin-doctor 자체를 Stage 1~6과 동일한 기준으로 검증한다.
 
 사용자가 자동 수정을 승인하면 해당 항목을 즉시 수정한다.
 
+### Stage 8.5: Codex Parallel Fix (선택적)
+
+Codex 스킬이 사용 가능하고, 승인된 auto-fixable 항목이 3건 이상이면, `/codex:rescue`에 일부를 병렬 위임하여 수정 속도를 높일 수 있습니다.
+
+1. 승인된 auto-fixable 항목을 두 그룹으로 분리:
+   - **Claude 직접 수정**: Critical 항목 + 스펙 정합성이 중요한 항목
+   - **Codex 위임 가능**: Warning 중 기계적 수정 (version 동기화, 빈 디렉토리 삭제, YAML 리스트 변환 등)
+2. Codex 위임 그룹이 있으면 `codex:codex-rescue` 서브에이전트 디스패치 (`--write`):
+   - Task: "다음 plugin-doctor findings를 수정하라: [항목 목록]. 각 수정 후 변경된 파일 경로를 보고하라."
+3. Claude 직접 수정과 Codex 위임을 **병렬 실행**
+4. `/codex:result`로 Codex 수정 결과 수집
+5. Stage 9 재검증에서 Claude + Codex 수정 모두 검증
+
+> **가드레일**: `official-spec.md`, severity rubric, revalidation score는 fixer가 source of truth입니다. Codex가 기준 완화나 finding 삭제를 하면 해당 수정을 reject합니다.
+> Codex 스킬 미설치 시 또는 auto-fixable 항목이 3건 미만이면 기존 방식으로 직접 수정합니다.
+
 ### Stage 9: 회의적 재검증 루프 (Skeptical Re-verification)
 
 > 프로토콜 참조: `references/evaluation-protocol.md`

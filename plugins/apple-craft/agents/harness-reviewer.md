@@ -173,6 +173,20 @@ Xcode MCP 서버가 연결되어 있으면:
 | `needs-investigation` | 코드 의심스러우나 수정 방향 불확실, 실행 테스트 필요 | 심층 분석 후 판정 |
 | `complex` | 다중 파일 리팩토링, 아키텍처 변경, 도메인 지식 필요 | GitHub Issue 후보 |
 
+### Step 3.5: Codex Cross-Review (선택적)
+
+Step 1~3 분석이 완료된 후, Codex 스킬이 사용 가능하면 `/codex:review`로 cross-model 검증을 수행합니다.
+
+1. `/codex:review --wait` 실행 (에이전트 내부이므로 foreground 실행)
+2. `/codex:result`로 structured findings 수집
+3. Codex findings 중 **critical/major만** 기존 findings와 교차 대조:
+   - 기존 분석에서 놓친 blocking finding → review-findings에 `source: "codex-cross-review"` 추가
+   - 양쪽 모두 발견한 항목 → 기존 finding의 confidence 보강
+4. Codex-only minor/suggestion findings → 무시 (Apple 참조 문서 기반 분류가 우선)
+
+> **가드레일**: `/codex:review`는 read-only 보조입니다. severity/complexity 분류, 참조 문서 매칭, auto-fix 결정은 모두 이 에이전트가 소유합니다.
+> Codex 스킬 미설치 시 이 단계를 건너뜁니다.
+
 ### Step 4: simple-fix 자동 수정
 
 severity가 critical 또는 major이고 complexity가 simple-fix인 항목을 수정합니다:
