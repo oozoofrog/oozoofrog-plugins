@@ -1,8 +1,8 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "oozoofrog-plugins",
-  "version": "1.30.0",
-  "description": "oozoofrog의 개인 Claude Code 플러그인 마켓플레이스 — macOS 릴리스 자동화, 컨텍스트 아키텍처, GPT 리서치, Codex CLI 위임, Apple 앱 자동화, Apple 플랫폼 통합 개발 어시스턴트, 플러그인 진단·수정",
+  "version": "1.31.0",
+  "description": "oozoofrog의 개인 Claude Code 플러그인 마켓플레이스 — macOS 릴리스 자동화, 컨텍스트 아키텍처, GPT 리서치, Codex CLI 위임, Apple 앱 자동화, Apple 플랫폼 통합 개발 어시스턴트, 플러그인 진단·수정, Git 워크플로우 자동화, 릴리스 라이프사이클",
   "owner": {
     "name": "oozoofrog",
     "email": "oozoofrog@gmail.com"
@@ -60,8 +60,8 @@
     },
     {
       "name": "apple-craft",
-      "description": "Apple 플랫폼 개발 스킬 모음 — 일반 구현/디버깅(apple-craft), 코드 리뷰(apple-review), 장기 대규모 구현 하네스(apple-harness), Pencil .pen → SwiftUI/UIKit 디자인 구현(pen-craft), Xcode MCP 연동, xcodebuild+xcsift 빌드 폴백, 최신 Apple API 참조 문서 20개 내장",
-      "version": "1.14.0",
+      "description": "Apple 플랫폼 개발 스킬 모음 — 일반 구현/디버깅(apple-craft), 코드 리뷰(apple-review), 장기 대규모 구현 하네스(apple-harness), Pencil .pen → SwiftUI/UIKit 디자인 구현(pen-craft), App Store 배포 자동화(appstore-deploy), Xcode MCP 연동, xcodebuild+xcsift 빌드 폴백, 최신 Apple API 참조 문서 20개 내장",
+      "version": "1.15.0",
       "author": {
         "name": "oozoofrog"
       },
@@ -86,6 +86,26 @@
         "name": "oozoofrog"
       },
       "source": "./plugins/api-learn",
+      "category": "development"
+    },
+    {
+      "name": "git-workflow",
+      "description": "GitHub 이슈 생성 + 브랜치 + Projects 보드 연동 자동화 — 코드베이스 조사 기반 구조화 이슈, 유형별 브랜치 패턴, version.json 마일스톤 연동",
+      "version": "1.0.0",
+      "author": {
+        "name": "oozoofrog"
+      },
+      "source": "./plugins/git-workflow",
+      "category": "development"
+    },
+    {
+      "name": "release-cycle",
+      "description": "GitHub 릴리스 라이프사이클 자동화 — 마일스톤 계획(plan-release) + 릴리스 실행(release). version.json 기반 상태 추적, 프로젝트 유형별 버전 범프, 이슈 기반 릴리스 노트 자동 생성",
+      "version": "1.0.0",
+      "author": {
+        "name": "oozoofrog"
+      },
+      "source": "./plugins/release-cycle",
       "category": "development"
     }
   ]

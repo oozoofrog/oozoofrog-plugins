@@ -1,0 +1,8 @@
+{
+  "name": "release-cycle",
+  "version": "1.0.0",
+  "description": "GitHub 릴리스 라이프사이클 자동화 — 마일스톤 계획(plan-release) + 릴리스 실행(release)",
+  "author": {
+    "name": "oozoofrog"
+  }
+}
