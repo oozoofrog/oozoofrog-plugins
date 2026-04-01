@@ -1,6 +1,6 @@
 {
   "name": "yoda",
-  "description": "학습과학 기반 코드 리뷰 및 교육 콘텐츠 생성 — Before/After/Why 트리플, 3계층 점진적 공개, 5개 포맷 팀 전파",
+  "description": "학습과학 기반 코드 리뷰 및 교육 콘텐츠 생성 — Before/After/Why 트리플, 3계층 점진적 공개, 4개 포맷(md/web/wiki/slides) 팀 전파",
   "version": "1.0.0",
   "author": {
     "name": "oozoofrog"

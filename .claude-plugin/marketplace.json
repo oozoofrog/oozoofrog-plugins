@@ -110,7 +110,7 @@
     },
     {
       "name": "yoda",
-      "description": "학습과학(인지부하이론, 이중코딩, 내러티브, 메타인지) 기반 코드 리뷰 및 교육 콘텐츠 생성. Before/After/Why 트리플, 3계층 점진적 공개, 5개 출력 포맷(md/web/wiki/slides/pptx) 지원",
+      "description": "학습과학(인지부하이론, 이중코딩, 내러티브, 메타인지) 기반 코드 리뷰 및 교육 콘텐츠 생성. Before/After/Why 트리플, 3계층 점진적 공개, 4개 출력 포맷(md/web/wiki/slides) 지원",
       "version": "1.0.0",
       "author": {
         "name": "oozoofrog"
