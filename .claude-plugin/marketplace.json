@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "oozoofrog-plugins",
-  "version": "1.31.0",
+  "version": "1.33.0",
   "description": "oozoofrog의 개인 Claude Code 플러그인 마켓플레이스 — macOS 릴리스 자동화, 컨텍스트 아키텍처, GPT 리서치, Codex CLI 위임, Apple 앱 자동화, Apple 플랫폼 통합 개발 어시스턴트, 플러그인 진단·수정, Git 워크플로우 자동화, 릴리스 라이프사이클",
   "owner": {
     "name": "oozoofrog",
@@ -106,6 +106,16 @@
         "name": "oozoofrog"
       },
       "source": "./plugins/release-cycle",
+      "category": "development"
+    },
+    {
+      "name": "yoda",
+      "description": "학습과학(인지부하이론, 이중코딩, 내러티브, 메타인지) 기반 코드 리뷰 및 교육 콘텐츠 생성. Before/After/Why 트리플, 3계층 점진적 공개, 4개 출력 포맷(md/web/wiki/slides) 지원",
+      "version": "1.1.0",
+      "author": {
+        "name": "oozoofrog"
+      },
+      "source": "./plugins/yoda",
       "category": "development"
     }
   ]
