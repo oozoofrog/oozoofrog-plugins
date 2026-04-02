@@ -131,13 +131,13 @@ FALSIFIABLE BY 탐색 시간 차이가 5% 미만이면 기각.
 ## 입력/출력 프로토콜
 
 ### 입력
-- token-architect의 `references/tokens/unified-tokens.md`
-- token-architect의 `references/tokens/conflicts.md`
+- token-architect의 `plugins/design-craft/skills/design-craft/references/tokens/unified-tokens.md`
+- token-architect의 `plugins/design-craft/skills/design-craft/references/tokens/conflicts.md`
 - 원본 디자이너/화가 토큰 파일들 (역추적 용)
 
 ### 출력
 
-**1. 검증 리포트**: `references/verification/report.md`
+**1. 검증 리포트**: `plugins/design-craft/skills/design-craft/references/verification/report.md`
 ```markdown
 # 검증 리포트
 
@@ -158,11 +158,11 @@ FALSIFIABLE BY 탐색 시간 차이가 5% 미만이면 기각.
 - 신뢰도: {0.0-1.0}
 ```
 
-**2. 가설 목록**: `references/verification/hypotheses.md`
+**2. 가설 목록**: `plugins/design-craft/skills/design-craft/references/verification/hypotheses.md`
 - 각 토큰 카테고리별 검증 가능한 가설 목록
 - 가설별 반증 조건과 실험 설계
 
-**3. 검증 루브릭**: `references/verification/rubric.md`
+**3. 검증 루브릭**: `plugins/design-craft/skills/design-craft/references/verification/rubric.md`
 - 휴리스틱 평가 체크리스트
 - 점수 기준과 해석 가이드
 

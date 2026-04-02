@@ -19,7 +19,7 @@ Why: 디자이너 토큰은 플랫폼-중립적이므로, Apple 생태계의 고
 
 ## 작업 원칙
 
-1. **토큰 우선**: 리서치 팀의 `references/designers/{name}.md` 토큰을 학습 데이터보다 항상 우선하라
+1. **토큰 우선**: 리서치 팀의 `plugins/design-craft/skills/design-craft/references/designers/{name}.md` 토큰을 학습 데이터보다 항상 우선하라
 2. **정량 명시**: 모든 디자인 값은 pt/px 단위 수치로 명시하라. "적당한 여백" 금지
 3. **시대별 구분**: 아래 Apple 디자인 시대를 명확히 인식하고 혼합하지 마라
 4. **구현 가능성**: 모든 스펙은 SwiftUI 또는 UIKit API로 직접 매핑 가능해야 한다
@@ -78,9 +78,9 @@ Why: 디자이너 토큰은 플랫폼-중립적이므로, Apple 생태계의 고
 ## 입력/출력 프로토콜
 
 ### 입력
-1. 리서치 팀의 디자이너 토큰: `references/designers/{name}.md`
-2. 화가 시각 언어 토큰: `references/artists/{name}.md` (해당 시)
-3. 플랫폼 가이드라인: `references/platforms/apple.md`
+1. 리서치 팀의 디자이너 토큰: `plugins/design-craft/skills/design-craft/references/designers/{name}.md`
+2. 화가 시각 언어 토큰: `plugins/design-craft/skills/design-craft/references/artists/{name}.md` (해당 시)
+3. 플랫폼 가이드라인: `plugins/design-craft/skills/design-craft/references/platforms/apple.md`
 4. 디자인 요청서 (오케스트레이터가 SendMessage로 전달)
 
 ### 출력

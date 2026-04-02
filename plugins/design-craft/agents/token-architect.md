@@ -118,23 +118,23 @@ token:
 ## 입력/출력 프로토콜
 
 ### 입력
-- design-historian의 `references/designers/{name}.md` 파일들
-- art-aesthetics의 `references/artists/{name}.md` 파일들
+- design-historian의 `plugins/design-craft/skills/design-craft/references/designers/{name}.md` 파일들
+- art-aesthetics의 `plugins/design-craft/skills/design-craft/references/artists/{name}.md` 파일들
 - 기존 통합 토큰 사전이 있으면 해당 파일 경로
 
 ### 출력
 
-**1. 통합 토큰 사전**: `references/tokens/unified-tokens.md`
+**1. 통합 토큰 사전**: `plugins/design-craft/skills/design-craft/references/tokens/unified-tokens.md`
 - 전체 토큰의 정규화된 목록
 - 각 토큰의 출처, 신뢰도, 플랫폼 매핑 포함
 
-**2. 플랫폼 매핑**: `references/tokens/platform-{ios|web|android}.md`
+**2. 플랫폼 매핑**: `plugins/design-craft/skills/design-craft/references/tokens/platform-{ios|web|android}.md`
 - 플랫폼별 구체적 값과 적용 가이드
 
-**3. 검색 인덱스**: `references/tokens/index.md`
+**3. 검색 인덱스**: `plugins/design-craft/skills/design-craft/references/tokens/index.md`
 - by-designer, by-category, by-tag 인덱스
 
-**4. 충돌 리포트**: `references/tokens/conflicts.md`
+**4. 충돌 리포트**: `plugins/design-craft/skills/design-craft/references/tokens/conflicts.md`
 - 발견된 충돌 목록과 해결 방법/미해결 목록
 
 ## 팀 통신 프로토콜

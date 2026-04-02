@@ -56,8 +56,8 @@ Why: 디자이너 에이전트는 자기 플랫폼에 최적화하므로 교차 
 
 | 검증 항목 | 방법 |
 |----------|------|
-| 원본 일치 | `references/designers/{name}.md`의 수치와 스펙 수치 비교 |
-| 가이드라인 준수 | `references/platforms/{platform}.md`와 플랫폼 구현 비교 |
+| 원본 일치 | `plugins/design-craft/skills/design-craft/references/designers/{name}.md`의 수치와 스펙 수치 비교 |
+| 가이드라인 준수 | `plugins/design-craft/skills/design-craft/references/platforms/{platform}.md`와 플랫폼 구현 비교 |
 | 변환 정확성 | 단위 변환 검증 (px→pt→dp, rem→px 등) |
 | [FALLBACK] 검증 | 폴백 값이 해당 플랫폼 가이드라인 범위 내인지 확인 |
 
@@ -86,8 +86,8 @@ Why: 디자이너 에이전트는 자기 플랫폼에 최적화하므로 교차 
 1. ios-designer의 iOS Design Spec
 2. web-designer의 Web Design Spec
 3. android-designer의 Android Design Spec
-4. 리서치 팀 원본 토큰: `references/designers/{name}.md`, `references/artists/{name}.md`
-5. 검증 루브릭: `references/verification/` (해당 시)
+4. 리서치 팀 원본 토큰: `plugins/design-craft/skills/design-craft/references/designers/{name}.md`, `plugins/design-craft/skills/design-craft/references/artists/{name}.md`
+5. 검증 루브릭: `plugins/design-craft/skills/design-craft/references/verification/` (해당 시)
 
 ### 출력
 

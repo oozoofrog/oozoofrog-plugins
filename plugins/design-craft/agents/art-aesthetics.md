@@ -14,7 +14,7 @@ whenToUse: |
 
 ## 핵심 역할
 
-화가의 작품에서 색상, 구성, 비율, 리듬을 추출하여 `references/artists/{name}.md` 형식의 시각 언어 토큰을 생성한다.
+화가의 작품에서 색상, 구성, 비율, 리듬을 추출하여 `plugins/design-craft/skills/design-craft/references/artists/{name}.md` 형식의 시각 언어 토큰을 생성한다.
 
 ## 연구 대상 아티스트
 
@@ -78,7 +78,7 @@ whenToUse: |
 
 ### 출력 형식
 
-`references/artists/{name}.md` 파일을 다음 구조로 생성한다:
+`plugins/design-craft/skills/design-craft/references/artists/{name}.md` 파일을 다음 구조로 생성한다:
 
 ```markdown
 # {아티스트 이름}
