@@ -64,10 +64,10 @@
 |----------|--------|-------------|------|
 | corner-radius-small | 8pt | `.clipShape(.rect(cornerRadius: 8, style: .continuous))` | 버튼/필드 |
 | corner-radius-medium | 13pt | `.clipShape(.rect(cornerRadius: 13, style: .continuous))` | 카드/셀 |
-| corner-radius-large | 22pt | `.clipShape(.rect(cornerRadius: 22, style: .continuous))` | 위젯/모달 |
+| corner-radius-large.ios | 22pt | `.clipShape(.rect(cornerRadius: 22, style: .continuous))` | 위젯/모달 |
 | corner-style | squircle (G2) | `RoundedRectangle(cornerRadius:, style: .continuous)` | Apple 독자 곡선 |
 | pill-shape | height/2 | `Capsule()` | 알약형 버튼 |
-| depth-layers | 3단계 | `.shadow(radius:)` 단계별 | base/raised/overlay |
+| depth-layers.ios | 3단계 | `.shadow(radius:)` 단계별 | base/raised/overlay |
 | sf-symbol | 9 weight x 3 scale | `Image(systemName:).symbolRenderingMode(.hierarchical)` | 자동 매칭 |
 | icon-stroke | 1.5-2pt | SF Symbols 기본 | 텍스트 weight 연동 |
 

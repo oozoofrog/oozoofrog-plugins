@@ -44,7 +44,7 @@
 
 | 토큰 | 디자이너A 값 | 디자이너B 값 | 해결 방식 |
 |------|------------|------------|----------|
-| corner-radius | Ive/Dye: 6-22pt 연속 곡률 | Rams/Vignelli/Mondrian: 0px 직각 | **맥락 분리** -- Apple 플랫폼: 연속 곡률, 그래픽/에디토리얼: 직각 |
+| corner-radius | Ive/Dye: 6-22pt 연속 곡률 | Rams/Vignelli/Mondrian: 0px 직각 | **맥락 분리** -- Apple: 연속 곡률, 그래픽: 직각. **추가 해소**: corner-radius-large를 `.ios`/`.web`/`.android` 플랫폼별 분리 토큰으로 전환 |
 | layout-symmetry | Rams: 좌우 대칭 95% | Mondrian/Brockmann/Lee Ufan: 비대칭 | **맥락 분리** -- 제품/도구: 대칭, 아트/에디토리얼: 비대칭 |
 | grid-strictness | Brockmann/Vignelli: 100% 그리드 정렬 | Kandinsky/Malevich: 자유 배치 | **맥락 분리** -- 정보 UI: 엄격 그리드, 크리에이티브/시각화: 자유 배치 |
 | form-style | Kare: 유기적 곡선 40% (친근함) | Malevich: 유기적 곡선 0% (순수 기하) | **맥락 분리** -- 소비자 앱: Kare 친근함, 아트/미니멀: Malevich 순수 기하 |

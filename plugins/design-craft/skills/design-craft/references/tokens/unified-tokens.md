@@ -108,7 +108,9 @@
 |--------|---|------|----------------|
 | corner-radius-small | 6-8pt | Ive | B |
 | corner-radius-medium | 10-13pt | Ive, Dye | B |
-| corner-radius-large | 16-22pt | Ive, Dye | B |
+| corner-radius-large.ios | 22pt | Dye | S |
+| corner-radius-large.web | 22px | Ive (iOS 동등) | B |
+| corner-radius-large.android | 16dp (M3 Large) 또는 28dp (M3 XL, iOS 동등 필요 시) | M3 Shape | S |
 | corner-style | .continuous (squircle, G2) | Ive, Dye | S |
 | corner-radius-zero | 0px (직각 선호) | Rams, Vignelli, Tschichold, Brockmann, Mondrian | B |
 | corner-radius-logo | 0px 또는 50% (극단 선택) | Rand | S |
@@ -118,7 +120,9 @@
 | aspect-ratio-device | 19.5:9 (iPhone), 4:3 (iPad) | Ive | S |
 | aspect-ratio-golden | 1:1.618 | Rams, Rand | B |
 | aspect-ratio-a-series | 1:1.414 | Vignelli, Brockmann | S |
-| depth-layers | iOS: 3단계 (base-raised-overlay), Android: 5단계 (M3 elevation 0-5) — 플랫폼별 별도 정의 | Dye, Matas, Kandinsky | C |
+| depth-layers.ios | 3단계: base / raised / overlay | Dye, Matas | A |
+| depth-layers.web | 3단계: base(0) / raised(4-12px shadow) / overlay(8-24px shadow) | Kandinsky | C |
+| depth-layers.android | 5단계: Level 0-5 (M3 tonal + shadow elevation) | M3 Elevation | S |
 | sf-symbol-rendering | mono/hierarchical/palette/multicolor | Ive | S |
 | pill-shape | height/2 radius (알약형) | Matas | A |
 | mondrian-line-weight | 3-8px | Mondrian | B |

@@ -78,12 +78,12 @@
 |----------|--------|-------------|------|
 | corner-radius-small | 8px | `border-radius: 8px` | 버튼/필드 |
 | corner-radius-medium | 13px | `border-radius: 13px` | 카드/셀 |
-| corner-radius-large | 22px | `border-radius: 22px` | 모달/위젯 |
+| corner-radius-large.web | 22px | `border-radius: 22px` | 모달/위젯 |
 | corner-radius-zero | 0px | `border-radius: 0` | 직각 스타일 |
 | pill-shape | 9999px | `border-radius: 9999px` | 알약형 |
 | form-vocabulary | 3종 | `clip-path: circle()`, `polygon()`, rect | 기본 형태 |
 | icon-stroke | 1.5-2px | `stroke-width: 1.5px` (SVG) | 아이콘 두께 |
-| depth-layers | 3단계 | `box-shadow: 0 1px 3px`, `0 4px 12px`, `0 8px 24px` | elevation |
+| depth-layers.web | 3단계 | `box-shadow: 0 1px 3px`, `0 4px 12px`, `0 8px 24px` | elevation |
 | mondrian-border | 3-8px 실선 | `border: 4px solid #1A1A1A` | 격자선 |
 | riley-stripe | 2-20px | `repeating-linear-gradient(...)` | 줄무늬 패턴 |
 

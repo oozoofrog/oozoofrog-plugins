@@ -69,13 +69,13 @@
 |----------|-----------|-------------|------|
 | corner-radius-small | 8.dp | `RoundedCornerShape(8.dp)` | M3 small |
 | corner-radius-medium | 12.dp | `RoundedCornerShape(12.dp)` | M3 medium |
-| corner-radius-large | 16.dp | `RoundedCornerShape(16.dp)` | M3 large — iOS 22pt와 시각적 비동등, M3 스펙 우선 (iOS 동등성이 필요하면 corner-radius-xl 28.dp 사용) |
+| corner-radius-large.android | 16.dp (M3 Large) | `RoundedCornerShape(16.dp)` | M3 스펙 우선. iOS 동등성 필요 시 corner-radius-xl 28.dp |
 | corner-radius-xl | 28.dp | `RoundedCornerShape(28.dp)` | M3 extra-large |
 | corner-radius-zero | 0.dp | `RectangleShape` | 직각 스타일 |
 | pill-shape | 50% | `CircleShape` 또는 `RoundedCornerShape(50)` | 알약형 |
 | form-vocabulary | 3종 | `RectangleShape`, `CircleShape`, 커스텀 | 기본 형태 |
 | icon-size | 24.dp | `Icon(modifier = Modifier.size(24.dp))` | M3 기본 |
-| depth-layers | 5단계 | `Surface(shadowElevation = 0/1/3/6/12.dp)` | M3 elevation |
+| depth-layers.android | 5단계 (M3 Level 0-5) | `Surface(shadowElevation = 0/1/3/6/12.dp)` | M3 tonal + shadow elevation |
 | mondrian-border | 4.dp 실선 | `Modifier.border(4.dp, Color.Black)` | 격자선 |
 
 ## Motion & Interaction
