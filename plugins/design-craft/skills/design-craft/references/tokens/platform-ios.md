@@ -54,6 +54,10 @@
 | accent-usage | 5-15% | `.tint(.accentColor)` | 포인트 컬러 제한 |
 | rothko-surface-dark | #1A1520~#4D3B52 | `Color(red:0.1, green:0.08, blue:0.12)` | 색조 다크 서피스 |
 
+### 접근성 주석
+- `turrell-kelvin`: 자동 색온도 전환은 몰입/웰니스 화면에서만 opt-in으로 제공하고, 기본 읽기/업무 화면은 고정 색온도 preset을 우선한다. 설정에서 언제든 opt-out 가능해야 한다.
+- `rothko-surface-dark`: 본문 텍스트는 최소 WCAG AA 4.5:1, 대형 텍스트·아이콘·구분선·입력 경계는 최소 3:1 대비를 유지한다. 긴 텍스트는 반투명 패널 또는 분리된 secondary surface 위에 올리고, pure black로 대체하지 않는다.
+
 ## Shape & Geometry
 
 | 통합 토큰 | iOS 값 | SwiftUI API | 비고 |
@@ -82,3 +86,13 @@
 | gesture-velocity | 500pt/s | `DragGesture.Value.velocity` | 스와이프 임계 |
 | rubber-band | 1/3 감속 | `ScrollView` 기본 내장 | 오버스크롤 |
 | frame-rate | 60fps | `CADisplayLink` / Metal | 최소 성능 기준 |
+
+### 접근성 주석
+- `turrell-breath`: `UIAccessibility.isReduceMotionEnabled` 또는 동등 설정이 켜지면 호흡 애니메이션을 정지하거나 crossfade로 대체한다. 반복 시 밝기 변화는 ±5%, 주기는 4-8초 범위를 넘지 않는다.
+
+
+## Token-level usage envelope (round-004)
+
+- `riley-bw`, `riley-stripe-width`: `Canvas`/장식 패널/로딩 면에서만 사용하고 `Text`, `TextField`, 포커스 가능한 control 뒤 배경으로는 금지한다. 줄무늬는 2pt 이상 유지하고, 패턴 면은 전환성 UI를 제외하면 화면의 50% 이하로 제한한다.
+- `turrell-kelvin`, `turrell-breath`: `UIAccessibility.isReduceMotionEnabled == false`인 경우에만 ambient layer에서 활성화하고, 30% 이상 viewport를 차지하는 몰입/웰니스 화면으로 한정한다. 자동 색온도 변화는 opt-in + opt-out이 모두 있어야 하며, 전환은 2초 이상·호흡은 ±5%/4-8초 범위를 지킨다.
+- `rothko-surface-dark`: `surface-0`~`surface-3` 성격의 색조 다크 배경으로만 쓰고, 장문 텍스트는 `secondarySystemBackground` 또는 glass/overlay 패널 위에 올린다. 본문은 4.5:1, large text와 separator/icon/border는 3:1을 충족해야 하며 texture/pattern/pure black 대체는 금지한다.

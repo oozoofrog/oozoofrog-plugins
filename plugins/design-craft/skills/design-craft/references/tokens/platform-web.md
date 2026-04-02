@@ -68,6 +68,10 @@
 | mondrian-gap-as-line | 갭 = 선 역할 | `gap: 4px; background: #1A1A1A` | 그리드 선 |
 | color-functional | 의미 기반 | `--info, --success, --warning, --error` | 시맨틱 변수 |
 
+### 접근성 주석
+- `turrell-kelvin`: 시간대 기반 색온도 전환은 몰입/웰니스 모드에서만 opt-in으로 사용한다. 기본 읽기 화면에서는 고정 theme preset을 우선하고, 자동 변화에는 항상 opt-out을 제공한다.
+- `rothko-dark-surface`: 본문 텍스트는 최소 WCAG AA 4.5:1, 대형 텍스트·아이콘·구분선·입력 경계는 최소 3:1 대비를 유지한다. pure black 대신 색조 dark surface를 유지하고, 장문 텍스트는 별도 패널/overlay로 분리한다.
+
 ## Shape & Geometry
 
 | 통합 토큰 | Web 값 | CSS Property | 비고 |
@@ -82,6 +86,9 @@
 | depth-layers | 3단계 | `box-shadow: 0 1px 3px`, `0 4px 12px`, `0 8px 24px` | elevation |
 | mondrian-border | 3-8px 실선 | `border: 4px solid #1A1A1A` | 격자선 |
 | riley-stripe | 2-20px | `repeating-linear-gradient(...)` | 줄무늬 패턴 |
+
+### 접근성 주석
+- `riley-bw` / `riley-stripe-width`: 고대비 반복 줄무늬는 장식/로딩 면으로 한정하고, 텍스트·입력·포커스 요소 뒤 배경으로는 금지한다. 화면 점유율은 50% 이하로 제한하고 1x 기준 최소 2px를 유지한다.
 
 ## Motion & Interaction
 
@@ -102,3 +109,14 @@
 | loading-stripe | 줄무늬 애니메이션 | `background: repeating-linear-gradient(-45deg, ...)` | Riley 패턴 |
 | breath-animation | 밝기 +-5% | `@keyframes breathe { 50% { opacity: 0.95 } }` | Turrell 호흡 |
 | focus-visible | 2px 외곽선 | `&:focus-visible { outline: 2px solid var(--accent) }` | WCAG 2.2 |
+
+### 접근성 주석
+- `turrell-breath`: `@media (prefers-reduced-motion: reduce)`에서 반드시 정지 또는 정적 crossfade로 대체한다. 반복 애니메이션은 ±5% 밝기 변화와 4-8초 주기를 넘기지 않는다.
+- `riley` 계열 애니메이션(`loading-stripe`)은 flash/flicker 금지와 콘텐츠 분리 원칙을 함께 적용한다.
+
+
+## Token-level usage envelope (round-004)
+
+- `riley-bw`, `riley-stripe-width`: `loading-stripe`, divider, hero decoration처럼 콘텐츠와 분리된 패턴 면에서만 사용한다. `Text`, `input`, `:focus-visible` 대상 뒤 배경으로는 금지하고, `prefers-reduced-motion: reduce`에서는 애니메이션을 끈다. 패턴 면은 전환성 UI를 제외하면 화면의 50% 이하로 제한한다.
+- `turrell-kelvin`, `turrell-breath`: 자동 색온도 변화는 opt-in + opt-out이 모두 있을 때만 허용하고, ambient panel/immersive section처럼 화면의 30% 이상을 차지하는 면에만 적용한다. 전환은 2초 이상, 호흡은 ±5%/4-8초를 넘기지 않으며 dense text는 별도 overlay panel로 분리한다.
+- `rothko-dark-surface`: `--surface-0`~`--surface-3` 계층으로만 확장하고 `#000000` 순수 검정 대체나 texture overlay는 금지한다. 본문은 4.5:1, large text와 separator/icon/border는 3:1을 유지해야 하며, 장문 콘텐츠는 별도 패널/overlay에 놓는다.
