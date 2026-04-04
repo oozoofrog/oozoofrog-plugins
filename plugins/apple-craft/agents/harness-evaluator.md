@@ -202,24 +202,33 @@ BUILD_TOOL = "static":
 #### 2a-2. 뷰 도달 가능성 검증 (View Reachability) — 기능완성도의 필수 하위 검증
 
 category가 "ui"인 기능에 대해, 새로 생성된 뷰가 앱의 루트 뷰에서 실제로 도달 가능한지 검증합니다.
-이 검증에 실패하면 해당 기능의 기능완성도 점수는 **최대 2점**으로 제한됩니다.
+
+**⚠️ Stop-gate: 이 검증에 실패하면 해당 기능은 다른 축 점수와 무관하게 즉시 FAIL (가중평균 강제 0점).**
+고아 뷰는 사용자에게 보이지 않으므로 기능이 존재하지 않는 것과 동일합니다.
 
 **검증 절차:**
 1. Builder가 새로 생성한 `struct XXXView: View` 정의를 Grep으로 식별
-2. 각 뷰에 대해 `XXXView(` 패턴으로 다른 파일에서의 사용 여부 검색
+2. 각 뷰에 대해 `XXXView(` 패턴으로 **같은 파일 포함 전체 프로젝트**에서 사용 여부 검색
+   - **same-file 구성 허용**: 같은 파일 내에서 상위 뷰가 하위 뷰를 사용하는 것은 정상 (예: `ContentView` 안에서 `private struct HeaderView`를 사용)
+   - same-file인 경우, **그 상위 뷰(같은 파일의 최상위 public/internal View)**가 다른 파일에서 사용되는지를 추적
 3. 사용하는 상위 뷰가 있으면, 그 상위 뷰도 동일하게 추적 (루트까지 체인 확인)
-4. **체인이 끊기는 뷰** = "고아 뷰(orphan view)" → 기능완성도 FAIL 사유
+4. **체인이 끊기는 뷰** = "고아 뷰(orphan view)" → 즉시 FAIL
 
 **RUNTIME_TOOL이 baepsae/axe일 때 추가 검증:**
 - 앱 실행 → 해당 화면까지 실제 네비게이션 시도
 - 도달 불가 시 스크린샷을 evidence로 첨부
 
 ```
-예시:
+예시 1 — 고아 뷰 (FAIL):
   Builder가 ControlsView.swift를 생성
   → Grep: "ControlsView(" → SettingsView.swift에서 사용
   → Grep: "SettingsView(" → 어디에서도 사용되지 않음
   → SettingsView가 고아 뷰 → ControlsView도 도달 불가 → FAIL
+
+예시 2 — same-file 구성 (정상):
+  SettingsView.swift 내에 struct SettingsView + private struct ToggleRow 정의
+  → ToggleRow는 같은 파일의 SettingsView에서만 사용 — 정상
+  → SettingsView가 루트에서 도달 가능하면 ToggleRow도 도달 가능 → PASS
 ```
 
 #### 2b. 코드 품질 (Code Quality) — 가중치 25%
