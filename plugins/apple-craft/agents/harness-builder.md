@@ -133,6 +133,25 @@ Read: ${CLAUDE_PLUGIN_ROOT}/skills/apple-craft/references/<doc>.md
 
 Write/Edit 도구로 코드 파일을 작성합니다.
 
+### Step 4.5: 뷰 연결 검증 (category="ui" 기능 필수)
+
+새로운 View를 생성한 경우, **빌드 전에** 해당 뷰가 앱의 뷰 계층에 연결되었는지 확인합니다.
+
+**체크리스트:**
+1. 새로 만든 `struct XXXView: View`가 상위 뷰에서 사용되는가?
+   - NavigationLink, sheet, fullScreenCover, TabView 등의 진입점이 존재하는가?
+2. 그 상위 뷰 자체가 앱의 루트(ContentView, WindowGroup, @main)에서 도달 가능한가?
+3. 중간에 끊긴 체인이 있으면 **연결 코드를 추가한 후** Step 5로 진행
+
+```
+예시 — 올바른 체인:
+  @main App → ContentView → TabView → HomeView → NavigationLink → SettingsView → ControlsView ✓
+
+예시 — 끊긴 체인:
+  ControlsView 생성 → SettingsView에 NavigationLink 추가 → 하지만 SettingsView를 아무 곳에서도 사용하지 않음 ✗
+  → HomeView에 SettingsView 진입점 추가 필요
+```
+
 ### Step 5: 빌드 검증 (BUILD_TOOL별 폴백 체인)
 
 빌드 내부 루프 (최대 3회), BUILD_TOOL에 따라 분기:

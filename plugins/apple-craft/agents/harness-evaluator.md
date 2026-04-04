@@ -199,6 +199,38 @@ BUILD_TOOL = "swift-build":
 BUILD_TOOL = "static":
 - 코드를 Read하여 기능 구현 확인 (빌드 검증 불가)
 
+#### 2a-2. 뷰 도달 가능성 검증 (View Reachability) — 기능완성도의 필수 하위 검증
+
+category가 "ui"인 기능에 대해, 새로 생성된 뷰가 앱의 루트 뷰에서 실제로 도달 가능한지 검증합니다.
+
+**⚠️ Stop-gate: 이 검증에 실패하면 해당 기능은 다른 축 점수와 무관하게 즉시 FAIL (가중평균 강제 0점).**
+고아 뷰는 사용자에게 보이지 않으므로 기능이 존재하지 않는 것과 동일합니다.
+
+**검증 절차:**
+1. Builder가 새로 생성한 `struct XXXView: View` 정의를 Grep으로 식별
+2. 각 뷰에 대해 `XXXView(` 패턴으로 **같은 파일 포함 전체 프로젝트**에서 사용 여부 검색
+   - **same-file 구성 허용**: 같은 파일 내에서 상위 뷰가 하위 뷰를 사용하는 것은 정상 (예: `ContentView` 안에서 `private struct HeaderView`를 사용)
+   - same-file인 경우, **그 상위 뷰(같은 파일의 최상위 public/internal View)**가 다른 파일에서 사용되는지를 추적
+3. 사용하는 상위 뷰가 있으면, 그 상위 뷰도 동일하게 추적 (루트까지 체인 확인)
+4. **체인이 끊기는 뷰** = "고아 뷰(orphan view)" → 즉시 FAIL
+
+**RUNTIME_TOOL이 baepsae/axe일 때 추가 검증:**
+- 앱 실행 → 해당 화면까지 실제 네비게이션 시도
+- 도달 불가 시 스크린샷을 evidence로 첨부
+
+```
+예시 1 — 고아 뷰 (FAIL):
+  Builder가 ControlsView.swift를 생성
+  → Grep: "ControlsView(" → SettingsView.swift에서 사용
+  → Grep: "SettingsView(" → 어디에서도 사용되지 않음
+  → SettingsView가 고아 뷰 → ControlsView도 도달 불가 → FAIL
+
+예시 2 — same-file 구성 (정상):
+  SettingsView.swift 내에 struct SettingsView + private struct ToggleRow 정의
+  → ToggleRow는 같은 파일의 SettingsView에서만 사용 — 정상
+  → SettingsView가 루트에서 도달 가능하면 ToggleRow도 도달 가능 → PASS
+```
+
 #### 2b. 코드 품질 (Code Quality) — 가중치 25%
 
 1. common-mistakes.md 반드시 Read:
@@ -308,7 +340,7 @@ BUILD_TOOL = "static":
 | 1-2 | 인터랙션 대부분 동작 불가. |
 
 ### 안티패턴 자동 탐지 목록
-- **기능**: TODO 주석으로 남겨둔 핵심 로직, 하드코딩된 더미 데이터, 빈 catch 블록
+- **기능**: TODO 주석으로 남겨둔 핵심 로직, 하드코딩된 더미 데이터, 빈 catch 블록, **고아 뷰(루트에서 도달 불가능한 View)**
 - **코드**: common-mistakes.md의 모든 패턴, force unwrap, Combine 사용 (async/await 우선)
 - **UI**: accessibilityLabel 누락, 하드코딩된 frame 크기, Color.red/blue 같은 임시 색상
 - **인터랙션**: 네비게이션 후 back 불가, 키보드 dismiss 미처리, 빈 상태 화면 없음
@@ -367,6 +399,11 @@ BUILD_TOOL = "static":
 
 ### Step 5: 판정
 
+**Stop-gate 우선 검사 (비율 계산 전):**
+- 고아 뷰(뷰 도달 가능성 검증 실패)로 FAIL된 기능이 **1건이라도** 있으면 → 즉시 **NEED_REVISION**
+- 고아 뷰는 사용자에게 보이지 않는 치명적 결함이므로, 비율과 무관하게 전체 하네스를 차단합니다.
+
+**비율 기반 판정 (stop-gate 통과 후):**
 - 전체 기능의 **80% 이상이 PASS 또는 PARTIAL** → 판정: **PASS**
 - 미달 → 판정: **NEED_REVISION** (Builder에게 {HARNESS_DIR}/evaluation-round-{N}.md의 수정 지침 전달)
 
