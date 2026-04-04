@@ -8,6 +8,8 @@ import json
 import shutil
 import subprocess
 import sys
+import threading
+import time
 from datetime import datetime
 from pathlib import Path
 from string import Template
@@ -964,11 +966,35 @@ def cmd_run(args: argparse.Namespace) -> int:
                 stderr=stderr_handle,
                 text=True,
             )
-            try:
-                proc.communicate(input=prompt, timeout=args.timeout_seconds or None)
-            except subprocess.TimeoutExpired:
-                proc.kill()
-                proc.wait()
+            # Send prompt via background thread so a full pipe buffer
+            # cannot block the main poll loop (mirrors communicate() internals).
+            def _feed_stdin() -> None:
+                try:
+                    if proc.stdin:
+                        proc.stdin.write(prompt)
+                        proc.stdin.close()
+                except BrokenPipeError:
+                    pass
+
+            stdin_thread = threading.Thread(target=_feed_stdin, daemon=True)
+            stdin_thread.start()
+
+            # Poll loop — check process status instead of blocking with timeout
+            start_time = time.monotonic()
+            timeout = args.timeout_seconds or None
+            timed_out = False
+            while proc.poll() is None:
+                elapsed = time.monotonic() - start_time
+                if timeout and elapsed > timeout:
+                    proc.kill()
+                    proc.wait()
+                    timed_out = True
+                    break
+                time.sleep(2)
+
+            stdin_thread.join(timeout=5)
+
+            if timed_out:
                 response = fallback_response(
                     round_num,
                     f"codex exec timed out after {args.timeout_seconds} seconds (process killed)",
