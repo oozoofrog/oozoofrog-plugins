@@ -199,6 +199,29 @@ BUILD_TOOL = "swift-build":
 BUILD_TOOL = "static":
 - 코드를 Read하여 기능 구현 확인 (빌드 검증 불가)
 
+#### 2a-2. 뷰 도달 가능성 검증 (View Reachability) — 기능완성도의 필수 하위 검증
+
+category가 "ui"인 기능에 대해, 새로 생성된 뷰가 앱의 루트 뷰에서 실제로 도달 가능한지 검증합니다.
+이 검증에 실패하면 해당 기능의 기능완성도 점수는 **최대 2점**으로 제한됩니다.
+
+**검증 절차:**
+1. Builder가 새로 생성한 `struct XXXView: View` 정의를 Grep으로 식별
+2. 각 뷰에 대해 `XXXView(` 패턴으로 다른 파일에서의 사용 여부 검색
+3. 사용하는 상위 뷰가 있으면, 그 상위 뷰도 동일하게 추적 (루트까지 체인 확인)
+4. **체인이 끊기는 뷰** = "고아 뷰(orphan view)" → 기능완성도 FAIL 사유
+
+**RUNTIME_TOOL이 baepsae/axe일 때 추가 검증:**
+- 앱 실행 → 해당 화면까지 실제 네비게이션 시도
+- 도달 불가 시 스크린샷을 evidence로 첨부
+
+```
+예시:
+  Builder가 ControlsView.swift를 생성
+  → Grep: "ControlsView(" → SettingsView.swift에서 사용
+  → Grep: "SettingsView(" → 어디에서도 사용되지 않음
+  → SettingsView가 고아 뷰 → ControlsView도 도달 불가 → FAIL
+```
+
 #### 2b. 코드 품질 (Code Quality) — 가중치 25%
 
 1. common-mistakes.md 반드시 Read:
@@ -308,7 +331,7 @@ BUILD_TOOL = "static":
 | 1-2 | 인터랙션 대부분 동작 불가. |
 
 ### 안티패턴 자동 탐지 목록
-- **기능**: TODO 주석으로 남겨둔 핵심 로직, 하드코딩된 더미 데이터, 빈 catch 블록
+- **기능**: TODO 주석으로 남겨둔 핵심 로직, 하드코딩된 더미 데이터, 빈 catch 블록, **고아 뷰(루트에서 도달 불가능한 View)**
 - **코드**: common-mistakes.md의 모든 패턴, force unwrap, Combine 사용 (async/await 우선)
 - **UI**: accessibilityLabel 누락, 하드코딩된 frame 크기, Color.red/blue 같은 임시 색상
 - **인터랙션**: 네비게이션 후 back 불가, 키보드 dismiss 미처리, 빈 상태 화면 없음
