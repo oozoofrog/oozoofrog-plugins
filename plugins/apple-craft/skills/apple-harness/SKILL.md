@@ -253,11 +253,30 @@ mkdir -p {HARNESS_DIR}
 기존 HARNESS_DIR에 `session.json`이 존재하면, 이전 세션의 중단으로 판단합니다:
 1. `session.json`을 Read하여 `build_style`, `current_round`, `current_feature_id`, `phase`를 복구
 2. `features.json`을 Read하여 각 기능의 현재 status를 확인
-3. 사용자에게 현재 상태를 요약하고, 재개할 Phase를 안내:
-   - `phase = "build"` + 미완료 기능 존재 → Phase 3에서 재개 (build_style 유지)
-   - `phase = "evaluate"` → Phase 4에서 재개
-   - `current_feature_id`가 설정되어 있으면 → 해당 기능이 `pending` 상태이므로 그 기능부터 재시작
-4. 사용자가 다른 Phase부터 시작하고 싶으면 허용
+3. **session.json과 features.json을 cross-validation**하여 실제 재개 지점을 결정:
+
+```
+if phase == "complete":
+    → 하네스 이미 완료. 완료 보고를 다시 보여주거나 새 하네스 시작.
+
+if phase == "evaluate":
+    features에 built 상태가 존재하는가?
+    ├─ 예 → Phase 4(EVALUATE)에서 재개 (아직 평가되지 않은 built 기능이 있음)
+    └─ 아니오 (모두 verified/failed/partial):
+        failed/partial이 존재하는가?
+        ├─ 예 → phase를 "build"로 보정, Phase 3에서 재개 (NEED_REVISION 후 중단된 것)
+        └─ 아니오 (모두 verified) → phase를 "complete"로 보정, 완료 보고
+
+if phase == "build":
+    current_feature_id가 non-null인가?
+    ├─ 예 → 해당 기능의 features.json status 확인:
+    │   ├─ pending → 해당 기능부터 재시작 (구현 중 중단)
+    │   └─ built → current_feature_id를 null로 보정, 다음 pending/failed 기능으로 이동
+    └─ 아니오 → 다음 pending/failed 기능부터 재개
+```
+
+4. 사용자에게 현재 상태를 요약하고, 재개할 Phase를 안내
+5. 사용자가 다른 Phase부터 시작하고 싶으면 허용
 
 ### Phase 1: PLAN
 
@@ -616,11 +635,16 @@ Agent 도구 호출:
     - 디자인 토큰이 SwiftUI 코드에 올바르게 반영되었는지 검증하세요
 ```
 
-**Phase 4 결과 처리:**
-- 판정 PASS (80%+ 기능 통과) → **하네스 완료**
-- 판정 NEED_REVISION:
-  - `build_style = "autonomous"` → Evaluator의 FAIL 피드백을 Builder에게 전달 → Phase 3-A 재실행
-  - `build_style = "collaborative"` → FAIL 항목을 사용자와 함께 분석하고 수정 → Phase 3-B로 FAIL/PARTIAL 기능만 재진행. 이 시점에서 사용자가 autonomous 전환을 요청할 수 있음.
+**Phase 4 결과 처리 + session.json 상태 전이:**
+
+- 판정 **PASS** (80%+ 기능 통과):
+  1. `session.json` → `{ "phase": "complete", "current_round": N }`
+  2. **하네스 완료** — 최종 보고 출력
+
+- 판정 **NEED_REVISION**:
+  1. `session.json` → `{ "phase": "build", "current_round": N+1 }` ← 즉시 build로 전이 + 라운드 증가
+  2. `build_style = "autonomous"` → Evaluator의 FAIL 피드백을 Builder에게 전달 → Phase 3-A 재실행
+  3. `build_style = "collaborative"` → FAIL 항목을 사용자와 함께 분석하고 수정 → Phase 3-B로 FAIL/PARTIAL 기능만 재진행. 이 시점에서 사용자가 autonomous 전환을 요청할 수 있음.
 
 ### Loop Control
 
@@ -733,12 +757,23 @@ failed → built (Builder 재구현)
 ```
 
 - `build_style`: Phase 2.5에서 설정, 모드 전환 시 업데이트
-- `current_round`: Phase 4 진입 시 증가
+- `current_round`: NEED_REVISION 판정 시 N+1로 증가 (Phase 4 진입이 아닌, 재빌드 결정 시점에 증가)
 - `current_feature_id`: collaborative 모드에서 기능 시작 시 설정, 완료/실패 시 null로 초기화. 재진입 시 이 값이 non-null이면 해당 기능이 중단된 것으로 판단
-- `phase`: 각 Phase 진입 시 업데이트. 재진입 시 어느 Phase에서 재개할지 결정
+- `phase`: 상태 전이 시 업데이트. 재진입 시 어느 Phase에서 재개할지 결정
+
+**phase 상태 전이 다이어그램:**
+```
+build_style 선택 → "build"
+  │
+  ▼
+Phase 3 완료 → "evaluate"
+  │
+  ├─ PASS → "complete" (최종)
+  └─ NEED_REVISION → "build" (current_round +1, 재빌드 루프)
+```
 
 **생성 시점:** Phase 2.5에서 build_style 선택 시 최초 생성. 이전 Phase(0~2)에서는 존재하지 않음.
-**업데이트 시점:** Phase 전환, 기능 시작/완료, 모드 전환, 라운드 증가 시.
+**업데이트 시점:** Phase 전환(build↔evaluate↔complete), 기능 시작/완료, 모드 전환 시.
 
 ## Git Integration
 
