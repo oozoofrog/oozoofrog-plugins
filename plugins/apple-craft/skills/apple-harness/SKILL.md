@@ -66,7 +66,15 @@ Anthropic의 [Harness Design](https://www.anthropic.com/engineering/harness-desi
          │
          ▼
 ┌─────────────────────────────────┐
-│  Phase 3: BUILD                 │  harness-builder 에이전트
+│  Phase 2.5: BUILD STYLE 선택   │  AskUserQuestion
+│  autonomous | collaborative    │
+└────────┬────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────┐
+│  Phase 3: BUILD                 │
+│  ┌ autonomous: harness-builder  │  서브에이전트 자율 구현
+│  └ collaborative: 메인 대화     │  사용자와 기능별 협업 구현
 │  기능별 코드 작성 + 빌드        │  {HARNESS_DIR}/design-spec.md 참조 (있으면)
 │  기능별 git 커밋                │  ◄── EVALUATE 피드백 (자동)
 └────────┬────────────────────────┘
@@ -391,9 +399,30 @@ Agent 도구 호출:
 
 **Agent 실패 처리**: "디자인 구현 실패, architect 산출물만으로 진행합니다"로 보고하고 Phase 3 진행 (graceful degradation).
 
+### Phase 2.5: BUILD STYLE 선택
+
+Phase 2 완료 후, Phase 3 진입 전에 빌드 스타일을 선택합니다:
+
+```
+AskUserQuestion:
+  question: "Build 스타일을 선택해주세요"
+  header: "Phase 3"
+  options:
+    - label: "자율 모드 (Autonomous)"
+      description: "Builder 에이전트가 모든 기능을 자율적으로 구현합니다. 빠르지만 세부 결정에 참여할 수 없습니다."
+    - label: "협업 모드 (Collaborative)"
+      description: "기능별로 구현 계획을 확인하고, 기술적 선택에 함께 참여합니다. 느리지만 세부 설계를 직접 결정합니다."
+```
+
+선택 결과를 `build_style` 변수에 저장하여 Phase 3에서 분기합니다.
+
 ### Phase 3: BUILD
 
-harness-builder 에이전트를 호출합니다:
+`build_style`에 따라 분기합니다.
+
+#### Phase 3-A: Autonomous Build (build_style = "autonomous")
+
+기존과 동일하게 harness-builder 에이전트를 호출합니다:
 
 ```
 Agent 도구 호출:
@@ -412,13 +441,110 @@ Agent 도구 호출:
     .pen 파일의 화면 구조와 디자인 토큰을 SwiftUI 코드에 반영하세요.
 ```
 
-**Phase 3 완료 검증 (필수):**
+**Phase 3-A 완료 검증 (필수):**
 Builder 에이전트 완료 후:
 1. `{HARNESS_DIR}/features.json`을 Read하여 status 변경 확인
 2. pending/failed가 남아있으면 Builder가 일부만 완료한 것 → 사용자에게 보고
 3. `built_unverified` 상태가 있으면 Xcode MCP 미연결 경고 표시
 
 **Agent 실패 처리**: Builder가 중간에 실패하면, {HARNESS_DIR}/features.json의 현재 상태를 확인하여 완료된 기능과 미완료 기능을 사용자에게 보고합니다.
+
+#### Phase 3-B: Collaborative Build (build_style = "collaborative")
+
+서브에이전트를 호출하지 않고, **메인 대화에서 직접 실행**합니다.
+사용자와 기능별로 대화하며 구현합니다.
+
+**Step 0: 빌드 도구 탐지**
+Autonomous Build의 Builder와 동일한 폴백 체인으로 빌드 도구를 탐지합니다:
+```
+BUILD_TOOL 탐지: Xcode MCP → xcodebuild+xcsift → swift build+xcsift → static
+```
+
+**기능 루프:**
+`{HARNESS_DIR}/features.json`에서 `status=pending|failed|partial`인 기능을 priority 순서대로 하나씩 진행합니다:
+
+```
+for each feature (priority 순서):
+
+  ┌─ Step 1: 기능 카드 ─────────────────────────┐
+  │ 기능 정보를 카드 형식으로 표시                │
+  │                                              │
+  │ ## 🎯 [F001] 앱 구조 설정                    │
+  │ **설명**: 기본 App 구조와 NavigationStack     │
+  │ **검증**: 앱 실행 시 메인 화면 표시           │
+  │ **의존성**: 없음                              │
+  │ **디자인 토큰**: $bg, $accent (있으면)        │
+  └──────────────────────────────────────────────┘
+       │
+       ▼
+  ┌─ Step 2: 구현 계획 ─────────────────────────┐
+  │ • 생성/수정할 파일 목록과 각 파일의 역할      │
+  │ • 사용할 패턴/프레임워크                      │
+  │ • design-spec.md의 토큰 매핑 참조            │
+  └──────────────────────────────────────────────┘
+       │
+       ▼
+  ┌─ Step 3: 기술적 선택지 (해당 시) ────────────┐
+  │ 트레이드오프가 존재하는 결정에만 제시          │
+  │ "명백한 최선"이 있으면 Claude가 결정          │
+  │                                              │
+  │ 예: "NavigationStack vs NavigationSplitView?" │
+  │ - Option A: NavigationStack — iOS 16+, 단순  │
+  │ - Option B: NavigationSplitView — iPad 대응  │
+  │                                              │
+  │ 판단 기준: "두 선택지의 결과가 사용자에게      │
+  │ 체감 가능하게 다른가?" → 아니면 Claude 결정   │
+  └──────────────────────────────────────────────┘
+       │
+       ▼
+  ┌─ Step 4: 외부 편집 감지 ─────────────────────┐
+  │ git diff로 사용자의 외부 편집을 확인          │
+  │ 변경이 있으면 인지하고 이후 코드에 반영       │
+  └──────────────────────────────────────────────┘
+       │
+       ▼
+  ┌─ Step 5: 코드 작성 ─────────────────────────┐
+  │ 합의된 계획에 따라 Write/Edit 도구로 구현     │
+  │ design-spec.md의 토큰 매핑 참조              │
+  │ category="ui" 시 뷰 연결 검증               │
+  └──────────────────────────────────────────────┘
+       │
+       ▼
+  ┌─ Step 6: 빌드 검증 + 커밋 ──────────────────┐
+  │ BUILD_TOOL로 빌드 검증 (폴백 체인 동일)       │
+  │ 실패 시 사용자와 함께 에러 분석/수정 (최대 3회)│
+  │ features.json status → built                 │
+  │ git commit: "feat(F001): <설명>"             │
+  └──────────────────────────────────────────────┘
+       │
+       ▼
+  ┌─ Step 7: 진행 상황 표시 ─────────────────────┐
+  │ | ID   | 기능        | 상태      |           │
+  │ |------|------------|----------|            │
+  │ | F001 | 앱 구조    | ✅ 완료   |           │
+  │ | F002 | 설정 화면  | 🔧 진행중 |           │
+  │ | F003 | 데이터 모델 | ⏳ 대기   |           │
+  └──────────────────────────────────────────────┘
+       │
+       ▼
+  ┌─ Step 8: 모드 전환 체크 ─────────────────────┐
+  │ 사용자가 "나머지는 자율로" → autonomous 전환  │
+  │ 남은 기능이 7개 이상 → 자율 전환 제안         │
+  └──────────────────────────────────────────────┘
+```
+
+**사용자 역할 분담:**
+- 사용자가 "이 부분은 내가 직접 할게" → **대기 + 보조** (기본). 사용자가 완료하면 Read로 확인 후 리뷰/보완.
+- 사용자 요청 시 **병렬 작업** 가능 (사용자: A 파일, Claude: B 파일).
+
+**모드 전환 (양방향):**
+- collaborative → autonomous: 사용자 요청 또는 남은 기능이 많을 때 제안. 남은 기능을 harness-builder 서브에이전트에 위임.
+- autonomous → collaborative: Evaluator 피드백 후 사용자가 함께 수정하고 싶을 때 전환 가능.
+
+**컨텍스트 관리:**
+- 메인 대화에서 실행되므로 컨텍스트 누적에 주의.
+- 기능 완료마다 이전 기능의 구현 세부사항을 요약하고, 다음 기능에 필요한 인터페이스 정보만 유지.
+- features.json의 진행 상태가 파일에 기록되므로, compaction 발생 시에도 현재 상태 복구 가능.
 
 ### Phase 4: EVALUATE
 
@@ -449,25 +575,50 @@ Agent 도구 호출:
 
 **Phase 4 결과 처리:**
 - 판정 PASS (80%+ 기능 통과) → **하네스 완료**
-- 판정 NEED_REVISION → Evaluator의 FAIL 피드백을 Builder에게 전달 → Phase 3 재실행
+- 판정 NEED_REVISION:
+  - `build_style = "autonomous"` → Evaluator의 FAIL 피드백을 Builder에게 전달 → Phase 3-A 재실행
+  - `build_style = "collaborative"` → FAIL 항목을 사용자와 함께 분석하고 수정 → Phase 3-B로 FAIL/PARTIAL 기능만 재진행. 이 시점에서 사용자가 autonomous 전환을 요청할 수 있음.
 
-### Loop Control (자율 진행)
+### Loop Control
+
+#### Autonomous 모드 (자율 진행)
 
 ```
-라운드 1: BUILD → EVALUATE
+라운드 1: BUILD(3-A) → EVALUATE
   PASS → 완료, 사용자에게 최종 보고
   NEED_REVISION → 자동으로 라운드 2 진행 (중간 보고만)
 
-라운드 2: BUILD ({HARNESS_DIR}/evaluation-round-1.md 참조) → EVALUATE
+라운드 2: BUILD(3-A) ({HARNESS_DIR}/evaluation-round-1.md 참조) → EVALUATE
   PASS → 완료
   NEED_REVISION → 자동으로 라운드 3 진행
 
-라운드 3: BUILD ({HARNESS_DIR}/evaluation-round-2.md 참조) → EVALUATE
+라운드 3: BUILD(3-A) ({HARNESS_DIR}/evaluation-round-2.md 참조) → EVALUATE
   PASS → 완료
   NEED_REVISION → 사용자에게 상황 보고 + 선택:
     a) 계속 → 라운드 4 (최종, 추가 1회만 허용)
     b) 중단 → 현재 상태로 종료, {HARNESS_DIR}/features.json과 커밋 히스토리 보고
     c) 수동 수정 → 사용자가 직접 수정 후 Evaluate만 재실행
+```
+
+#### Collaborative 모드
+
+```
+라운드 1: BUILD(3-B, 사용자와 협업) → EVALUATE
+  PASS → 완료, 사용자에게 최종 보고
+  NEED_REVISION → FAIL 항목을 사용자와 함께 분석, 수정 방향 토론 후 재구현
+
+라운드 2: BUILD(3-B, FAIL/PARTIAL만) → EVALUATE
+  PASS → 완료
+  NEED_REVISION → 라운드 3 진행
+
+라운드 3: BUILD(3-B) → EVALUATE
+  PASS → 완료
+  NEED_REVISION → 사용자에게 상황 보고 + 선택:
+    a) 계속 (collaborative) → 라운드 4
+    b) 자율 전환 → 남은 FAIL 항목을 autonomous로 전환
+    c) 중단 → 현재 상태로 종료
+
+모드 전환: 어느 라운드에서든 사용자가 요청하면 autonomous ↔ collaborative 전환 가능
 ```
 
 Builder 재실행 시 프롬프트에 반드시 포함:
@@ -539,6 +690,7 @@ failed → built (Builder 재구현)
 - 각 에이전트는 **독립 서브에이전트**로 실행 → 자연스러운 컨텍스트 격리
 - 에이전트 간 통신은 **파일 기반** ({HARNESS_DIR}/harness-spec.md, {HARNESS_DIR}/features.json)
 - 대규모 프로젝트의 경우 Builder가 자동 컴팩션 활용
+- **Collaborative 모드 주의**: 메인 대화에서 실행되므로 컨텍스트 누적이 발생함. 기능 완료마다 이전 기능의 구현 세부사항을 요약하고, 다음 기능에 필요한 인터페이스 정보만 유지. 남은 기능이 7개 이상이면 autonomous 전환을 제안.
 
 ## Response Templates
 
@@ -547,7 +699,7 @@ failed → built (Builder 재구현)
 ## 🔨 apple-craft harness 시작
 
 **요청**: <사용자 요구사항>
-**모드**: Plan → Design → Build → Evaluate (최대 3 라운드)
+**모드**: Plan → Design → Build(<build_style>) → Evaluate (최대 3 라운드)
 
 Phase 1: PLAN 시작 — Planner 에이전트가 스펙을 작성합니다...
 ```
@@ -600,6 +752,8 @@ Phase 1: PLAN 시작 — Planner 에이전트가 스펙을 작성합니다...
 
 5. **자기평가 한계**: Evaluator도 LLM이므로 완벽한 QA는 아닙니다. 최종 결과는 반드시 사람이 검토해야 합니다.
 
+7. **Collaborative 모드 컨텍스트**: Collaborative 모드는 메인 대화에서 실행되므로, 기능 수가 많은 프로젝트에서는 컨텍스트 윈도우가 빠르게 소모됩니다. 10개 이상의 기능이 있는 프로젝트에서는 autonomous 모드를 권장하거나, collaborative로 핵심 기능만 진행한 후 나머지를 autonomous로 전환하세요.
+
 6. **Pencil MCP 선택적**: Phase 2-A(디자인 설계)는 Pencil 없이도 항상 실행되어 Builder/Evaluator에게 토큰 매핑과 화면 구조를 제공합니다. Phase 2-B(디자인 구현)만 Pencil MCP 연결 시 실행됩니다. Pencil이 SwiftUI 코드를 직접 생성하지 않으므로, 디자인→코드 변환은 Builder가 수행합니다.
 
 ## Quick Reference
@@ -626,14 +780,20 @@ apple-harness 실행 흐름
 │   ├─ AskUserQuestion으로 사용자 선택 확인
 │   ├─ 기존 .pen 읽기 또는 새 디자인 생성 + design-spec.md pending backfill
 │   └─ Phase 3으로 진행
-├─ Phase 3: BUILD (harness-builder)
-│   ├─ Step 0: 빌드 도구 탐지 (Xcode MCP → xcodebuild+xcsift → swift build+xcsift → static)
-│   ├─ {HARNESS_DIR}/features.json에서 pending/failed 기능 선택
-│   ├─ 참조 문서 Read
-│   ├─ Swift 코드 작성 ({HARNESS_DIR}/design-spec.md 참조)
-│   ├─ 빌드 검증 (BUILD_TOOL에 따른 폴백 체인, 내부 3회 재시도)
-│   ├─ {HARNESS_DIR}/features.json status → built (검증 성공) 또는 built_unverified (static)
-│   └─ git commit
+├─ Phase 2.5: BUILD STYLE 선택 (AskUserQuestion)
+│   ├─ autonomous: 서브에이전트 자율 구현 (기존)
+│   └─ collaborative: 메인 대화에서 사용자와 협업 구현
+├─ Phase 3: BUILD
+│   ├─ [autonomous] harness-builder 서브에이전트 호출
+│   │   ├─ Step 0: 빌드 도구 탐지
+│   │   ├─ pending/failed 기능 자율 구현 + 빌드 검증 + 커밋
+│   │   └─ features.json status → built
+│   └─ [collaborative] 메인 대화에서 직접 실행
+│       ├─ Step 0: 빌드 도구 탐지 (동일 폴백 체인)
+│       ├─ 기능별: 카드 표시 → 구현 계획 → 기술적 선택지 → 코드 작성 → 빌드 → 커밋
+│       ├─ 외부 편집 감지 (git diff)
+│       ├─ 모드 전환 가능 (collaborative ↔ autonomous)
+│       └─ features.json status → built
 ├─ Phase 4: EVALUATE (harness-evaluator)
 │   ├─ Step 0: baepsae/axe 최우선 탐지 + Pencil + 보조 도구 탐색
 │   ├─ 4축 다차원 검증 (기능완성/코드품질/UI품질/인터랙션)
