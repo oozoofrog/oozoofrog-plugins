@@ -250,14 +250,35 @@ mkdir -p {HARNESS_DIR}
 모든 에이전트 호출 시 프롬프트에 `HARNESS_DIR: {HARNESS_DIR}` 경로를 반드시 전달합니다.
 
 **재진입 감지 (새 대화에서 하네스 호출 시):**
-기존 HARNESS_DIR에 `session.json`이 존재하면, 이전 세션의 중단으로 판단합니다:
+
+**Step 1: 산출물 존재 확인**
+HARNESS_DIR에서 다음 파일을 확인합니다:
+- `session.json` 존재 → Step 2(session 기반 재진입)로 진행
+- `session.json` 없음 + `harness-spec.md`/`features.json` 존재 → Phase 1~2 중단. 사용자에게 "이전 Plan/Design 산출물이 있습니다. 이어서 진행할까요?" 확인 후, Phase 2.5(BUILD STYLE 선택)부터 재개
+- 아무 파일도 없음 → 새 세션 시작 (Phase 0)
+
+**Step 2: session.json 기반 재진입**
 1. `session.json`을 Read하여 `build_style`, `current_round`, `current_feature_id`, `phase`를 복구
 2. `features.json`을 Read하여 각 기능의 현재 status를 확인
 3. **session.json과 features.json을 cross-validation**하여 실제 재개 지점을 결정:
 
 ```
+# 0. 공통 보정: evaluate 단계에서 current_feature_id는 항상 null이어야 함
+if phase == "evaluate" && current_feature_id != null:
+    current_feature_id를 null로 보정
+
+# 1. current_round 보정: evaluation 보고서와 동기화
+if evaluation-round-{current_round}.md가 이미 존재:
+    current_round를 current_round+1로 보정
+    (이전 라운드 evaluate는 완료되었지만 다음 build 전이 전에 중단된 것)
+
+# 2. current_round 상한 검증
+if current_round > 4:
+    → 하네스 최대 라운드 초과. 현재 상태로 강제 종료, 결과 보고.
+
+# 3. phase별 재개 지점 결정
 if phase == "complete":
-    → 하네스 이미 완료. 완료 보고를 다시 보여주거나 새 하네스 시작.
+    → 하네스 이미 완료. "이전 세션이 완료되었습니다" 안내 후 완료 보고 재표시 또는 새 하네스 시작.
 
 if phase == "evaluate":
     features에 built 상태가 존재하는가?
@@ -752,28 +773,30 @@ failed → built (Builder 재구현)
   "build_style": "autonomous | collaborative",
   "current_round": 1,
   "current_feature_id": "F003 | null",
-  "phase": "plan | verify | design | build | evaluate | complete"
+  "phase": "build | evaluate | complete"
 }
 ```
 
 - `build_style`: Phase 2.5에서 설정, 모드 전환 시 업데이트
-- `current_round`: NEED_REVISION 판정 시 N+1로 증가 (Phase 4 진입이 아닌, 재빌드 결정 시점에 증가)
-- `current_feature_id`: collaborative 모드에서 기능 시작 시 설정, 완료/실패 시 null로 초기화. 재진입 시 이 값이 non-null이면 해당 기능이 중단된 것으로 판단
-- `phase`: 상태 전이 시 업데이트. 재진입 시 어느 Phase에서 재개할지 결정
+- `current_round`: 1에서 시작. NEED_REVISION 판정 시 N+1로 증가. **최대값: 4** (라운드 3 + 추가 1회). 재진입 시 `current_round > 4`이면 강제 종료.
+- `current_feature_id`: collaborative 모드에서 기능 시작 시 설정, 완료/실패 시 null로 초기화. autonomous 모드에서는 항상 null (Builder 서브에이전트가 관리하지 않음). 재진입 시 non-null이면 해당 기능이 중단된 것으로 판단.
+- `phase`: `build`, `evaluate`, `complete` 3개 값만 사용. Phase 0~2 단계에서는 session.json이 존재하지 않으므로 `plan`/`verify`/`design` 값은 사용하지 않음.
 
 **phase 상태 전이 다이어그램:**
 ```
-build_style 선택 → "build"
+build_style 선택 → "build" (current_round=1)
   │
   ▼
 Phase 3 완료 → "evaluate"
   │
   ├─ PASS → "complete" (최종)
   └─ NEED_REVISION → "build" (current_round +1, 재빌드 루프)
+                        │
+                        └─ current_round > 4 → 강제 종료
 ```
 
-**생성 시점:** Phase 2.5에서 build_style 선택 시 최초 생성. 이전 Phase(0~2)에서는 존재하지 않음.
-**업데이트 시점:** Phase 전환(build↔evaluate↔complete), 기능 시작/완료, 모드 전환 시.
+**생성 시점:** Phase 2.5에서 build_style 선택 시 최초 생성. 이전 Phase(0~2)에서는 존재하지 않음 — Phase 1~2 중단 시에는 harness-spec.md/features.json 존재 여부로 재진입 감지.
+**업데이트 시점:** Phase 전환(build↔evaluate↔complete), 기능 시작/완료, 모드 전환, NEED_REVISION 시 라운드 증가.
 
 ## Git Integration
 
