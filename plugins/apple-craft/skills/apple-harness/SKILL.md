@@ -254,7 +254,27 @@ mkdir -p {HARNESS_DIR}
 **Step 1: 산출물 존재 확인**
 HARNESS_DIR에서 다음 파일을 확인합니다:
 - `session.json` 존재 → Step 2(session 기반 재진입)로 진행
-- `session.json` 없음 + `harness-spec.md`/`features.json` 존재 → Phase 1~2 중단. 사용자에게 "이전 Plan/Design 산출물이 있습니다. 이어서 진행할까요?" 확인 후, Phase 2.5(BUILD STYLE 선택)부터 재개
+- `session.json` 없음 + `features.json` 존재 → **features.json의 status를 분석하여 분류**:
+
+  ```
+  모든 기능이 pending인가?
+  ├─ 예 → Phase 1~2 중단 (Plan/Design 완료, Build 시작 전).
+  │   사용자에게 "이전 Plan/Design 산출물이 있습니다. 이어서 진행할까요?"
+  │   확인 후 Phase 2.5(BUILD STYLE 선택)부터 재개.
+  │
+  └─ 아니오 (built/verified/failed/partial 존재):
+      모든 기능이 verified인가?
+      ├─ 예 → 성공 완료 세션 (session.json 유실).
+      │   "이전 하네스가 성공적으로 완료된 상태입니다" 안내.
+      │   완료 보고 또는 새 하네스 시작 선택.
+      │
+      └─ 아니오 → 중간 세션 중단 (session.json 유실).
+          사용자에게 features.json 현재 상태를 요약하고,
+          build_style을 AskUserQuestion으로 선택한 뒤
+          Phase 3에서 pending/failed 기능부터 재개.
+  ```
+
+- `session.json` 없음 + `harness-spec.md`만 존재 (features.json 없음) → Phase 1 Planner 중간 중단. harness-spec.md를 확인하고 Phase 1부터 재개.
 - 아무 파일도 없음 → 새 세션 시작 (Phase 0)
 
 **Step 2: session.json 기반 재진입**
