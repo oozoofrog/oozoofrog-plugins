@@ -245,8 +245,19 @@ mkdir -p {HARNESS_DIR}
 - `{HARNESS_DIR}/features.json`
 - `{HARNESS_DIR}/design-spec.md`
 - `{HARNESS_DIR}/evaluation-round-{N}.md`
+- `{HARNESS_DIR}/session.json` — 세션 메타데이터 (build_style, 현재 라운드 등)
 
 모든 에이전트 호출 시 프롬프트에 `HARNESS_DIR: {HARNESS_DIR}` 경로를 반드시 전달합니다.
+
+**재진입 감지 (새 대화에서 하네스 호출 시):**
+기존 HARNESS_DIR에 `session.json`이 존재하면, 이전 세션의 중단으로 판단합니다:
+1. `session.json`을 Read하여 `build_style`, `current_round`, `current_feature_id`, `phase`를 복구
+2. `features.json`을 Read하여 각 기능의 현재 status를 확인
+3. 사용자에게 현재 상태를 요약하고, 재개할 Phase를 안내:
+   - `phase = "build"` + 미완료 기능 존재 → Phase 3에서 재개 (build_style 유지)
+   - `phase = "evaluate"` → Phase 4에서 재개
+   - `current_feature_id`가 설정되어 있으면 → 해당 기능이 `pending` 상태이므로 그 기능부터 재시작
+4. 사용자가 다른 Phase부터 시작하고 싶으면 허용
 
 ### Phase 1: PLAN
 
@@ -414,7 +425,18 @@ AskUserQuestion:
       description: "기능별로 구현 계획을 확인하고, 기술적 선택에 함께 참여합니다. 느리지만 세부 설계를 직접 결정합니다."
 ```
 
-선택 결과를 `build_style` 변수에 저장하여 Phase 3에서 분기합니다.
+선택 결과를 `{HARNESS_DIR}/session.json`에 기록합니다:
+
+```json
+{
+  "build_style": "autonomous" | "collaborative",
+  "current_round": 1,
+  "current_feature_id": null,
+  "phase": "build"
+}
+```
+
+이 파일은 세션 중단/재진입 시 상태 복구에 사용됩니다.
 
 ### Phase 3: BUILD
 
@@ -466,7 +488,13 @@ BUILD_TOOL 탐지: Xcode MCP → xcodebuild+xcsift → swift build+xcsift → st
 ```
 for each feature (priority 순서):
 
-  ┌─ Step 1: 기능 카드 ─────────────────────────┐
+  ┌─ Step 1: 기능 시작 기록 ─────────────────────┐
+  │ session.json의 current_feature_id를 업데이트  │
+  │ → 중단 시 어느 기능에서 멈췄는지 복구 가능    │
+  └──────────────────────────────────────────────┘
+       │
+       ▼
+  ┌─ Step 2: 기능 카드 ─────────────────────────┐
   │ 기능 정보를 카드 형식으로 표시                │
   │                                              │
   │ ## 🎯 [F001] 앱 구조 설정                    │
@@ -477,14 +505,14 @@ for each feature (priority 순서):
   └──────────────────────────────────────────────┘
        │
        ▼
-  ┌─ Step 2: 구현 계획 ─────────────────────────┐
+  ┌─ Step 3: 구현 계획 ─────────────────────────┐
   │ • 생성/수정할 파일 목록과 각 파일의 역할      │
   │ • 사용할 패턴/프레임워크                      │
   │ • design-spec.md의 토큰 매핑 참조            │
   └──────────────────────────────────────────────┘
        │
        ▼
-  ┌─ Step 3: 기술적 선택지 (해당 시) ────────────┐
+  ┌─ Step 4: 기술적 선택지 (해당 시) ────────────┐
   │ 트레이드오프가 존재하는 결정에만 제시          │
   │ "명백한 최선"이 있으면 Claude가 결정          │
   │                                              │
@@ -497,28 +525,36 @@ for each feature (priority 순서):
   └──────────────────────────────────────────────┘
        │
        ▼
-  ┌─ Step 4: 외부 편집 감지 ─────────────────────┐
+  ┌─ Step 5: 외부 편집 감지 ─────────────────────┐
   │ git diff로 사용자의 외부 편집을 확인          │
   │ 변경이 있으면 인지하고 이후 코드에 반영       │
   └──────────────────────────────────────────────┘
        │
        ▼
-  ┌─ Step 5: 코드 작성 ─────────────────────────┐
+  ┌─ Step 6: 코드 작성 ─────────────────────────┐
   │ 합의된 계획에 따라 Write/Edit 도구로 구현     │
   │ design-spec.md의 토큰 매핑 참조              │
   │ category="ui" 시 뷰 연결 검증               │
   └──────────────────────────────────────────────┘
        │
        ▼
-  ┌─ Step 6: 빌드 검증 + 커밋 ──────────────────┐
+  ┌─ Step 7: 빌드 검증 + 상태 기록 + 커밋 ──────┐
   │ BUILD_TOOL로 빌드 검증 (폴백 체인 동일)       │
   │ 실패 시 사용자와 함께 에러 분석/수정 (최대 3회)│
-  │ features.json status → built                 │
-  │ git commit: "feat(F001): <설명>"             │
+  │                                              │
+  │ ✅ 빌드 성공 시 (이 순서대로 실행):           │
+  │   1. features.json status → built            │
+  │   2. git commit: "feat(F001): <설명>"        │
+  │   3. session.json current_feature_id → null  │
+  │                                              │
+  │ ❌ 빌드 3회 실패 시:                          │
+  │   1. features.json status → failed           │
+  │   2. session.json current_feature_id → null  │
+  │   3. 사용자에게 스킵/재시도 선택 제시         │
   └──────────────────────────────────────────────┘
        │
        ▼
-  ┌─ Step 7: 진행 상황 표시 ─────────────────────┐
+  ┌─ Step 8: 진행 상황 표시 ─────────────────────┐
   │ | ID   | 기능        | 상태      |           │
   │ |------|------------|----------|            │
   │ | F001 | 앱 구조    | ✅ 완료   |           │
@@ -527,9 +563,11 @@ for each feature (priority 순서):
   └──────────────────────────────────────────────┘
        │
        ▼
-  ┌─ Step 8: 모드 전환 체크 ─────────────────────┐
+  ┌─ Step 9: 모드 전환 체크 ─────────────────────┐
   │ 사용자가 "나머지는 자율로" → autonomous 전환  │
   │ 남은 기능이 7개 이상 → 자율 전환 제안         │
+  │                                              │
+  │ 전환 시 session.json build_style 업데이트     │
   └──────────────────────────────────────────────┘
 ```
 
@@ -538,8 +576,8 @@ for each feature (priority 순서):
 - 사용자 요청 시 **병렬 작업** 가능 (사용자: A 파일, Claude: B 파일).
 
 **모드 전환 (양방향):**
-- collaborative → autonomous: 사용자 요청 또는 남은 기능이 많을 때 제안. 남은 기능을 harness-builder 서브에이전트에 위임.
-- autonomous → collaborative: Evaluator 피드백 후 사용자가 함께 수정하고 싶을 때 전환 가능.
+- collaborative → autonomous: 사용자 요청 또는 남은 기능이 많을 때 제안. 남은 기능을 harness-builder 서브에이전트에 위임. `session.json`의 `build_style`을 `"autonomous"`로 업데이트.
+- autonomous → collaborative: Evaluator 피드백 후 사용자가 함께 수정하고 싶을 때 전환 가능. `session.json`의 `build_style`을 `"collaborative"`로 업데이트.
 
 **컨텍스트 관리:**
 - 메인 대화에서 실행되므로 컨텍스트 누적에 주의.
@@ -547,6 +585,11 @@ for each feature (priority 순서):
 - features.json의 진행 상태가 파일에 기록되므로, compaction 발생 시에도 현재 상태 복구 가능.
 
 ### Phase 4: EVALUATE
+
+**Phase 4 진입 시 session.json 업데이트:**
+```json
+{ "phase": "evaluate", "current_round": N, "current_feature_id": null }
+```
 
 harness-evaluator 에이전트를 호출합니다:
 
@@ -678,6 +721,25 @@ failed → built (Builder 재구현)
 - status와 priority만 업데이트 가능
 - JSON 형식 유지 (마크다운이 아닌 JSON — 모델의 부적절한 편집 방지)
 
+## session.json Schema
+
+```json
+{
+  "build_style": "autonomous | collaborative",
+  "current_round": 1,
+  "current_feature_id": "F003 | null",
+  "phase": "plan | verify | design | build | evaluate | complete"
+}
+```
+
+- `build_style`: Phase 2.5에서 설정, 모드 전환 시 업데이트
+- `current_round`: Phase 4 진입 시 증가
+- `current_feature_id`: collaborative 모드에서 기능 시작 시 설정, 완료/실패 시 null로 초기화. 재진입 시 이 값이 non-null이면 해당 기능이 중단된 것으로 판단
+- `phase`: 각 Phase 진입 시 업데이트. 재진입 시 어느 Phase에서 재개할지 결정
+
+**생성 시점:** Phase 2.5에서 build_style 선택 시 최초 생성. 이전 Phase(0~2)에서는 존재하지 않음.
+**업데이트 시점:** Phase 전환, 기능 시작/완료, 모드 전환, 라운드 증가 시.
+
 ## Git Integration
 
 - Builder가 각 기능 완료 시 **설명적 커밋 메시지**로 커밋
@@ -752,9 +814,9 @@ Phase 1: PLAN 시작 — Planner 에이전트가 스펙을 작성합니다...
 
 5. **자기평가 한계**: Evaluator도 LLM이므로 완벽한 QA는 아닙니다. 최종 결과는 반드시 사람이 검토해야 합니다.
 
-7. **Collaborative 모드 컨텍스트**: Collaborative 모드는 메인 대화에서 실행되므로, 기능 수가 많은 프로젝트에서는 컨텍스트 윈도우가 빠르게 소모됩니다. 10개 이상의 기능이 있는 프로젝트에서는 autonomous 모드를 권장하거나, collaborative로 핵심 기능만 진행한 후 나머지를 autonomous로 전환하세요.
-
 6. **Pencil MCP 선택적**: Phase 2-A(디자인 설계)는 Pencil 없이도 항상 실행되어 Builder/Evaluator에게 토큰 매핑과 화면 구조를 제공합니다. Phase 2-B(디자인 구현)만 Pencil MCP 연결 시 실행됩니다. Pencil이 SwiftUI 코드를 직접 생성하지 않으므로, 디자인→코드 변환은 Builder가 수행합니다.
+
+7. **Collaborative 모드 컨텍스트**: Collaborative 모드는 메인 대화에서 실행되므로, 기능 수가 많은 프로젝트에서는 컨텍스트 윈도우가 빠르게 소모됩니다. 10개 이상의 기능이 있는 프로젝트에서는 autonomous 모드를 권장하거나, collaborative로 핵심 기능만 진행한 후 나머지를 autonomous로 전환하세요.
 
 ## Quick Reference
 
@@ -781,8 +843,8 @@ apple-harness 실행 흐름
 │   ├─ 기존 .pen 읽기 또는 새 디자인 생성 + design-spec.md pending backfill
 │   └─ Phase 3으로 진행
 ├─ Phase 2.5: BUILD STYLE 선택 (AskUserQuestion)
-│   ├─ autonomous: 서브에이전트 자율 구현 (기존)
-│   └─ collaborative: 메인 대화에서 사용자와 협업 구현
+│   ├─ autonomous | collaborative 선택
+│   └─ {HARNESS_DIR}/session.json 생성 (build_style, phase, round 기록)
 ├─ Phase 3: BUILD
 │   ├─ [autonomous] harness-builder 서브에이전트 호출
 │   │   ├─ Step 0: 빌드 도구 탐지
@@ -793,15 +855,18 @@ apple-harness 실행 흐름
 │       ├─ 기능별: 카드 표시 → 구현 계획 → 기술적 선택지 → 코드 작성 → 빌드 → 커밋
 │       ├─ 외부 편집 감지 (git diff)
 │       ├─ 모드 전환 가능 (collaborative ↔ autonomous)
+│       ├─ session.json에 current_feature_id 기록 (재진입 대비)
 │       └─ features.json status → built
 ├─ Phase 4: EVALUATE (harness-evaluator)
+│   ├─ session.json phase → "evaluate" 업데이트
 │   ├─ Step 0: baepsae/axe 최우선 탐지 + Pencil + 보조 도구 탐색
 │   ├─ 4축 다차원 검증 (기능완성/코드품질/UI품질/인터랙션)
 │   ├─ 디자인-코드 비교 ({HARNESS_DIR}/design-spec.md 존재 시)
 │   ├─ {HARNESS_DIR}/evaluation-round-{N}.md 상세 로그 생성
 │   ├─ PASS/PARTIAL/FAIL 점수 + 가중 평균
-│   └─ 80% 통과 → 완료 / 미달 → BUILD 자동 재실행
-└─ 자율 루프 (최대 3 라운드), 3회 실패 시에만 사용자 확인
+│   └─ 80% 통과 → 완료 / 미달 → BUILD 재실행 (build_style 유지)
+├─ 자율 루프 (최대 3 라운드), 3회 실패 시에만 사용자 확인
+└─ 재진입: session.json 존재 시 → 상태 복구 후 해당 Phase에서 재개
 ```
 
 ## Walkthrough Example
