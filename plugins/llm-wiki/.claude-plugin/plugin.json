@@ -1,0 +1,9 @@
+{
+  "name": "llm-wiki",
+  "description": "LLM 위키 — 프로젝트별 지식 베이스를 LLM이 점진적으로 구축·유지합니다. 소스 문서 수집, 위키 페이지 생성, 교차 참조, 건강 점검. Karpathy LLM Wiki 패턴 기반",
+  "author": {
+    "name": "oozoofrog",
+    "email": "oozoofrog@gmail.com"
+  },
+  "version": "1.0.0"
+}

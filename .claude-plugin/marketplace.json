@@ -127,6 +127,16 @@
       },
       "source": "./plugins/design-craft",
       "category": "design"
+    },
+    {
+      "name": "llm-wiki",
+      "description": "LLM 위키 — 프로젝트별 지식 베이스를 LLM이 점진적으로 구축·유지. 소스 수집, 위키 페이지 생성, 교차 참조, 건강 점검. Karpathy LLM Wiki 패턴 기반",
+      "version": "1.0.0",
+      "author": {
+        "name": "oozoofrog"
+      },
+      "source": "./plugins/llm-wiki",
+      "category": "development"
     }
   ]
 }
