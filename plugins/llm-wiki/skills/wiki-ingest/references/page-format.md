@@ -16,6 +16,8 @@ sources:
   - source-filename.md
 references:
   - other-wiki-page
+authority_path: ".claude/references/library-name.md"
+source_kind: api-learn | manual | web
 tags:
   - lowercase-tag
 aliases:
@@ -34,14 +36,18 @@ aliases:
 | updated | Y | 마지막 갱신 날짜 |
 | sources | N | 원본 소스 파일 목록 (`sources/` 내 파일명). ingest로 수집된 페이지에 사용 |
 | references | N | 참조한 위키 페이지 목록 (`pages/` 내 파일명, 확장자 제외). analysis 타입에 주로 사용 |
+| authority_path | N | 권위 원본 경로. api-learn에서 동기화된 페이지는 `.claude/references/{lib}.md` 경로 기록 |
+| source_kind | N | 소스 유형: `api-learn` (API 레퍼런스에서 동기화), `manual` (직접 수집), `web` (URL에서 수집) |
 | tags | N | 소문자 태그 목록 (검색·분류에 활용) |
 | aliases | N | 별칭 목록 (한국어/영어 등, 검색에 활용) |
 
-### sources vs references 구분
+### sources vs references vs authority_path 구분
 
 - **`sources`**: `.wiki/sources/` 디렉토리의 원본 파일을 가리킴. `wiki-ingest`로 수집된 페이지가 사용.
 - **`references`**: `.wiki/pages/` 디렉토리의 다른 위키 페이지를 가리킴. `wiki-query --save`로 생성된 analysis 페이지가 주로 사용.
-- 하나의 페이지가 둘 다 가질 수 있음 (예: 소스에서 수집했지만 다른 위키 페이지도 참조하는 경우).
+- **`authority_path`**: api-learn에서 동기화된 페이지의 권위 원본 경로. `wiki-lint`가 이 경로의 파일과 비교하여 stale 여부를 판단.
+- **`source_kind`**: 페이지 출처 유형. api-learn 동기화(`api-learn`), 사용자 직접 수집(`manual`), URL 수집(`web`).
+- 하나의 페이지가 `sources`, `references`, `authority_path`를 모두 가질 수 있음.
 
 ## 본문 구조
 

@@ -97,6 +97,10 @@ assistant: "위키의 전체 건강 상태를 진단하겠습니다."
 1. **오래된 콘텐츠**:
    - `updated` 날짜가 30일 이상 경과한 페이지 → **Info: 갱신 필요 가능성**
    - 소스 파일이 수정된 후 위키 페이지가 갱신되지 않은 경우 → **Warning: 소스 변경 후 미갱신**
+   - **api-learn stale detection**: `source_kind: api-learn`이고 `authority_path`가 있는 페이지에 대해:
+     - `authority_path`의 파일이 존재하는지 확인 (삭제되었으면 → **Warning: 권위 원본 삭제됨**)
+     - 원본 레퍼런스의 frontmatter `collected` 날짜가 위키 페이지의 `updated`보다 최신이면 → **Warning: API 레퍼런스가 갱신됨, 위키 재동기화 필요**
+     - 원본 레퍼런스의 `version`이 위키 페이지 태그의 버전과 다르면 → **Warning: 라이브러리 버전 불일치**
 
 2. **스텁 페이지**:
    - 본문이 100자 미만인 페이지 → **Info: 스텁 페이지 (내용 보강 필요)**

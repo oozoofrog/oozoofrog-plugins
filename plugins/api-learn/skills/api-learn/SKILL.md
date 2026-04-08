@@ -222,6 +222,18 @@ doc_count: {총 문서 수}
 - 승인 시 기존 파일 덮어쓰기, `_index.md` 날짜/줄수 갱신
 - CLAUDE.md 블록은 이미 있으므로 건드리지 않음
 
+### Phase 4 — 위키 동기화 제안 (Pipeline)
+
+`.wiki/` 디렉토리가 프로젝트에 존재하는 경우에만 실행:
+
+1. `.wiki/index.md`를 확인하여 해당 라이브러리의 위키 페이지 존재 여부 확인
+2. 위키 페이지가 **없으면**: "위키에도 동기화하시겠습니까?" 제안
+3. 위키 페이지가 **있으면**: "위키 페이지를 갱신하시겠습니까?" 제안
+4. 사용자 승인 시 `/wiki-ingest .claude/references/{library}.md`와 동일한 흐름 실행
+   - `source_kind: api-learn`, `authority_path: .claude/references/{library}.md` 메타데이터 자동 설정
+
+> **Loose Coupling 원칙**: api-learn은 `.wiki/`가 없어도 완전히 독립 동작합니다. 위키 동기화는 순수한 제안이며, `.wiki/` 미존재 시 이 Phase는 조용히 건너뜁니다.
+
 ### 완료 보고
 
 수집 완료 후 다음을 보고합니다:
@@ -230,3 +242,4 @@ doc_count: {총 문서 수}
 - 총 줄 수
 - 감지된 프로젝트 사용 패턴 수
 - CLAUDE.md 등록 여부
+- 위키 동기화 여부 (`.wiki/` 존재 시)
