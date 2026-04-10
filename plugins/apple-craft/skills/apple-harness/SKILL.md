@@ -67,14 +67,15 @@ Anthropic의 [Harness Design](https://www.anthropic.com/engineering/harness-desi
          ▼
 ┌─────────────────────────────────┐
 │  Phase 2.5: BUILD STYLE 선택   │  AskUserQuestion
-│  autonomous | collaborative    │
+│  autonomous | agent-led | user-led │
 └────────┬────────────────────────┘
          │
          ▼
 ┌─────────────────────────────────┐
 │  Phase 3: BUILD                 │
 │  ┌ autonomous: harness-builder  │  서브에이전트 자율 구현
-│  └ collaborative: 메인 대화     │  사용자와 기능별 협업 구현
+│  ├ agent-led: 메인 대화         │  에이전트 코드 작성, 사용자 기술 선택 참여
+│  └ user-led: 메인 대화          │  에이전트 가이드 생성, 사용자 코드 작성, 에이전트 리뷰
 │  기능별 코드 작성 + 빌드        │  {HARNESS_DIR}/design-spec.md 참조 (있으면)
 │  기능별 git 커밋                │  ◄── EVALUATE 피드백 (자동)
 └────────┬────────────────────────┘
@@ -271,14 +272,14 @@ HARNESS_DIR에서 다음 파일을 확인합니다:
       └─ 아니오 → 중간 세션 중단 (session.json 유실).
           사용자에게 features.json 현재 상태를 요약하고,
           build_style을 AskUserQuestion으로 선택한 뒤
-          Phase 3에서 pending/failed 기능부터 재개.
+          Phase 3에서 pending/failed/partial 기능부터 재개.
   ```
 
 - `session.json` 없음 + `harness-spec.md`만 존재 (features.json 없음) → Phase 1 Planner 중간 중단. harness-spec.md를 확인하고 Phase 1부터 재개.
 - 아무 파일도 없음 → 새 세션 시작 (Phase 0)
 
 **Step 2: session.json 기반 재진입**
-1. `session.json`을 Read하여 `build_style`, `current_round`, `current_feature_id`, `phase`를 복구
+1. `session.json`을 Read하여 `build_style`, `current_round`, `current_feature_id`, `batch_features`, `phase`를 복구
 2. `features.json`을 Read하여 각 기능의 현재 status를 확인
 3. **session.json과 features.json을 cross-validation**하여 실제 재개 지점을 결정:
 
@@ -305,15 +306,60 @@ if phase == "evaluate":
     ├─ 예 → Phase 4(EVALUATE)에서 재개 (아직 평가되지 않은 built 기능이 있음)
     └─ 아니오 (모두 verified/failed/partial):
         failed/partial이 존재하는가?
-        ├─ 예 → phase를 "build"로 보정, Phase 3에서 재개 (NEED_REVISION 후 중단된 것)
+        ├─ 예 → phase를 "build"로 보정, build_style에 따라 Phase 3-A/B/C에서 재개
+        │       (NEED_REVISION 후 중단된 것. 아래 `if phase == "build"` 분기로 폴스루)
         └─ 아니오 (모두 verified) → phase를 "complete"로 보정, 완료 보고
 
 if phase == "build":
-    current_feature_id가 non-null인가?
-    ├─ 예 → 해당 기능의 features.json status 확인:
-    │   ├─ pending → 해당 기능부터 재시작 (구현 중 중단)
-    │   └─ built → current_feature_id를 null로 보정, 다음 pending/failed 기능으로 이동
-    └─ 아니오 → 다음 pending/failed 기능부터 재개
+    build_style 확인:
+    ├─ "autonomous" → Phase 3-A 재개:
+    │   current_feature_id는 항상 null (Builder 서브에이전트 관리)
+    │   → 다음 pending/failed/partial 기능부터 Builder 재호출
+    │
+    ├─ "collaborative" → Phase 3-B 재개:
+    │   current_feature_id가 non-null인가?
+    │   ├─ 예 → 해당 기능의 features.json status 확인:
+    │   │   ├─ pending → git log --oneline --grep="feat(FID):" 로 커밋 존재 확인:
+    │   │   │   ├─ 커밋 있음 → status를 built로 보정, current_feature_id → null
+    │   │   │   └─ 커밋 없음 → 해당 기능부터 재시작 (구현 중 중단)
+    │   │   ├─ failed/partial → 해당 기능의 수정부터 재개.
+    │   │   │   evaluation-round-{N-1}.md 존재 시 피드백 포함, 빌드 에러 이력도 함께 참조.
+    │   │   └─ built → current_feature_id를 null로 보정, 다음 pending/failed/partial 기능으로 이동
+    │   └─ 아니오 → 다음 pending/failed/partial 기능부터 재개
+    │
+    └─ "user-led" → Phase 3-C 재개:
+        batch_features가 non-null인가?
+        ├─ 예 → 배치 모드 재진입
+        │   current_feature_id가 non-null인가?
+        │   ├─ 예 → 해당 기능의 features.json status 확인:
+        │   │   ├─ built → 커밋 완료 후 중단. current_feature_id → null로 보정
+        │   │   ├─ pending → git log --oneline --grep="feat(FID):" 로 커밋 존재 확인:
+        │   │   │   ├─ 커밋 있음 → status를 built로 보정, current_feature_id → null
+        │   │   │   └─ 커밋 없음 → 실제 미커밋. 해당 기능은 재커밋 필요로 표시
+        │   │   └─ failed/partial → 수정 재처리 필요 표시 (eval 피드백 + 빌드 에러 이력 모두 참조)
+        │   └─ 아니오 → 배치 대기/리뷰 중 중단 (정상)
+        │   batch_features의 각 FID에 대해 features.json status를 확인
+        │   "이전에 배치 작업 중이었습니다: [FID 목록]
+        │    [완료: F002, F003] [미완료: F004]
+        │    작업을 계속하시겠습니까, 아니면 리뷰를 진행할까요?"
+        └─ 아니오 →
+            current_feature_id가 non-null인가?
+            ├─ 예 → 해당 기능의 features.json status 확인:
+            │   ├─ pending → git log --oneline --grep="feat(FID):" 로 커밋 존재 확인:
+            │   │   ├─ 커밋 있음 → status를 built로 보정, current_feature_id → null
+            │   │   └─ 커밋 없음 → "이전에 [FID] 구현 가이드를 드렸습니다.
+            │   │                    작업 중이셨나요? 리뷰를 진행할까요?"
+            │   ├─ failed/partial → 수정 가이드 재생성.
+            │   │   evaluation-round-{N-1}.md 존재 시 Evaluator 피드백 포함,
+            │   │   빌드 에러 이력도 함께 참조 (두 원인이 동시 존재 가능).
+            │   │   "이전에 [FID] 작업 중이었습니다. (status: [FAIL/PARTIAL])
+            │   │    수정을 계속하시겠습니까?"
+            │   └─ built → current_feature_id를 null로 보정, 다음 pending/failed/partial 기능으로 이동
+            └─ 아니오 → 다음 pending/failed/partial 기능을 확인하여 status별 가이드 생성:
+                ├─ pending → 구현 가이드 생성 (초회 구현)
+                └─ failed/partial → 수정 가이드 생성.
+                    evaluation-round-{N-1}.md 존재 시 Evaluator 피드백 포함,
+                    빌드 에러 이력도 함께 참조 (두 원인이 동시 존재 가능).
 ```
 
 4. 사용자에게 현재 상태를 요약하고, 재개할 Phase를 안내
@@ -481,17 +527,20 @@ AskUserQuestion:
   options:
     - label: "자율 모드 (Autonomous)"
       description: "Builder 에이전트가 모든 기능을 자율적으로 구현합니다. 빠르지만 세부 결정에 참여할 수 없습니다."
-    - label: "협업 모드 (Collaborative)"
-      description: "기능별로 구현 계획을 확인하고, 기술적 선택에 함께 참여합니다. 느리지만 세부 설계를 직접 결정합니다."
+    - label: "협업 모드 — 에이전트 주도 (Agent-led Collaborative)"
+      description: "에이전트가 코드를 작성하고, 기술적 선택에 사용자가 참여합니다. 느리지만 세부 설계를 직접 결정합니다."
+    - label: "협업 모드 — 사용자 주도 (User-led Collaborative)"
+      description: "에이전트가 기능별 구현 가이드를 작성하고, 사용자가 직접 코드를 작성합니다. 에이전트는 리뷰어 역할."
 ```
 
 선택 결과를 `{HARNESS_DIR}/session.json`에 기록합니다:
 
 ```json
 {
-  "build_style": "autonomous" | "collaborative",
+  "build_style": "autonomous" | "collaborative" | "user-led",
   "current_round": 1,
   "current_feature_id": null,
+  "batch_features": null,
   "phase": "build"
 }
 ```
@@ -500,7 +549,7 @@ AskUserQuestion:
 
 ### Phase 3: BUILD
 
-`build_style`에 따라 분기합니다.
+`build_style`에 따라 분기합니다: `"autonomous"` → Phase 3-A, `"collaborative"` → Phase 3-B, `"user-led"` → Phase 3-C.
 
 #### Phase 3-A: Autonomous Build (build_style = "autonomous")
 
@@ -516,7 +565,7 @@ Agent 도구 호출:
     라운드: {현재 라운드 번호}/3
     {Evaluator 피드백이 있으면 포함}
 
-    {HARNESS_DIR}/features.json에서 status=pending 또는 status=failed인 기능을
+    {HARNESS_DIR}/features.json에서 status=pending, status=failed, 또는 status=partial인 기능을
     priority 순서대로 하나씩 구현해주세요.
     각 기능 완료 시 git 커밋하세요.
     {HARNESS_DIR}/design-spec.md가 존재하면 디자인 명세를 참조하여 코드를 작성하세요.
@@ -526,7 +575,7 @@ Agent 도구 호출:
 **Phase 3-A 완료 검증 (필수):**
 Builder 에이전트 완료 후:
 1. `{HARNESS_DIR}/features.json`을 Read하여 status 변경 확인
-2. pending/failed가 남아있으면 Builder가 일부만 완료한 것 → 사용자에게 보고
+2. pending/failed/partial가 남아있으면 Builder가 일부만 완료한 것 → 사용자에게 보고
 3. `built_unverified` 상태가 있으면 Xcode MCP 미연결 경고 표시
 
 **Agent 실패 처리**: Builder가 중간에 실패하면, {HARNESS_DIR}/features.json의 현재 상태를 확인하여 완료된 기능과 미완료 기능을 사용자에게 보고합니다.
@@ -603,9 +652,10 @@ for each feature (priority 순서):
   │ 실패 시 사용자와 함께 에러 분석/수정 (최대 3회)│
   │                                              │
   │ ✅ 빌드 성공 시 (이 순서대로 실행):           │
-  │   1. features.json status → built            │
-  │   2. git commit: "feat(F001): <설명>"        │
+  │   1. git commit: "feat(F001): <설명>"        │
+  │   2. features.json status → built            │
   │   3. session.json current_feature_id → null  │
+  │   (커밋 후 status 변경 → built=커밋완료 보장) │
   │                                              │
   │ ❌ 빌드 3회 실패 시:                          │
   │   1. features.json status → failed           │
@@ -635,8 +685,9 @@ for each feature (priority 순서):
 - 사용자가 "이 부분은 내가 직접 할게" → **대기 + 보조** (기본). 사용자가 완료하면 Read로 확인 후 리뷰/보완.
 - 사용자 요청 시 **병렬 작업** 가능 (사용자: A 파일, Claude: B 파일).
 
-**모드 전환 (양방향):**
+**모드 전환 (3방향):**
 - collaborative → autonomous: 사용자 요청 또는 남은 기능이 많을 때 제안. 남은 기능을 harness-builder 서브에이전트에 위임. `session.json`의 `build_style`을 `"autonomous"`로 업데이트.
+- collaborative → user-led: 사용자가 "내가 직접 할게" / "가이드만 줘"라고 요청 시 전환. `session.json`의 `build_style`을 `"user-led"`로 업데이트.
 - autonomous → collaborative: Evaluator 피드백 후 사용자가 함께 수정하고 싶을 때 전환 가능. `session.json`의 `build_style`을 `"collaborative"`로 업데이트.
 
 **컨텍스트 관리:**
@@ -644,11 +695,176 @@ for each feature (priority 순서):
 - 기능 완료마다 이전 기능의 구현 세부사항을 요약하고, 다음 기능에 필요한 인터페이스 정보만 유지.
 - features.json의 진행 상태가 파일에 기록되므로, compaction 발생 시에도 현재 상태 복구 가능.
 
+#### Phase 3-C: User-led Collaborative Build (build_style = "user-led")
+
+서브에이전트를 호출하지 않고, **메인 대화에서 직접 실행**합니다.
+에이전트가 기능별 구현 가이드를 생성하고, 사용자가 직접 코드를 작성합니다.
+에이전트는 리뷰어 역할로, 사용자 승인 없이 코드를 수정하지 않습니다.
+
+**Step 0: 빌드 도구 탐지**
+Phase 3-B와 동일한 폴백 체인으로 빌드 도구를 탐지합니다:
+```
+BUILD_TOOL 탐지: Xcode MCP → xcodebuild+xcsift → swift build+xcsift → static
+```
+
+**기능 루프:**
+`{HARNESS_DIR}/features.json`에서 `status=pending|failed|partial`인 기능을 priority 순서대로 하나씩 진행합니다:
+
+```
+for each feature (priority 순서):
+
+  ┌─ Step 1: 기능 시작 기록 ─────────────────────┐
+  │ session.json의 current_feature_id를 업데이트  │
+  │ → 중단 시 어느 기능에서 멈췄는지 복구 가능    │
+  └──────────────────────────────────────────────┘
+       │
+       ▼
+  ┌─ Step 2: 구현 가이드 생성 ───────────────────┐
+  │ 기능 카드 + 상세 구현 가이드를 작성하여 표시   │
+  │                                              │
+  │ ## [FID] 기능명                               │
+  │ **설명**: features.json의 description         │
+  │ **검증 기준**: features.json의 verification   │
+  │ **의존성**: 의존하는 기능 목록                 │
+  │ **디자인 토큰**: design 필드의 tokens (있으면) │
+  │                                              │
+  │ ### 구현 가이드                               │
+  │ **생성/수정 파일:**                           │
+  │ - `경로/파일.swift` — 역할 설명               │
+  │                                              │
+  │ **구현 패턴:**                                │
+  │ - 사용할 패턴/프레임워크 설명                  │
+  │                                              │
+  │ **코드 스니펫 예시:**                          │
+  │ ```swift                                     │
+  │ // 핵심 구조의 코드 예시                       │
+  │ ```                                          │
+  │                                              │
+  │ **디자인 토큰 매핑:** (design-spec.md 참조)    │
+  │ - $token → SwiftUI 매핑                      │
+  │                                              │
+  │ **주의사항:**                                  │
+  │ - 구현 시 유의할 점                            │
+  └──────────────────────────────────────────────┘
+       │
+       ▼
+  ┌─ Step 3: 사용자 작업 대기 ───────────────────┐
+  │ "구현 가이드를 확인하시고 작업해주세요.         │
+  │  완료되면 '완료' 또는 '다음'이라고 알려주세요. │
+  │  질문이 있으면 언제든 물어보세요."             │
+  │                                              │
+  │ 사용자 메시지 유형에 따른 분기:               │
+  │ "완료"/"다음"/"done" → Step 4 리뷰 진입      │
+  │ "질문: ..."          → 질문에 답변 후 계속 대기│
+  │ "이건 에이전트가 해줘" → 부분 위임 (아래 참조)│
+  │ "N개 먼저 할게"      → 배치 모드 (current_feature_id→null)│
+  │                                              │
+  │ ⚠️ 사용자 응답 전까지 Write/Edit 도구 사용 금지│
+  └──────────────────────────────────────────────┘
+       │
+       ▼ (사용자: "완료" / "다음")
+  ┌─ Step 4: 변경사항 감지 + 리뷰 ──────────────┐
+  │ git diff로 사용자 변경사항 수집               │
+  │                                              │
+  │ 리뷰 리포트:                                  │
+  │ ✅ 구현 가이드 대비 완료 항목                  │
+  │ ⚠️ 누락/개선 사항                             │
+  │ 🐛 잠재 버그/이슈                             │
+  │                                              │
+  │ 수정 제안이 있으면:                            │
+  │ "다음 수정을 적용할까요?"                      │
+  │ - 제안 N: ... (diff 형태)                    │
+  │ 사용자 승인 시에만 에이전트가 코드 수정        │
+  └──────────────────────────────────────────────┘
+       │
+       ▼
+  ┌─ Step 5: 빌드 검증 + 상태 기록 + 커밋 ──────┐
+  │ BUILD_TOOL로 빌드 검증 (폴백 체인 동일)       │
+  │ 실패 시 에러 분석 리포트 + 수정 제안           │
+  │   사용자 승인 시에만 에이전트가 수정           │
+  │                                              │
+  │ ✅ 빌드 성공 시 (이 순서대로 실행):           │
+  │   1. git commit: "feat(FID): <설명>"         │
+  │   2. features.json status → built            │
+  │   3. session.json current_feature_id → null  │
+  │   (커밋 후 status 변경 → built=커밋완료 보장) │
+  │                                              │
+  │ ❌ 빌드 3회 실패 시:                          │
+  │   1. features.json status → failed           │
+  │   2. session.json current_feature_id → null  │
+  │   3. 사용자에게 스킵/재시도 선택 제시         │
+  └──────────────────────────────────────────────┘
+       │
+       ▼
+  ┌─ Step 6: 진행 상황 표시 ─────────────────────┐
+  │ | ID   | 기능        | 상태      |           │
+  │ |------|------------|----------|            │
+  │ | F001 | 앱 구조    | ✅ 완료   |           │
+  │ | F002 | 설정 화면  | 🔧 진행중 |           │
+  │ | F003 | 데이터 모델 | ⏳ 대기   |           │
+  └──────────────────────────────────────────────┘
+       │
+       ▼
+  ┌─ Step 7: 모드 전환 체크 ─────────────────────┐
+  │ 사용자가 "나머지는 자율로" → autonomous 전환  │
+  │ 사용자가 "에이전트가 짜줘" → collaborative    │
+  │ 남은 기능이 7개 이상 → 전환 제안              │
+  │                                              │
+  │ 전환 시 session.json build_style 업데이트     │
+  └──────────────────────────────────────────────┘
+```
+
+**코드 수정 권한 규칙:**
+
+Phase 3-C에서 에이전트의 Write/Edit 도구 사용 조건:
+
+| 조건 | Write/Edit 허용 |
+|------|----------------|
+| HARNESS_DIR 내 메타파일 (session.json, features.json) | ✅ 항상 |
+| 리뷰에서 제안한 코드 수정 → 사용자 "적용해줘" 승인 | ✅ 승인 후 |
+| 빌드 에러 수정 → 사용자 "수정해줘" 승인 | ✅ 승인 후 |
+| 사용자 "이것도 에이전트가 해줘" 위임 | ✅ 위임 시 |
+| 가이드 제시 후 사용자 응답 없이 코드 작성 | ❌ 금지 |
+| 리뷰 피드백을 사용자 승인 없이 자동 적용 | ❌ 금지 |
+| "명백한 수정"이라는 판단으로 자율 수정 | ❌ 금지 |
+
+**부분 위임:**
+사용자가 특정 기능만 에이전트에게 위임할 수 있습니다:
+- 사용자: "F003은 에이전트가 해줘" → F003만 Phase 3-B 방식으로 에이전트가 구현
+- `session.json`의 `build_style`은 `"user-led"` 유지
+- F003 완료 후 다음 기능은 다시 user-led 가이드 모드로 복귀
+- **재진입 시**: 부분 위임된 기능이 `pending` 상태로 재진입되면, 위임 컨텍스트는 유실되므로 user-led 기본 흐름(구현 가이드 생성)으로 복구. 사용자가 다시 위임 요청 가능
+
+**배치 모드:**
+사용자가 여러 기능을 한꺼번에 작업할 때:
+
+1. **진입**: 사용자가 "F002, F003, F004 먼저 할게" 또는 "3개 먼저 할게" 등 명시적 요청. 단건 기능 루프의 Step 3에서 진입 가능 — 이 경우 현재 기능의 `current_feature_id`를 `null`로 초기화 (해당 기능은 배치에 포함됨)
+2. **가이드 생성**: 해당 기능들의 구현 가이드를 연속 출력. `session.json` 업데이트: `batch_features`에 기능 ID 목록 기록, `current_feature_id` → `null`
+3. **대기**: "N개 기능의 구현 가이드를 작성했습니다. 작업 완료 후 알려주세요. 개별 기능 완료 시에도 중간 리뷰 가능합니다."
+4. **리뷰**: `git diff`로 전체 변경사항을 기능별로 분류하여 리뷰. 수정 제안은 사용자 승인 후에만 적용
+5. **빌드 검증**: 전체 빌드 1회 실행. 성공 → step 6으로 진행 (이 시점에서 status는 아직 `pending` 유지). 실패 시 에러를 기능별로 매핑하여 리포트
+6. **커밋**: 기능별로 순차 처리 — 각 기능마다: `current_feature_id` 설정 → git commit → `features.json` status → `built` → `current_feature_id` → `null`. status를 커밋 이후에 변경하므로, `built` = "커밋 완료"가 보장됨
+7. **해제**: `session.json`의 `batch_features` → `null`, `current_feature_id` → `null`. 단건 모드로 복귀
+
+**배치 + 부분 위임 조합:** 배치 모드 중 사용자가 "F004는 에이전트가 짜줘" → F004만 Phase 3-B 방식으로 에이전트가 구현. 나머지 배치 기능은 사용자가 계속 작업. `batch_features`와 `build_style`은 유지.
+
+**모드 전환 (3방향):**
+- user-led → autonomous: 사용자 "나머지는 자율로" 또는 남은 기능 ≥7개 시 제안. `session.json`의 `build_style`을 `"autonomous"`로 업데이트.
+- user-led → collaborative: 사용자 "나머지는 에이전트가 짜줘". `session.json`의 `build_style`을 `"collaborative"`로 업데이트.
+- autonomous/collaborative → user-led: 사용자 "내가 직접 할게" / "가이드만 줘". `session.json`의 `build_style`을 `"user-led"`로 업데이트.
+
+**모드 전환 시 배치 상태 처리:** 모드 전환 시 `batch_features`가 non-null이면 `null`로 클리어합니다. 배치 내 이미 `built` 상태인 기능은 보존되며, `pending` 상태인 기능은 새 모드에서 개별 처리됩니다.
+
+**컨텍스트 관리:**
+- 메인 대화에서 실행되므로 컨텍스트 누적에 주의.
+- 기능 완료마다 이전 기능의 구현 가이드와 리뷰를 요약하고, 다음 기능에 필요한 인터페이스 정보만 유지.
+- features.json의 진행 상태가 파일에 기록되므로, compaction 발생 시에도 현재 상태 복구 가능.
+
 ### Phase 4: EVALUATE
 
 **Phase 4 진입 시 session.json 업데이트:**
 ```json
-{ "phase": "evaluate", "current_round": N, "current_feature_id": null }
+{ "phase": "evaluate", "current_round": N, "current_feature_id": null, "batch_features": null }
 ```
 
 harness-evaluator 에이전트를 호출합니다:
@@ -684,8 +900,9 @@ Agent 도구 호출:
 
 - 판정 **NEED_REVISION**:
   1. `session.json` → `{ "phase": "build", "current_round": N+1 }` ← 즉시 build로 전이 + 라운드 증가
-  2. `build_style = "autonomous"` → Evaluator의 FAIL 피드백을 Builder에게 전달 → Phase 3-A 재실행
-  3. `build_style = "collaborative"` → FAIL 항목을 사용자와 함께 분석하고 수정 → Phase 3-B로 FAIL/PARTIAL 기능만 재진행. 이 시점에서 사용자가 autonomous 전환을 요청할 수 있음.
+  2. `build_style = "autonomous"` → Evaluator의 FAIL/PARTIAL 피드백을 Builder에게 전달 → Phase 3-A에서 failed/partial 기능 재실행
+  3. `build_style = "collaborative"` → FAIL/PARTIAL 항목을 사용자와 함께 분석하고 수정 → Phase 3-B로 failed/partial 기능만 재진행. 이 시점에서 사용자가 autonomous 또는 user-led 전환을 요청할 수 있음.
+  4. `build_style = "user-led"` → Evaluator의 FAIL/PARTIAL 피드백을 **수정 가이드** 형태로 변환하여 제시 → Phase 3-C로 복귀하여 사용자 주도 수정. 이 시점에서 사용자가 autonomous 또는 collaborative 전환을 요청할 수 있음.
 
 ### Loop Control
 
@@ -708,12 +925,12 @@ Agent 도구 호출:
     c) 수동 수정 → 사용자가 직접 수정 후 Evaluate만 재실행
 ```
 
-#### Collaborative 모드
+#### Collaborative 모드 (에이전트 주도)
 
 ```
 라운드 1: BUILD(3-B, 사용자와 협업) → EVALUATE
   PASS → 완료, 사용자에게 최종 보고
-  NEED_REVISION → FAIL 항목을 사용자와 함께 분석, 수정 방향 토론 후 재구현
+  NEED_REVISION → FAIL/PARTIAL 항목을 사용자와 함께 분석, 수정 방향 토론 후 재구현
 
 라운드 2: BUILD(3-B, FAIL/PARTIAL만) → EVALUATE
   PASS → 완료
@@ -723,14 +940,44 @@ Agent 도구 호출:
   PASS → 완료
   NEED_REVISION → 사용자에게 상황 보고 + 선택:
     a) 계속 (collaborative) → 라운드 4
-    b) 자율 전환 → 남은 FAIL 항목을 autonomous로 전환
+    b) 자율 전환 → 남은 FAIL/PARTIAL 항목을 autonomous로 전환
     c) 중단 → 현재 상태로 종료
 
-모드 전환: 어느 라운드에서든 사용자가 요청하면 autonomous ↔ collaborative 전환 가능
+모드 전환: 어느 라운드에서든 사용자가 요청하면 autonomous ↔ collaborative ↔ user-led 전환 가능
 ```
 
-Builder 재실행 시 프롬프트에 반드시 포함:
-- `{HARNESS_DIR}/evaluation-round-{N-1}.md를 참조하여 FAIL/PARTIAL 항목의 구체적 수정 지침을 확인하세요`
+#### User-led 모드 (사용자 주도)
+
+```
+라운드 1: BUILD(3-C, 사용자 구현 + 에이전트 리뷰) → EVALUATE
+  PASS → 완료, 사용자에게 최종 보고
+  NEED_REVISION → FAIL/PARTIAL 항목에 대해 수정 가이드 재생성
+    사용자가 수정 후 리뷰 → 재빌드
+
+라운드 2: BUILD(3-C, FAIL/PARTIAL만) → EVALUATE
+  PASS → 완료
+  NEED_REVISION → 라운드 3 진행
+
+라운드 3: BUILD(3-C) → EVALUATE
+  PASS → 완료
+  NEED_REVISION → 사용자에게 상황 보고 + 선택:
+    a) 계속 (user-led) → 라운드 4
+    b) 에이전트 주도 협업 전환 → Phase 3-B로 남은 FAIL/PARTIAL 항목 처리
+    c) 자율 전환 → Phase 3-A로 위임
+    d) 중단 → 현재 상태로 종료
+
+모드 전환: 어느 라운드에서든 사용자가 요청하면 autonomous ↔ collaborative ↔ user-led 전환 가능
+```
+
+**NEED_REVISION 시 user-led 특화:**
+- Evaluator의 FAIL/PARTIAL 피드백을 **수정 가이드** 형태로 변환하여 제시
+- 기존 구현 가이드 + "Evaluator 피드백 요약 + 구체적 수정 포인트" 포맷
+- 사용자가 수정 후 리뷰 → 빌드 검증 → 다음 라운드
+
+NEED_REVISION 후 Phase 3 재진입 시 반드시 포함 (모든 라운드에서 동일하게 적용):
+- **autonomous/collaborative**: Builder 프롬프트에 `{HARNESS_DIR}/evaluation-round-{N-1}.md를 참조하여 FAIL/PARTIAL 항목의 구체적 수정 지침을 확인하세요` 포함
+- **user-led**: 수정 가이드(Step 2) 생성 시 `{HARNESS_DIR}/evaluation-round-{N-1}.md`의 FAIL/PARTIAL 피드백을 요약하여 "Evaluator 피드백 + 구체적 수정 포인트" 형태로 가이드에 반영. 재진입 시에도 Step 1에서 `current_feature_id`를 설정합니다.
+- ※ Phase 3-B의 Step 번호(9 Step)와 Phase 3-C의 Step 번호(7 Step)는 상이합니다. 각 Phase의 Step 정의를 참조하세요.
 
 ## features.json Schema
 
@@ -777,8 +1024,8 @@ built → verified (Evaluator PASS)
 built → partial (Evaluator PARTIAL — 소폭 수정 필요)
 built → failed (Evaluator FAIL — 재구현 필요)
 built_unverified → verified/partial/failed (Evaluator 검증)
-partial → built (Builder 소폭 수정)
-failed → built (Builder 재구현)
+partial → built (소폭 수정 — autonomous/collaborative: Builder, user-led: 사용자)
+failed → built (재구현 또는 빌드 실패 재시도 — autonomous/collaborative: Builder, user-led: 사용자)
 ```
 
 **불변 규칙:**
@@ -790,27 +1037,33 @@ failed → built (Builder 재구현)
 
 ```json
 {
-  "build_style": "autonomous | collaborative",
+  "build_style": "autonomous | collaborative | user-led",
   "current_round": 1,
   "current_feature_id": "F003 | null",
+  "batch_features": ["F002", "F003"] | null,
   "phase": "build | evaluate | complete"
 }
 ```
 
-- `build_style`: Phase 2.5에서 설정, 모드 전환 시 업데이트
+- `build_style`: Phase 2.5에서 설정, 모드 전환 시 업데이트. `"autonomous"` → Phase 3-A, `"collaborative"` → Phase 3-B, `"user-led"` → Phase 3-C
 - `current_round`: 1에서 시작. NEED_REVISION 판정 시 N+1로 증가. **최대값: 4** (라운드 3 + 추가 1회). 재진입 시 `current_round > 4`이면 강제 종료.
-- `current_feature_id`: collaborative 모드에서 기능 시작 시 설정, 완료/실패 시 null로 초기화. autonomous 모드에서는 항상 null (Builder 서브에이전트가 관리하지 않음). 재진입 시 non-null이면 해당 기능이 중단된 것으로 판단.
+- `current_feature_id`: collaborative/user-led 모드에서 기능 시작 시 설정, 완료/실패 시 null로 초기화. autonomous 모드에서는 항상 null (Builder 서브에이전트가 관리하지 않음). 재진입 시 non-null이면 해당 기능이 중단된 것으로 판단.
+- `batch_features`: user-led 모드 배치 작업 시 대기 중인 기능 ID 목록. 배치 완료 시 `null`로 클리어. user-led 외 모드에서는 항상 `null`.
 - `phase`: `build`, `evaluate`, `complete` 3개 값만 사용. Phase 0~2 단계에서는 session.json이 존재하지 않으므로 `plan`/`verify`/`design` 값은 사용하지 않음.
 
 **phase 상태 전이 다이어그램:**
 ```
 build_style 선택 → "build" (current_round=1)
   │
+  ├─ autonomous  → Phase 3-A (Builder 서브에이전트)
+  ├─ collaborative → Phase 3-B (에이전트 주도, 메인 대화)
+  └─ user-led    → Phase 3-C (사용자 주도, 메인 대화)
+  │
   ▼
 Phase 3 완료 → "evaluate"
   │
   ├─ PASS → "complete" (최종)
-  └─ NEED_REVISION → "build" (current_round +1, 재빌드 루프)
+  └─ NEED_REVISION → "build" (current_round +1, build_style 유지하여 동일 Phase 3 변형으로 재진입)
                         │
                         └─ current_round > 4 → 강제 종료
 ```
@@ -921,19 +1174,28 @@ apple-harness 실행 흐름
 │   ├─ 기존 .pen 읽기 또는 새 디자인 생성 + design-spec.md pending backfill
 │   └─ Phase 3으로 진행
 ├─ Phase 2.5: BUILD STYLE 선택 (AskUserQuestion)
-│   ├─ autonomous | collaborative 선택
+│   ├─ autonomous | agent-led collaborative | user-led collaborative 선택
 │   └─ {HARNESS_DIR}/session.json 생성 (build_style, phase, round 기록)
 ├─ Phase 3: BUILD
 │   ├─ [autonomous] harness-builder 서브에이전트 호출
 │   │   ├─ Step 0: 빌드 도구 탐지
-│   │   ├─ pending/failed 기능 자율 구현 + 빌드 검증 + 커밋
+│   │   ├─ pending/failed/partial 기능 자율 구현 + 빌드 검증 + 커밋
 │   │   └─ features.json status → built
-│   └─ [collaborative] 메인 대화에서 직접 실행
+│   ├─ [agent-led collaborative] 메인 대화에서 직접 실행
+│   │   ├─ Step 0: 빌드 도구 탐지 (동일 폴백 체인)
+│   │   ├─ 기능별: 카드 표시 → 구현 계획 → 기술적 선택지 → 코드 작성 → 빌드 → 커밋
+│   │   ├─ 외부 편집 감지 (git diff)
+│   │   ├─ 모드 전환 가능 (autonomous ↔ collaborative ↔ user-led)
+│   │   ├─ session.json에 current_feature_id 기록 (재진입 대비)
+│   │   └─ features.json status → built
+│   └─ [user-led collaborative] 메인 대화에서 직접 실행
 │       ├─ Step 0: 빌드 도구 탐지 (동일 폴백 체인)
-│       ├─ 기능별: 카드 표시 → 구현 계획 → 기술적 선택지 → 코드 작성 → 빌드 → 커밋
-│       ├─ 외부 편집 감지 (git diff)
-│       ├─ 모드 전환 가능 (collaborative ↔ autonomous)
-│       ├─ session.json에 current_feature_id 기록 (재진입 대비)
+│       ├─ 기능별: 구현 가이드 생성 → 사용자 작업 대기 → 변경사항 리뷰 → 빌드 → 커밋
+│       ├─ 사용자 승인 없이 코드 수정 금지
+│       ├─ 배치 모드 지원 (batch_features)
+│       ├─ 부분 위임 가능 (개별 기능만 에이전트에게 위임)
+│       ├─ 모드 전환 가능 (autonomous ↔ collaborative ↔ user-led)
+│       ├─ session.json에 current_feature_id + batch_features 기록
 │       └─ features.json status → built
 ├─ Phase 4: EVALUATE (harness-evaluator)
 │   ├─ session.json phase → "evaluate" 업데이트
