@@ -14,12 +14,20 @@ Xcode의 내장 AI 에이전트가 사용하는 코드 스타일 규칙입니다
 - **Imports**: 파일 상단에 간결하게 (SwiftUI, Foundation)
 - **Comments**: 복잡한 로직에만 설명 주석 추가
 
+## Swift 6.3 Practical Notes
+
+- **C Interop**: C 호출 지점이 필요하면 일반 Swift 함수에 기대지 말고 `@c`를 사용합니다.
+- **Module Selectors**: `Module::symbol` 문법은 충돌 해소나 의미 명확화가 필요할 때만 사용합니다.
+- **Optimization Attributes**: `@specialize`, `@inline(always)`, `@export(implementation)`은 측정 근거가 있을 때만 사용합니다.
+- **Testing Diagnostics**: 비치명적 테스트 진단은 `Issue.record(..., severity: .warning)`을 우선 검토합니다.
+- **Test Cancellation**: 실행 중 전제가 깨지면 무리하게 계속하지 말고 `try Test.cancel()` 사용을 검토합니다.
+
 ## Xcode MCP Tool Integration
 
 Xcode MCP 서버가 연결되어 있으면 다음 도구를 활용하세요:
 
 ### 문서 & 탐색
-- **`mcp__xcode__DocumentationSearch`**: 로컬 참조 20개에 없는 Apple API 검색. 최신 API는 여기서 찾기
+- **`mcp__xcode__DocumentationSearch`**: 로컬 참조 21개에 없는 Apple API 검색. 최신 API는 여기서 찾기
 
 ### 빌드 & 실행
 - **`mcp__xcode__BuildProject`**: 코드 작성 후 빌드 검증 (시간이 오래 걸릴 수 있음)

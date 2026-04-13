@@ -170,6 +170,7 @@ UNMAPPED=0
 
 INDEX_ROWS=""
 typeset -A SEEN_LOCAL
+typeset -A MAPPED_LOCAL
 
 mkdir -p "$REF_DIR"
 
@@ -191,6 +192,7 @@ for src_file in "${md_files[@]}"; do
   fi
 
   SEEN_LOCAL[$local_name]=1
+  MAPPED_LOCAL[$local_name]=1
 
   if ! new_checksum="$(shasum -a 256 "$src_file" | awk '{print $1}')"; then
     echo "Error: 체크섬 계산 실패: $src_name" >&2
@@ -247,9 +249,34 @@ for local_name in ${(v)FILE_MAP}; do
   fi
 done
 
+# --- 수동 보강 문서 인덱스 포함 ---
+MANUAL_ROWS=""
+MANUAL_COUNT=0
+for local_path in "$REF_DIR"/*.md(N); do
+  local_name="${local_path:t}"
+
+  case "$local_name" in
+    _index.md|code-style.md|common-mistakes.md|response-templates.md)
+      continue
+      ;;
+  esac
+
+  if [[ -n "${MAPPED_LOCAL[$local_name]:-}" ]]; then
+    continue
+  fi
+
+  if ! manual_checksum="$(shasum -a 256 "$local_path" | awk '{print $1}')"; then
+    echo "Error: 체크섬 계산 실패: $local_name" >&2
+    exit 1
+  fi
+  manual_line_count="$(wc -l < "$local_path" | tr -d ' ')"
+  MANUAL_ROWS+="| $local_name | Manual supplement | $manual_line_count | $manual_checksum |"$'\n'
+  (( ++MANUAL_COUNT ))
+done
+
 # --- _index.md 생성 ---
 if ! $DIFF_ONLY; then
-  TOTAL=$((ADDED + UPDATED + UNCHANGED))
+  TOTAL=$((ADDED + UPDATED + UNCHANGED + MANUAL_COUNT))
   cat > "$INDEX_FILE" << EOF
 ---
 xcode_version: "$XCODE_VERSION"
@@ -262,10 +289,11 @@ doc_count: $TOTAL
 # apple-craft Reference Index
 
 Xcode $XCODE_VERSION (build $XCODE_BUILD) AdditionalDocumentation sync 결과.
+Manual supplement 문서도 함께 인덱싱합니다.
 
 | Local File | Xcode Original | Lines | SHA256 |
 |------------|---------------|-------|--------|
-${INDEX_ROWS}
+${INDEX_ROWS}${MANUAL_ROWS}
 EOF
   echo ""
   echo "📋 _index.md 갱신 완료"

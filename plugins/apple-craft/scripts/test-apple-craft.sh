@@ -476,6 +476,11 @@ else
     "@concurrent|swift-concurrency|background|nonisolated" \
     "6. Xcode MCP 미연결: Swift 6.2 설명"
 
+  run_claude_test \
+    "Swift 6.3의 @c와 module selector 설명해줘" \
+    "@c|module selectors|::|swift-6-3-language-and-tooling" \
+    "7. Xcode MCP 미연결: Swift 6.3 설명"
+
   part_summary
 fi
 

@@ -32,6 +32,35 @@ guard case .available = model.availability else { return }
 let session = LanguageModelSession()
 ```
 
+## Swift 6.3 C Interop
+
+```swift
+// ❌ Wrong: plain Swift 함수를 C에서 바로 호출할 수 있다고 가정
+func callFromC() {
+    print("Hello")
+}
+
+// ✅ Correct: C entry point가 필요하면 @c로 명시
+@c(MyLibrary_callFromC)
+func callFromC() {
+    print("Hello")
+}
+```
+
+## Swift 6.3 Module Selectors
+
+```swift
+// ❌ Wrong: 동일 이름 API가 여러 모듈에 있을 때 암묵적 해석에 의존
+import ModuleA
+import ModuleB
+
+let value = getValue()
+
+// ✅ Correct: 충돌 지점에서 모듈 선택자를 명시
+let valueA = ModuleA::getValue()
+let valueB = ModuleB::getValue()
+```
+
 ## Swift 6.2 Concurrency
 
 ```swift
@@ -45,6 +74,16 @@ class PhotoProcessor {
     @concurrent
     func process() async { /* 명시적으로 백그라운드 스레드 풀에서 실행 */ }
 }
+```
+
+## Swift Testing (6.3)
+
+```swift
+// ❌ Wrong: 비치명적 진단까지 테스트 실패로 처리
+#expect(cacheMisses.isEmpty)
+
+// ✅ Correct: 결과는 남기되 실패로 만들고 싶지 않으면 warning issue 사용
+Issue.record("Cache miss detected during warm-up", severity: .warning)
 ```
 
 ## SwiftData Inheritance

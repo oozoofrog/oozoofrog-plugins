@@ -27,7 +27,7 @@ assistant: "review 모드로 해당 화면을 분석하고, 성능 및 Swift Con
 # apple-review
 
 Apple 에코시스템 참조 문서 기반의 심층 코드 리뷰를 수행합니다.
-일반 코드 리뷰와 달리, 20개 Apple API 참조 문서 + common-mistakes.md를 기준으로
+일반 코드 리뷰와 달리, 20개 Apple API 참조 문서 + Swift 6.3 보강 문서 + common-mistakes.md를 기준으로
 Apple 플랫폼 고유의 문제를 발견하고 트리아지합니다.
 이 스킬은 구현/수정 요청을 직접 수행하는 스킬이 아니라, 문제를 식별하고 우선순위를 정하는 **리뷰 전용 스킬**입니다.
 실제 구현/수정은 `apple-craft`, 처음부터/전체 구현은 `apple-harness`가 더 적합합니다.
@@ -39,7 +39,7 @@ apple-craft 스킬과 동일한 참조 문서를 공유합니다.
 
 - `references/common-mistakes.md` — 필수 로드 (안티패턴 체크리스트)
 - `references/code-style.md` — 필수 로드 (Apple 코딩 컨벤션)
-- 나머지 18개 참조 문서 — 대상 코드의 프레임워크에 따라 선택 로드
+- 나머지 19개 참조 문서 — 대상 코드의 프레임워크에 따라 선택 로드
 
 ---
 

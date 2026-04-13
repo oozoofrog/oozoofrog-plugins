@@ -2,7 +2,7 @@
 
 Apple 플랫폼 개발 스킬 모음 — 일반 구현/수정/디버깅(`apple-craft`), 코드 리뷰(`apple-review`), 장기 대규모 구현(`apple-harness`) + Xcode MCP 연동.
 
-Xcode 26 번들 문서 기반 최신 API 참조 문서 20개 내장.
+Xcode 26 번들 문서 20개 + Swift 6.3 보강 문서 1개를 내장합니다.
 
 ## 핵심 기능
 
@@ -10,7 +10,7 @@ Xcode 26 번들 문서 기반 최신 API 참조 문서 20개 내장.
 |------|------|
 | **코드 작성** | Swift/SwiftUI/UIKit/AppKit 코드 작성, 리팩토링, 마이그레이션 |
 | **빌드 & 디버깅** | Xcode MCP 연동으로 빌드, 프리뷰, 에러 진단 |
-| **API 탐색** | DocumentationSearch + 20개 최신 API 참조 문서 |
+| **API 탐색** | DocumentationSearch + 21개 최신 참조 문서 |
 | **코드 리뷰** | Apple 에코시스템 참조 문서 기반 심층 코드 리뷰 + 자동 수정/GitHub Issue 생성 |
 | **Harness 모드** | Plan→Build→Evaluate 에이전트 루프로 장기 개발 자동화 |
 
@@ -20,13 +20,13 @@ Xcode 26 번들 문서 기반 최신 API 참조 문서 20개 내장.
 - 코드/PR 점검과 리뷰 → `apple-review`
 - 처음부터/앱 전체/대규모 장기 구현 → `apple-harness`
 
-## 내장 참조 문서 (20개)
+## 내장 참조 문서 (21개)
 
 | Category | Topics |
 |----------|--------|
 | **Design** | Liquid Glass (SwiftUI, UIKit, AppKit, WidgetKit) |
 | **AI** | FoundationModels (on-device LLM), Visual Intelligence, AppIntents |
-| **Swift** | Swift 6.2 Concurrency, InlineArray & Span |
+| **Swift** | Swift 6.3 Language & Tooling, Swift 6.2 Concurrency, InlineArray & Span |
 | **Data** | SwiftData Class Inheritance, AttributedString Updates |
 | **UI** | WebKit+SwiftUI, Toolbar Features, Styled Text Editing, AlarmKit |
 | **Commerce** | StoreKit Updates |
