@@ -2,5 +2,5 @@
   "name": "apple-craft",
   "description": "Apple 플랫폼 개발 스킬 모음 — 일반 구현/디버깅(apple-craft), 코드 리뷰(apple-review), 장기 대규모 구현 하네스(apple-harness, Designer 2-way split), App Store 배포 자동화(appstore-deploy), Xcode MCP 연동, xcodebuild+xcsift 빌드 폴백, Xcode 26 번들 문서 20개 + Swift 6.3 보강 문서 내장, Pencil 디자인 통합",
   "author": { "name": "oozoofrog" },
-  "version": "1.20.0"
+  "version": "1.20.1"
 }
