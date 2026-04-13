@@ -347,19 +347,28 @@ if phase == "build":
             ├─ 예 → 해당 기능의 features.json status 확인:
             │   ├─ pending → git log --oneline --grep="feat(FID):" 로 커밋 존재 확인:
             │   │   ├─ 커밋 있음 → status를 built로 보정, current_feature_id → null
-            │   │   └─ 커밋 없음 → "이전에 [FID] 구현 가이드를 드렸습니다.
-            │   │                    작업 중이셨나요? 리뷰를 진행할까요?"
+            │   │   └─ 커밋 없음 → guides/{FID}-guide.md 존재 확인:
+            │   │       ├─ 존재 → 파일 open + "이전에 [FID] 가이드를 열어드렸습니다.
+            │   │       │          작업 중이셨나요? 리뷰를 진행할까요?" (재생성 안 함)
+            │   │       └─ 없음 → 새 가이드 파일 생성 + open (Step 2부터 재진입)
             │   ├─ failed/partial → 수정 가이드 재생성.
+            │   │   guides/{FID}-guide.md 덮어쓰기 (기존 사용자 편집 백업은
+            │   │   guides/{FID}-guide.backup-r{N-1}.md로 보존).
             │   │   evaluation-round-{N-1}.md 존재 시 Evaluator 피드백 포함,
-            │   │   빌드 에러 이력도 함께 참조 (두 원인이 동시 존재 가능).
-            │   │   "이전에 [FID] 작업 중이었습니다. (status: [FAIL/PARTIAL])
-            │   │    수정을 계속하시겠습니까?"
+            │   │   build-errors/{FID}-build-attempt-*.md 존재 시 빌드 에러 이력
+            │   │   참조 (두 원인이 동시 존재 가능). worst-cases.md 관련 엔트리
+            │   │   도 추출하여 "피해야 할 패턴" 섹션 갱신.
+            │   │   open 후 "이전에 [FID] 작업 중이었습니다. (status: [FAIL/PARTIAL])
+            │   │    수정 가이드를 새로 열어드렸습니다. 확인 후 계속하시겠습니까?"
             │   └─ built → current_feature_id를 null로 보정, 다음 pending/failed/partial 기능으로 이동
             └─ 아니오 → 다음 pending/failed/partial 기능을 확인하여 status별 가이드 생성:
-                ├─ pending → 구현 가이드 생성 (초회 구현)
-                └─ failed/partial → 수정 가이드 생성.
+                ├─ pending → guides/{FID}-guide.md 존재 여부 확인:
+                │   ├─ 존재 → 파일 open만 수행 (재생성 금지, 사용자 편집 보존)
+                │   └─ 없음 → 구현 가이드 생성 + open (초회 구현)
+                └─ failed/partial → 수정 가이드 재생성 (덮어쓰기 + backup 보존).
                     evaluation-round-{N-1}.md 존재 시 Evaluator 피드백 포함,
-                    빌드 에러 이력도 함께 참조 (두 원인이 동시 존재 가능).
+                    build-errors/{FID}-build-attempt-*.md 및 worst-cases.md
+                    참조 (두 원인이 동시 존재 가능).
 ```
 
 4. 사용자에게 현재 상태를 요약하고, 재개할 Phase를 안내
@@ -698,14 +707,46 @@ for each feature (priority 순서):
 #### Phase 3-C: User-led Collaborative Build (build_style = "user-led")
 
 서브에이전트를 호출하지 않고, **메인 대화에서 직접 실행**합니다.
-에이전트가 기능별 구현 가이드를 생성하고, 사용자가 직접 코드를 작성합니다.
+에이전트가 기능별 구현 가이드를 **문서 파일로 생성**하고, 사용자가 직접 코드를 작성합니다.
 에이전트는 리뷰어 역할로, 사용자 승인 없이 코드를 수정하지 않습니다.
 
-**Step 0: 빌드 도구 탐지**
+**핵심 원칙 — 문서가 1차, 대화는 승인 신호:**
+
+Phase 3-C의 모든 맥락 전달(가이드, 리뷰, 빌드 에러)은 **파일로 생성**하여 `open` 명령으로 에디터에 띄웁니다.
+대화창은 짧은 승인 신호(AskUserQuestion)만 주고받습니다.
+
+- **사용자 편집 우선**: 사용자가 가이드/리뷰 파일을 편집하면, 그 변경이 이후 작업에 반영됩니다
+- **산출물 누적**: 모든 가이드/리뷰/빌드 에러가 HARNESS_DIR에 남아 재진입/회고에 활용
+- **컨텍스트 절약**: 긴 가이드가 대화창에 누적되지 않음
+
+**파일 레이아웃:**
+
+```
+{HARNESS_DIR}/
+├── guides/
+│   ├── F001-guide.md              ← Step 2 구현 가이드 (기능별 1개)
+│   └── F002-guide.md
+├── reviews/
+│   ├── F001-review-r1.md          ← Step 4 리뷰 리포트 (라운드별)
+│   └── F001-review-r2.md
+├── build-errors/
+│   ├── F001-build-attempt-1.md    ← Step 5 빌드 실패 리포트 (시도별)
+│   └── F001-build-attempt-2.md
+└── worst-cases.md                  ← 누적 안티패턴 카탈로그
+```
+
+**Step 0: 빌드 도구 탐지 + 디렉토리 준비**
 Phase 3-B와 동일한 폴백 체인으로 빌드 도구를 탐지합니다:
 ```
 BUILD_TOOL 탐지: Xcode MCP → xcodebuild+xcsift → swift build+xcsift → static
 ```
+
+추가로 Phase 3-C 파일 디렉토리를 준비합니다:
+```bash
+mkdir -p {HARNESS_DIR}/guides {HARNESS_DIR}/reviews {HARNESS_DIR}/build-errors
+```
+
+worst-cases.md가 없으면 빈 파일을 생성하고, 있으면 Read하여 이후 가이드 생성에 참조합니다.
 
 **기능 루프:**
 `{HARNESS_DIR}/features.json`에서 `status=pending|failed|partial`인 기능을 priority 순서대로 하나씩 진행합니다:
@@ -719,69 +760,85 @@ for each feature (priority 순서):
   └──────────────────────────────────────────────┘
        │
        ▼
-  ┌─ Step 2: 구현 가이드 생성 ───────────────────┐
-  │ 기능 카드 + 상세 구현 가이드를 작성하여 표시   │
+  ┌─ Step 2: 가이드 문서 생성 + open ───────────┐
+  │ worst-cases.md Read → 관련 안티패턴 추출      │
   │                                              │
-  │ ## [FID] 기능명                               │
-  │ **설명**: features.json의 description         │
-  │ **검증 기준**: features.json의 verification   │
-  │ **의존성**: 의존하는 기능 목록                 │
-  │ **디자인 토큰**: design 필드의 tokens (있으면) │
+  │ Write: {HARNESS_DIR}/guides/{FID}-guide.md   │
+  │ 템플릿: "가이드 파일 템플릿" 섹션 참조       │
   │                                              │
-  │ ### 구현 가이드                               │
-  │ **생성/수정 파일:**                           │
-  │ - `경로/파일.swift` — 역할 설명               │
+  │ Bash: open {HARNESS_DIR}/guides/{FID}-guide.md│
   │                                              │
-  │ **구현 패턴:**                                │
-  │ - 사용할 패턴/프레임워크 설명                  │
-  │                                              │
-  │ **코드 스니펫 예시:**                          │
-  │ ```swift                                     │
-  │ // 핵심 구조의 코드 예시                       │
-  │ ```                                          │
-  │                                              │
-  │ **디자인 토큰 매핑:** (design-spec.md 참조)    │
-  │ - $token → SwiftUI 매핑                      │
-  │                                              │
-  │ **주의사항:**                                  │
-  │ - 구현 시 유의할 점                            │
+  │ 대화 응답 (짧게):                             │
+  │ "[FID] 가이드를 열었습니다.                   │
+  │  파일을 확인하시고 작업해주세요. 필요하면      │
+  │  가이드 내용을 직접 편집하셔도 됩니다."       │
   └──────────────────────────────────────────────┘
        │
        ▼
-  ┌─ Step 3: 사용자 작업 대기 ───────────────────┐
-  │ "구현 가이드를 확인하시고 작업해주세요.         │
-  │  완료되면 '완료' 또는 '다음'이라고 알려주세요. │
-  │  질문이 있으면 언제든 물어보세요."             │
+  ┌─ Step 3: 사용자 작업 대기 + 파일 편집 감지 ──┐
+  │ AskUserQuestion:                              │
+  │   question: "[FID] 작업 상태를 알려주세요"    │
+  │   options:                                    │
+  │   - "완료 — 리뷰 진행"                         │
+  │   - "질문 있음 — 논의 후 재개"                 │
+  │   - "에이전트에게 위임 (부분 위임)"            │
+  │   - "N개 먼저 하고 싶음 — 배치 모드"           │
   │                                              │
-  │ 사용자 메시지 유형에 따른 분기:               │
-  │ "완료"/"다음"/"done" → Step 4 리뷰 진입      │
-  │ "질문: ..."          → 질문에 답변 후 계속 대기│
-  │ "이건 에이전트가 해줘" → 부분 위임 (아래 참조)│
-  │ "N개 먼저 할게"      → 배치 모드 (current_feature_id→null)│
+  │ 사용자가 응답 전에 가이드 파일을 편집하면     │
+  │ "완료" 선택 시 Claude가 다음을 수행:         │
+  │   1. Read: guides/{FID}-guide.md             │
+  │   2. 편집 diff 분석 ("사용자 문서 편집 감지"  │
+  │      섹션의 판단 기준 적용)                  │
+  │   3. 의미 있는 변경 → Step 4 리뷰/이후 가이드 │
+  │      에 반영 + features.json/design-spec.md  │
+  │      /harness-spec.md 필요 시 즉시 업데이트  │
   │                                              │
   │ ⚠️ 사용자 응답 전까지 Write/Edit 도구 사용 금지│
+  │   (HARNESS_DIR 내 메타파일은 예외)            │
   └──────────────────────────────────────────────┘
        │
-       ▼ (사용자: "완료" / "다음")
-  ┌─ Step 4: 변경사항 감지 + 리뷰 ──────────────┐
+       ▼ (사용자: "완료")
+  ┌─ Step 4: 리뷰 문서 생성 + open ─────────────┐
   │ git diff로 사용자 변경사항 수집               │
+  │ 현재 라운드 번호 N을 session.json에서 읽음    │
   │                                              │
-  │ 리뷰 리포트:                                  │
-  │ ✅ 구현 가이드 대비 완료 항목                  │
-  │ ⚠️ 누락/개선 사항                             │
-  │ 🐛 잠재 버그/이슈                             │
+  │ Write: {HARNESS_DIR}/reviews/{FID}-review-  │
+  │        r{N}.md                               │
+  │ 내용: ✅ 완료 / ⚠️ 누락·개선 / 🐛 잠재 이슈   │
+  │       + 수정 제안 (diff 형태)                 │
   │                                              │
-  │ 수정 제안이 있으면:                            │
-  │ "다음 수정을 적용할까요?"                      │
-  │ - 제안 N: ... (diff 형태)                    │
-  │ 사용자 승인 시에만 에이전트가 코드 수정        │
+  │ Bash: open {HARNESS_DIR}/reviews/{FID}-...   │
+  │                                              │
+  │ AskUserQuestion:                              │
+  │   question: "[FID] 리뷰 리포트 확인 결과"    │
+  │   options:                                    │
+  │   - "모든 제안 적용 — Claude가 수정"          │
+  │   - "일부만 적용 — 번호 알려주세요"            │
+  │   - "제안 스킵 — 빌드 검증 바로 진행"         │
+  │   - "직접 수정하겠음 — 잠시 대기"              │
+  │                                              │
+  │ 사용자 승인 시에만 Claude가 코드 수정          │
+  │ 리뷰 파일을 사용자가 편집했다면 Read로 반영    │
   └──────────────────────────────────────────────┘
        │
        ▼
   ┌─ Step 5: 빌드 검증 + 상태 기록 + 커밋 ──────┐
-  │ BUILD_TOOL로 빌드 검증 (폴백 체인 동일)       │
-  │ 실패 시 에러 분석 리포트 + 수정 제안           │
-  │   사용자 승인 시에만 에이전트가 수정           │
+  │ BUILD_TOOL로 빌드 검증                        │
+  │                                              │
+  │ ❌ 빌드 실패 시 (각 시도마다):                 │
+  │   attempt 번호 K를 증분                       │
+  │   Write: build-errors/{FID}-build-attempt-  │
+  │          {K}.md                              │
+  │   내용: 에러 요약 + 문제 코드 스냅샷 + 원인   │
+  │         분석 + 수정 제안                      │
+  │   Bash: open build-errors/{FID}-...          │
+  │                                              │
+  │   AskUserQuestion:                            │
+  │   - "제안대로 수정 — Claude 적용"              │
+  │   - "내가 직접 수정하겠음"                     │
+  │   - "이 기능 스킵 (failed로 표시)"             │
+  │                                              │
+  │   수정 후 재빌드 (최대 3회 시도)              │
   │                                              │
   │ ✅ 빌드 성공 시 (이 순서대로 실행):           │
   │   1. git commit: "feat(FID): <설명>"         │
@@ -791,17 +848,20 @@ for each feature (priority 순서):
   │                                              │
   │ ❌ 빌드 3회 실패 시:                          │
   │   1. features.json status → failed           │
-  │   2. session.json current_feature_id → null  │
-  │   3. 사용자에게 스킵/재시도 선택 제시         │
+  │   2. 모든 build-errors/{FID}-build-attempt-* │
+  │      를 worst-cases.md에 엔트리로 누적        │
+  │      (Worst Case 기록 섹션 참조)             │
+  │   3. session.json current_feature_id → null  │
+  │   4. 사용자에게 스킵/재시도 선택 제시         │
   └──────────────────────────────────────────────┘
        │
        ▼
   ┌─ Step 6: 진행 상황 표시 ─────────────────────┐
-  │ | ID   | 기능        | 상태      |           │
-  │ |------|------------|----------|            │
-  │ | F001 | 앱 구조    | ✅ 완료   |           │
-  │ | F002 | 설정 화면  | 🔧 진행중 |           │
-  │ | F003 | 데이터 모델 | ⏳ 대기   |           │
+  │ | ID   | 기능        | 상태      | 가이드      │
+  │ |------|------------|----------|------------│
+  │ | F001 | 앱 구조    | ✅ 완료   | ✔ r1 PASS │
+  │ | F002 | 설정 화면  | 🔧 진행중 | guides/... │
+  │ | F003 | 데이터 모델 | ⏳ 대기   | -          │
   └──────────────────────────────────────────────┘
        │
        ▼
@@ -814,19 +874,119 @@ for each feature (priority 순서):
   └──────────────────────────────────────────────┘
 ```
 
+**가이드 파일 템플릿 ({HARNESS_DIR}/guides/{FID}-guide.md):**
+
+```markdown
+# [FID] 기능명
+
+> 생성: {ISO timestamp}
+> 라운드: {current_round}
+> 이 문서는 Claude가 생성한 구현 가이드입니다.
+> 자유롭게 편집하세요. 편집 내용은 다음 단계(리뷰/빌드)에 반영됩니다.
+
+## 기능 카드
+
+- **설명**: features.json의 description
+- **검증 기준**: features.json의 verification
+- **의존성**: 의존하는 기능 목록
+- **디자인 토큰**: design 필드의 tokens (있으면)
+
+## 구현 가이드
+
+### 생성/수정 파일
+- `경로/파일.swift` — 역할 설명
+
+### 구현 패턴
+- 사용할 패턴/프레임워크 설명
+
+### 코드 스니펫 예시
+```swift
+// 핵심 구조의 코드 예시
+```
+
+### 디자인 토큰 매핑 (design-spec.md 참조)
+- $token → SwiftUI 매핑
+
+### 주의사항
+- 구현 시 유의할 점
+
+## 피해야 할 패턴 (worst-cases.md 추출)
+{worst-cases.md에서 이 FID 또는 관련 카테고리의 교훈을 추출하여 삽입.
+없으면 이 섹션 전체 생략.}
+
+## Evaluator 피드백 (NEED_REVISION 후 재진입 시)
+{evaluation-round-{N-1}.md에서 이 FID의 FAIL/PARTIAL 피드백을 삽입.
+초회 구현 시 이 섹션 전체 생략.}
+```
+
 **코드 수정 권한 규칙:**
 
 Phase 3-C에서 에이전트의 Write/Edit 도구 사용 조건:
 
 | 조건 | Write/Edit 허용 |
 |------|----------------|
-| HARNESS_DIR 내 메타파일 (session.json, features.json) | ✅ 항상 |
-| 리뷰에서 제안한 코드 수정 → 사용자 "적용해줘" 승인 | ✅ 승인 후 |
-| 빌드 에러 수정 → 사용자 "수정해줘" 승인 | ✅ 승인 후 |
+| HARNESS_DIR 내 메타파일 (session.json, features.json, design-spec.md, harness-spec.md) | ✅ 항상 |
+| HARNESS_DIR 내 산출물 파일 (guides/, reviews/, build-errors/, worst-cases.md) | ✅ 항상 |
+| 리뷰에서 제안한 코드 수정 → AskUserQuestion "모든 제안 적용" 또는 "일부 적용" 선택 | ✅ 승인 후 |
+| 빌드 에러 수정 → AskUserQuestion "제안대로 수정" 선택 | ✅ 승인 후 |
 | 사용자 "이것도 에이전트가 해줘" 위임 | ✅ 위임 시 |
-| 가이드 제시 후 사용자 응답 없이 코드 작성 | ❌ 금지 |
+| 가이드 생성 후 사용자 응답 없이 코드 작성 | ❌ 금지 |
 | 리뷰 피드백을 사용자 승인 없이 자동 적용 | ❌ 금지 |
 | "명백한 수정"이라는 판단으로 자율 수정 | ❌ 금지 |
+
+**Worst Case 기록 (worst-cases.md):**
+
+빌드 에러로 기능이 `failed` 처리되거나, 재빌드 과정에서 중대한 오류가 반복될 때 `{HARNESS_DIR}/worst-cases.md`에 엔트리를 추가합니다. 이후 가이드 생성 시 "피해야 할 패턴" 섹션의 소스가 됩니다.
+
+**엔트리 템플릿:**
+
+```markdown
+## [{ISO timestamp}] [{FID}] {에러 한 줄 요약}
+
+**맥락**: 어떤 가이드(guides/{FID}-guide.md)의 어떤 지시를 따랐는가 / 사용자가 어떤 방식으로 구현했는가
+**문제 코드**:
+```swift
+// 실제로 빌드 실패를 유발한 코드 스니펫 (context 10-20줄)
+```
+**빌드 에러**: `error: ...` (xcsift JSON의 message 필드)
+**원인 분석**: 왜 실패했는가 (1-3줄)
+**수정**: 어떻게 해결했는가 / 대안 코드 스니펫
+**교훈**: 이후 가이드에 반영할 규칙 1줄 (예: "NavigationStack에서 value-based navigation 사용 시 Hashable 준수 필요")
+**카테고리**: `ui` / `data` / `logic` / `test` / `config` (features.json의 category와 매칭)
+```
+
+**기록 시점:**
+1. 기능이 `failed` 처리될 때 (빌드 3회 실패) — 모든 build-attempt-*.md를 종합하여 1개 엔트리 생성
+2. Evaluator NEED_REVISION 판정에서 동일 패턴이 2회 이상 반복될 때 (라운드 간 학습)
+
+**참조 시점:**
+- Step 2 가이드 생성 시 Read → 같은 카테고리의 엔트리에서 "교훈"을 추출하여 "피해야 할 패턴" 섹션에 삽입
+- 새 세션 시작 시 Read하지 않음 (세션별 격리가 원칙, 단 사용자가 명시적으로 참조 요청 시 예외)
+
+**사용자 문서 편집 감지 및 반영:**
+
+Step 3에서 사용자가 `guides/{FID}-guide.md`를 편집했거나, Step 4에서 `reviews/{FID}-review-r{N}.md`를 편집한 경우, Claude는 해당 파일을 Read하여 편집 내용을 감지하고 다음 원칙으로 반영합니다.
+
+**반영 대상 (의미 있는 변경):**
+- **파일 경로/구조 변경**: "생성/수정 파일" 섹션 수정 → 리뷰/빌드 단계 및 이후 관련 기능 가이드에 반영
+- **사용 프레임워크/패턴 교체**: "구현 패턴" 또는 코드 스니펫의 핵심 기술 선택 변경 → 같은 기술을 쓰는 이후 모든 기능에 전파
+- **디자인 토큰/스타일 규약 재정의**: "디자인 토큰 매핑" 수정 → design-spec.md 업데이트 (Claude가 즉시 반영)
+- **검증 기준 강화/완화**: "검증 기준" 섹션 수정 → features.json의 verification 업데이트 (단, 기준 완화는 금지 규칙과 충돌하므로 사용자에게 재확인)
+- **주의사항 신규 추가**: 사용자가 제약을 추가 → 이후 같은 카테고리 기능 가이드의 "주의사항"에 전파
+- **리뷰 수정 제안 편집**: 사용자가 리뷰 제안 내용을 수정했다면 수정된 내용으로 적용
+
+**반영 제외 (단순 메모):**
+- 주석/체크박스 마크 (`- [x]`, `// TODO`, `<!-- memo -->`)
+- 오탈자 수정, 공백/포매팅 변경
+- 사용자가 "생각 중" 영역에 쓴 메모 (명시적 섹션 밖)
+
+**반영 범위 결정 규칙:**
+- **현재 기능 이후 단계(리뷰/빌드)에만**: 한 기능에 국한된 구현 세부사항 변경
+- **이후 모든 기능에 (design-spec.md/harness-spec.md 업데이트 + 대기 중 기능의 가이드 재생성 제안)**:
+  - 디자인 토큰/프레임워크/아키텍처 선택처럼 프로젝트 전반에 영향을 미치는 변경
+  - 변경 감지 시 AskUserQuestion으로 "이 변경을 이후 모든 기능에도 적용할까요?" 확인
+
+**판별이 모호할 때:** AskUserQuestion으로 사용자에게 반영 범위를 직접 선택하도록 합니다. Claude가 단독으로 전역 문서(design-spec.md/harness-spec.md)를 수정하지 않습니다.
 
 **부분 위임:**
 사용자가 특정 기능만 에이전트에게 위임할 수 있습니다:
@@ -838,13 +998,16 @@ Phase 3-C에서 에이전트의 Write/Edit 도구 사용 조건:
 **배치 모드:**
 사용자가 여러 기능을 한꺼번에 작업할 때:
 
-1. **진입**: 사용자가 "F002, F003, F004 먼저 할게" 또는 "3개 먼저 할게" 등 명시적 요청. 단건 기능 루프의 Step 3에서 진입 가능 — 이 경우 현재 기능의 `current_feature_id`를 `null`로 초기화 (해당 기능은 배치에 포함됨)
-2. **가이드 생성**: 해당 기능들의 구현 가이드를 연속 출력. `session.json` 업데이트: `batch_features`에 기능 ID 목록 기록, `current_feature_id` → `null`
-3. **대기**: "N개 기능의 구현 가이드를 작성했습니다. 작업 완료 후 알려주세요. 개별 기능 완료 시에도 중간 리뷰 가능합니다."
-4. **리뷰**: `git diff`로 전체 변경사항을 기능별로 분류하여 리뷰. 수정 제안은 사용자 승인 후에만 적용
-5. **빌드 검증**: 전체 빌드 1회 실행. 성공 → step 6으로 진행 (이 시점에서 status는 아직 `pending` 유지). 실패 시 에러를 기능별로 매핑하여 리포트
-6. **커밋**: 기능별로 순차 처리 — 각 기능마다: `current_feature_id` 설정 → git commit → `features.json` status → `built` → `current_feature_id` → `null`. status를 커밋 이후에 변경하므로, `built` = "커밋 완료"가 보장됨
-7. **해제**: `session.json`의 `batch_features` → `null`, `current_feature_id` → `null`. 단건 모드로 복귀
+1. **진입**: 사용자가 "F002, F003, F004 먼저 할게" 또는 "3개 먼저 할게" 등 명시적 요청 (Step 3의 AskUserQuestion "N개 먼저 하고 싶음" 선택지로도 진입). 단건 기능 루프에서 진입 시 현재 기능의 `current_feature_id`를 `null`로 초기화 (해당 기능은 배치에 포함됨)
+2. **가이드 파일 생성**: 해당 기능들에 대해 `guides/{FID}-guide.md` 파일을 **개별로 N개 생성** (단일 파일 아님). `session.json` 업데이트: `batch_features`에 기능 ID 목록 기록, `current_feature_id` → `null`
+3. **open 일괄**: `open guides/F002-guide.md guides/F003-guide.md guides/F004-guide.md` 로 모든 가이드를 한꺼번에 에디터에 띄움
+4. **대기**: 짧은 대화 응답 — "N개 기능의 구현 가이드를 모두 열었습니다. 작업 완료 후 알려주세요." + AskUserQuestion으로 완료 신호 수집 (옵션: "모두 완료 — 일괄 리뷰" / "개별 리뷰 원함 — FID 지정" / "추가 논의 필요")
+5. **리뷰 파일 생성**: `git diff`로 전체 변경사항을 기능별로 분류. 각 기능마다 `reviews/{FID}-review-r{N}.md` 파일을 **개별로 생성** + `open` 일괄. 수정 제안은 사용자 AskUserQuestion 승인 후에만 적용
+6. **빌드 검증**: 전체 빌드 1회 실행. 실패 시 기능별 `build-errors/{FID}-build-attempt-{K}.md` 파일 생성 + `open` 일괄
+7. **커밋**: 기능별로 순차 처리 — 각 기능마다: `current_feature_id` 설정 → git commit → `features.json` status → `built` → `current_feature_id` → `null`. status를 커밋 이후에 변경하므로, `built` = "커밋 완료"가 보장됨
+8. **해제**: `session.json`의 `batch_features` → `null`, `current_feature_id` → `null`. 단건 모드로 복귀
+
+**배치 모드 파일 편집 감지:** 사용자가 배치 내 여러 가이드 파일을 편집했다면, 완료 신호 수신 후 각 파일을 Read하여 "의미 있는 변경"을 감지. 기능별로 개별 처리하되, 공통 규칙 변경(디자인 토큰/프레임워크 등)은 이후 모든 기능에 반영 여부를 AskUserQuestion으로 확인.
 
 **배치 + 부분 위임 조합:** 배치 모드 중 사용자가 "F004는 에이전트가 짜줘" → F004만 Phase 3-B 방식으로 에이전트가 구현. 나머지 배치 기능은 사용자가 계속 작업. `batch_features`와 `build_style`은 유지.
 
@@ -1188,11 +1351,17 @@ apple-harness 실행 흐름
 │   │   ├─ 모드 전환 가능 (autonomous ↔ collaborative ↔ user-led)
 │   │   ├─ session.json에 current_feature_id 기록 (재진입 대비)
 │   │   └─ features.json status → built
-│   └─ [user-led collaborative] 메인 대화에서 직접 실행
-│       ├─ Step 0: 빌드 도구 탐지 (동일 폴백 체인)
-│       ├─ 기능별: 구현 가이드 생성 → 사용자 작업 대기 → 변경사항 리뷰 → 빌드 → 커밋
+│   └─ [user-led collaborative] 메인 대화에서 직접 실행 (문서 기반 소통)
+│       ├─ Step 0: 빌드 도구 탐지 + guides/reviews/build-errors 디렉토리 준비
+│       ├─ 기능별 파일 플로우:
+│       │   Step 2: guides/{FID}-guide.md 생성 + open (worst-cases.md 참조)
+│       │   Step 3: AskUserQuestion 대기 + 가이드 파일 편집 감지
+│       │   Step 4: reviews/{FID}-review-r{N}.md 생성 + open + AskUserQuestion
+│       │   Step 5: 실패 시 build-errors/{FID}-build-attempt-{K}.md 생성 + open
+│       │           3회 실패 시 worst-cases.md에 엔트리 누적
+│       ├─ 사용자 파일 편집 반영: 의미 있는 변경 감지 → 이후 단계/기능에 전파
 │       ├─ 사용자 승인 없이 코드 수정 금지
-│       ├─ 배치 모드 지원 (batch_features)
+│       ├─ 배치 모드 지원 (batch_features, 개별 가이드 파일 N개 일괄 open)
 │       ├─ 부분 위임 가능 (개별 기능만 에이전트에게 위임)
 │       ├─ 모드 전환 가능 (autonomous ↔ collaborative ↔ user-led)
 │       ├─ session.json에 current_feature_id + batch_features 기록

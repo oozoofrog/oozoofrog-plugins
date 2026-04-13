@@ -60,8 +60,8 @@
     },
     {
       "name": "apple-craft",
-      "description": "Apple 플랫폼 개발 스킬 모음 — 일반 구현/디버깅(apple-craft), 코드 리뷰(apple-review), 장기 대규모 구현 하네스(apple-harness), Pencil .pen → SwiftUI/UIKit 디자인 구현(pen-craft), App Store 배포 자동화(appstore-deploy), Xcode MCP 연동, xcodebuild+xcsift 빌드 폴백, 최신 Apple API 참조 문서 20개 내장",
-      "version": "1.18.0",
+      "description": "Apple 플랫폼 개발 스킬 모음 — 일반 구현/디버깅(apple-craft), 코드 리뷰(apple-review), 장기 대규모 구현 하네스(apple-harness, user-led 문서 기반 소통 지원), Pencil .pen → SwiftUI/UIKit 디자인 구현(pen-craft), App Store 배포 자동화(appstore-deploy), Xcode MCP 연동, xcodebuild+xcsift 빌드 폴백, 최신 Apple API 참조 문서 20개 내장",
+      "version": "1.19.0",
       "author": {
         "name": "oozoofrog"
       },
