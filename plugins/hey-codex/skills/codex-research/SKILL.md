@@ -190,6 +190,7 @@ bash "${CLAUDE_PLUGIN_ROOT}/scripts/codex-research.sh" run <workspace> --max-rou
 - **bounded가 기본**: 명시 요청 없으면 기본 3~5 라운드. 무한 루프는 사용자 명시 동의 필수.
 - **같은 실패 2회 반복 시** `refine` 대신 `pivot`, `rescope`, `escalate` 우선 검토.
 - **Git 관리**: keep -> 자동 commit, discard/crash -> git restore (.codex-research/ 제외).
+- **`sleep N && <cmd>` 체인 절대 금지**: Claude Code Bash 도구가 선행 sleep 체인을 차단합니다. `run` 중인 연구는 `codex-research.sh status <workspace>`를 단독 호출해 라운드 진행을 확인하고, 실제 대기가 필요하면 `Monitor` 도구의 `until <check>; do sleep 2; done` 패턴을 사용하세요. `tail -f` 같은 로그 확인도 단독 Bash 호출로 분리합니다.
 
 ## References
 

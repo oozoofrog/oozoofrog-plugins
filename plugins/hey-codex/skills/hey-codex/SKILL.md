@@ -130,6 +130,8 @@ bash "${CLAUDE_PLUGIN_ROOT}/scripts/codex-status.sh" <SESSION_TOKEN>
 ```
 출력: `RUNNING (PID=..., output=Nlines)` | `COMPLETED` | `FAILED (exit code: N)` | `CRASHED`
 
+> **금지 패턴**: `sleep 30 && tail -f <raw.txt>` 같은 선행 sleep 체인은 Bash 도구가 차단합니다. 백그라운드 완료는 자동 알림으로 통지되므로 **폴링 자체가 불필요**합니다. 꼭 필요하면 `codex-status.sh`를 단독으로 한 번 호출하거나, `Monitor` 도구의 `until <check>; do sleep 2; done`을 사용하세요.
+
 ### 6. 결과 처리
 
 모드별 후처리 전략: `references/output-handling.md`
@@ -180,6 +182,8 @@ bash "${CLAUDE_PLUGIN_ROOT}/scripts/codex-status.sh" <SESSION_TOKEN>
 - **Codex 프롬프트는 원문 유지**: 사용자가 입력한 프롬프트 언어 그대로 Codex에 전달
 - **exec 모드 전용**: `codex exec` 서브커맨드만 사용 (인터랙티브 모드는 Bash 도구에서 사용 불가)
 - **Background 실행**: Codex CLI는 `codex-run.sh` 래퍼 + `run_in_background: true`로 실행. 고정 타임아웃 없음. 상태 확인이 필요하면 `codex-status.sh`를 별도 Bash 호출로 실행
+- **`sleep N && <cmd>` 체인 절대 금지**: Claude Code Bash 도구가 선행 sleep 체인을 차단합니다. 백그라운드 태스크는 **완료 시 자동 알림**이 오므로 폴링 불필요. 꼭 대기가 필요하면 `Monitor` 도구의 `until <check>; do sleep 2; done` 패턴을 사용하고, 단순 진행 확인은 `codex-status.sh <SESSION_TOKEN>`을 단독 호출하세요
+- **출력 tail 확인은 단독 호출**: 로그 파일을 엿볼 때는 `tail -N <path>`만 단독으로 실행. `sleep` 뒤에 파이프/체인으로 붙이지 마세요
 
 ## References
 
