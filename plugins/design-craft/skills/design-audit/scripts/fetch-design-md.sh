@@ -61,8 +61,8 @@ fi
 cat <<EOF
 ==[ DESIGN.md: $SLUG ]==
 
-# 로컬 경로 (즉시 접근, 권장)
-Read plugins/design-craft/skills/design-audit/references/designs/${SLUG}.md
+# 로컬 절대 경로 (Read 도구용 — 설치 환경에 따라 자동 결정)
+Read ${LOCAL_FILE}
 
 # 프로젝트 루트에 설치 (선택)
 npx getdesign@latest add $SLUG

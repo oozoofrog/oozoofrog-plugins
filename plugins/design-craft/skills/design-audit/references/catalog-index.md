@@ -6,7 +6,7 @@ VoltAgent [awesome-design-md](https://github.com/VoltAgent/awesome-design-md)의
 
 - **동등 경험**: getdesign CLI로 설치한 DESIGN.md를 사용하는 경험과 본 스킬 사용 경험은 동일해야 한다. 정확한 hex, 폰트, 수치, 컴포넌트 스펙이 모두 보존되어 있다.
 - **바이트 수준 복제**: 원본과 동일 파일명·동일 내용. 요약·재구성하지 않았다. sha256 해시는 `references/designs/manifest.json`에 보존.
-- **본문 로드 경로**: Phase 3에서 Top-3 선정 후 `Read` 도구로 `plugins/design-craft/skills/design-audit/references/designs/{slug}.md`를 즉시 로드한다.
+- **본문 로드 경로**: Phase 3에서 Top-3 선정 후 `Read` 도구로 `$REF/designs/{slug}.md`(스킬 상대 경로)를 즉시 로드한다. 실제 호출 시에는 SKILL.md가 위치한 절대 경로를 기반으로 경로를 구성해야 하며, 리포지토리 기준 `plugins/...` 경로는 설치 환경에서 동작하지 않는다.
 
 ## 스키마
 
@@ -23,7 +23,7 @@ VoltAgent [awesome-design-md](https://github.com/VoltAgent/awesome-design-md)의
 
 ## 접근 경로
 
-- **스킬 내부 (권장)**: `Read plugins/design-craft/skills/design-audit/references/designs/{slug}.md` — 로그인 불필요, 즉시 접근
+- **스킬 내부 (권장)**: `Read $REF/designs/{slug}.md` — 로그인 불필요, 즉시 접근. Claude는 SKILL.md 로드 시점의 절대 경로를 기반으로 Read 호출을 구성한다. Bash 호출 시에는 `$CLAUDE_PLUGIN_ROOT/skills/design-audit/references/designs/{slug}.md` 또는 `scripts/fetch-design-md.sh <slug>` 사용.
 - **npm 설치 (대안)**: `npx getdesign@latest add <slug>` — 프로젝트 루트에 원본 설치
 - **웹 확인**: `https://getdesign.md/<slug>/design-md`
 
