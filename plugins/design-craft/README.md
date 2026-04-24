@@ -12,6 +12,7 @@
 |------|------|
 | `/design-research` | 디자이너/화가 연구 → 정량적 토큰 생성 |
 | `/design-craft` | 플랫폼별 디자인 스펙 생성 (토큰 기반) |
+| `/design-audit` | 앱 디자인 상태 진단 → awesome-design-md 69개 DESIGN.md 본문 내재화 기반 Top-3 매칭 리포트 (정확한 hex·폰트·수치 인용) |
 
 ## 에이전트
 

@@ -1,7 +1,7 @@
 {
   "name": "design-craft",
-  "description": "멀티플랫폼 디자인 하네스 — iOS/Web/Android 플랫폼별 최적화 디자이너 에이전트 팀, 유명 디자이너·화가 디자인 토큰 체계화, 정량적 검증 프레임워크",
-  "version": "0.1.0",
+  "description": "멀티플랫폼 디자인 하네스 — iOS/Web/Android 플랫폼별 최적화 디자이너 에이전트 팀, 유명 디자이너·화가 디자인 토큰 체계화, 정량적 검증 프레임워크. awesome-design-md 69개 브랜드 DESIGN.md 본문 내재화 기반 앱 디자인 진단·매칭(design-audit) 포함 — getdesign CLI와 동등한 경험 제공",
+  "version": "0.3.0",
   "author": {
     "name": "oozoofrog"
   }
