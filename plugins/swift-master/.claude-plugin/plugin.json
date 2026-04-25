@@ -1,8 +1,0 @@
-{
-  "name": "swift-master",
-  "description": "Swift 6.2/6.3 동시성 가이드 — @concurrent, nonisolated(nonsending), 모듈 기본 격리, AsyncStream/TaskGroup 베스트 프랙티스. lock/semaphore/sync 차단형 동기화 전면 금지 정책.",
-  "version": "0.1.0",
-  "author": {
-    "name": "oozoofrog"
-  }
-}
