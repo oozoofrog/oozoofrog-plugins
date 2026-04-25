@@ -7,7 +7,7 @@ Claude Code 플러그인 마켓플레이스 리포지토리.
 - `.claude-plugin/marketplace.json` — 마켓플레이스 매니페스트 (버전, 플러그인 목록)
 - `plugins/{name}/` — 각 플러그인 독립 디렉토리
 
-## 플러그인 목록 (13개)
+## 플러그인 목록 (14개)
 
 | 플러그인 | 스킬 | 에이전트 | 훅 |
 |----------|------|---------|-----|
@@ -24,6 +24,7 @@ Claude Code 플러그인 마켓플레이스 리포지토리.
 | yoda | yoda | — | — |
 | design-craft | design-research, design-craft, design-audit | design-historian, art-aesthetics, token-architect, verification-scientist, ios-designer, web-designer, android-designer, design-qa | — |
 | llm-wiki | wiki-init, wiki-ingest, wiki-query, wiki-lint | wiki-keeper | — |
+| swift-master | swift-master | — | — |
 
 ## 플러그인 개발 규칙
 

@@ -1,8 +1,8 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "oozoofrog-plugins",
-  "version": "1.41.1",
-  "description": "oozoofrog의 개인 Claude Code 플러그인 마켓플레이스 — macOS 릴리스 자동화, 컨텍스트 아키텍처, GPT 리서치, Codex CLI 위임, Apple 앱 자동화, Apple 플랫폼 통합 개발 어시스턴트, 플러그인 진단·수정, Git 워크플로우 자동화, 릴리스 라이프사이클",
+  "version": "1.42.0",
+  "description": "oozoofrog의 개인 Claude Code 플러그인 마켓플레이스 — macOS 릴리스 자동화, 컨텍스트 아키텍처, GPT 리서치, Codex CLI 위임, Apple 앱 자동화, Apple 플랫폼 통합 개발 어시스턴트, 플러그인 진단·수정, Git 워크플로우 자동화, 릴리스 라이프사이클, Swift 6.2/6.3 동시성 전문 가이드",
   "owner": {
     "name": "oozoofrog",
     "email": "oozoofrog@gmail.com"
@@ -136,6 +136,16 @@
         "name": "oozoofrog"
       },
       "source": "./plugins/llm-wiki",
+      "category": "development"
+    },
+    {
+      "name": "swift-master",
+      "description": "Swift 6.2/6.3 동시성 가이드 — @concurrent, nonisolated(nonsending), 모듈 기본 격리(SE-0466), AsyncStream.makeStream, DiscardingTaskGroup, 13개 CRITICAL 안티패턴. lock/semaphore/sync 차단형 동기화 전면 금지 정책",
+      "version": "0.1.0",
+      "author": {
+        "name": "oozoofrog"
+      },
+      "source": "./plugins/swift-master",
       "category": "development"
     }
   ]
