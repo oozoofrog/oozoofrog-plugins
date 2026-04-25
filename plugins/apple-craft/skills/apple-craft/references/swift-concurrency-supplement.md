@@ -480,32 +480,21 @@ func fetch(_ url: URL) async throws -> Data {
 }
 ```
 
-### 7.3 명시적 cancellation hook이 필요할 때
+### 7.3 명시적 cancellation hook이 정말 필요한 경우
 
-```swift
-func fetchWithExplicitCancel(_ url: URL) async throws -> Data {
-    let session = URLSession.shared
-    let task = session.dataTask(with: url)        // 팩토리 (completionHandler nil)
+**대부분의 경우 § 7.2 패턴으로 충분**합니다. URLSession async API는 Task cancellation에 자동으로 반응합니다.
 
-    return try await withTaskCancellationHandler {
-        try await withCheckedThrowingContinuation { (cont: CheckedContinuation<Data, Error>) in
-            Task {
-                do {
-                    let (data, _) = try await session.data(from: url)
-                    cont.resume(returning: data)
-                } catch {
-                    cont.resume(throwing: error)
-                }
-            }
-            task.resume()
-        }
-    } onCancel: {
-        task.cancel()
-    }
-}
-```
+명시적 hook이 정말 필요한 시나리오는 매우 드뭅니다 (예: download/streaming task의 progress 콜백 + 외부 cancel 신호 결합). 이런 경우의 정석은:
 
-> 일반적인 권장은 7.2 패턴. 7.3은 delegate 기반 download/streaming task 등 task 핸들이 직접 필요한 경우만.
+1. **`URLSessionDataDelegate` / `URLSessionDownloadDelegate`를 별도 클래스로 구현** — async API에 `delegate:` 파라미터로 전달 (iOS 15+)
+2. delegate에서 task 핸들을 캡처하여 외부 cancel 신호 처리
+3. 또는 `dataTask(with:completionHandler:)` 팩토리로 task를 받아 continuation에 결과를 직접 전달 — 단 이때는 task 변수 캡처 시 Sendable race를 피하기 위해 `final class` holder + `Mutex<URLSessionDataTask?>` 등 별도 동기화 필요
+
+**잘못된 패턴 (예시 차원에서 코드 미게재 — 다음과 같은 안티패턴 주의)**:
+- `dataTask(with:url)`로 task A를 만들고 `withCheckedThrowingContinuation` 안에서 별도로 `data(from:url)`을 호출하면 **두 개의 별개 HTTP 요청**이 발생하고 cancellation은 task A만 취소됨 → 실제 결과 요청은 취소되지 않음
+- continuation 클로저 안에서 `Task { try await ... }`로 결과를 받으려 하면 같은 race가 발생
+
+**권장**: § 7.2 패턴을 기본으로 사용하고, 위 시나리오가 정말 필요하면 [WWDC21 10254](https://developer.apple.com/videos/play/wwdc2021/10254/)의 "Bridging from sync to async" 패턴을 참고해 프로젝트별로 구현.
 
 ### 7.4 ResourcePool actor + CheckedContinuation
 
