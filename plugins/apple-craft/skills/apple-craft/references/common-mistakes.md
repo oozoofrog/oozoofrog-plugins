@@ -76,6 +76,104 @@ class PhotoProcessor {
 }
 ```
 
+### DispatchSemaphore / NSLock — actor로 전환
+
+```swift
+// ❌ Wrong: future-work를 동기 차단 (협력적 풀 데드락 위험)
+final class ResourcePool {
+    private let semaphore = DispatchSemaphore(value: 3)
+    func acquire() {
+        semaphore.wait()   // 다른 Task의 signal()을 동기 대기
+    }
+}
+
+// ✅ Correct: actor로 비동기 게이팅
+actor ResourcePool {
+    private var available: Int = 3
+    private var waiters: [CheckedContinuation<Void, Never>] = []
+
+    func acquire() async {
+        if available > 0 { available -= 1; return }
+        await withCheckedContinuation { waiters.append($0) }
+    }
+    func release() {
+        if let w = waiters.first { waiters.removeFirst(); w.resume() }
+        else { available += 1 }
+    }
+}
+```
+
+근거: John McCall (Swift Core Team) — "single scheduled thread만으로도 데드락 가능". 상세는 `references/swift-concurrency-supplement.md` § 1 참조.
+
+### AsyncStream — bufferingPolicy 미지정
+
+```swift
+// ❌ Wrong: 기본 .unbounded → producer 빠를 때 메모리 폭주
+let stream = AsyncStream<Event> { continuation in
+    legacy.onEvent = { continuation.yield($0) }
+}
+
+// ✅ Correct: 항상 bufferingPolicy 명시
+let (stream, continuation) = AsyncStream.makeStream(
+    of: Event.self,
+    bufferingPolicy: .bufferingNewest(64)   // 또는 .bufferingOldest(n)
+)
+```
+
+상세: `references/swift-concurrency-supplement.md` § 4
+
+### withTaskGroup 결과 미소비 — DiscardingTaskGroup으로
+
+```swift
+// ❌ Wrong: 결과를 안 쓰면서 일반 TaskGroup → 메모리 누적
+await withTaskGroup(of: Void.self) { group in
+    for client in connections {
+        group.addTask { await handle(client) }
+    }
+}
+
+// ✅ Correct (iOS 18+): 자식 완료 즉시 release
+await withDiscardingTaskGroup { group in
+    for client in connections {
+        group.addTask { await handle(client) }
+    }
+}
+```
+
+⚠️ `DiscardingTaskGroup`은 `next()` 메서드 자체가 없어 결과 수집 불가. 결과가 필요하면 일반 `withTaskGroup` 사용.
+
+### lock을 await 가로질러 보유
+
+```swift
+// ❌ Wrong: lock 유지한 채 await — forward-progress 위반 위험
+let lock = NSLock()
+func update() async {
+    lock.lock()
+    defer { lock.unlock() }
+    let data = await fetchRemote()   // 🚫 await across lock
+    state.merge(data)
+}
+
+// ✅ Correct: lock 밖에서 await, lock은 짧은 critical section만
+func update() async {
+    let data = await fetchRemote()
+    lock.lock()
+    defer { lock.unlock() }
+    state.merge(data)
+}
+
+// ✅ 더 나은 선택: actor로 전환
+actor StateStore {
+    var state: State = .init()
+    func update() async {
+        let data = await fetchRemote()
+        state.merge(data)
+    }
+}
+```
+
+근거: WWDC21 10254 — "you should be careful not to hold locks across an await". 상세: `references/swift-concurrency-supplement.md` § 1.1 Tier 2
+
 ## Swift Testing (6.3)
 
 ```swift

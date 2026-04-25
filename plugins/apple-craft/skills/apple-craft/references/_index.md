@@ -3,7 +3,7 @@ xcode_version: "26.4"
 xcode_build: "24909"
 xcode_path: "/Applications/Xcode.app"
 sync_date: "2026-04-13"
-doc_count: 21
+doc_count: 22
 ---
 
 # apple-craft Reference Index
@@ -34,4 +34,5 @@ Manual supplement 문서도 함께 인덱싱합니다.
 | liquid-glass-widgetkit.md | WidgetKit-Implementing-Liquid-Glass-Design.md | 234 | a2c7e5e849002a34023ed536c690dc42759aef545e625fd393482848435d0444 |
 | visionos-widgets.md | Widgets-for-visionOS.md | 247 | a1710b92f027d27c31c1b7d1db2fce64f26b7a4261b69555f6c1eb4991600203 |
 | swift-6-3-language-and-tooling.md | Manual supplement | 280 | 40546b5d2eae3636523fbd09099dc4e932b423fa86a0f9d1f6c82997baba5188 |
+| swift-concurrency-supplement.md | Manual supplement | 589 | 3a5b49835dad07d2522a97aab73debf55b95aeba9b5b361bbb96d123f5df2d69 |
 

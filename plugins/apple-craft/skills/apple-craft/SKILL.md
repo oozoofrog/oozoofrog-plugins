@@ -145,7 +145,8 @@ Xcode MCP 서버가 연결되어 있으면 적극 활용합니다. 미연결 시
 | Liquid Glass (WidgetKit) | `references/liquid-glass-widgetkit.md` | widget glass, widgetRenderingMode, widgetAccentable | iOS, macOS, visionOS |
 | FoundationModels | `references/foundation-models.md` | FoundationModels, SystemLanguageModel, LanguageModelSession, @Generable, Tool protocol, 온디바이스 LLM | iOS, macOS |
 | Swift 6.3 Language & Tooling | `references/swift-6-3-language-and-tooling.md` | Swift 6.3, @c, module selectors, ::, @specialize, @inline(always), @export(implementation), swift package show-traits, Issue.record, Test.cancel, DocC, Android SDK | All |
-| Swift 6.2 Concurrency | `references/swift-concurrency.md` | @concurrent, nonisolated, Sendable, data race, actor, 동시성, async/await | All |
+| Swift 6.2 Concurrency (Apple 원본) | `references/swift-concurrency.md` | @concurrent, nonisolated, Sendable, data race, actor, 동시성, async/await | All |
+| Concurrency Supplement (정책·심화) | `references/swift-concurrency-supplement.md` | lock, semaphore, sync, DispatchSemaphore, NSLock, Mutex, AsyncStream.makeStream, bufferingPolicy, DiscardingTaskGroup, ThrowingDiscardingTaskGroup, bounded concurrency, sliding window, nonisolated(nonsending), NonisolatedNonsendingByDefault, defaultIsolation, MainActor 모듈 격리, SE-0461, SE-0466, SE-0433, forward progress, cooperative thread pool, 협력적 스레드 풀, 데드락, CLLocationManager AsyncStream, URLSession 취소, CheckedContinuation actor, LIBDISPATCH_COOPERATIVE_POOL_STRICT | All |
 | InlineArray & Span | `references/swift-inline-array-span.md` | InlineArray, Span, MutableSpan, RawSpan, OutputSpan, UTF8Span | All |
 | SwiftData Inheritance | `references/swiftdata-inheritance.md` | SwiftData, @Model, class inheritance, 클래스 상속, polymorphic | All |
 | Visual Intelligence | `references/visual-intelligence.md` | Visual Intelligence, SemanticContentDescriptor, IntentValueQuery, 비주얼 인텔리전스 | iOS |
@@ -172,6 +173,14 @@ Xcode MCP 서버가 연결되어 있으면 적극 활용합니다. 미연결 시
    Grep: pattern="검색어" path="${CLAUDE_PLUGIN_ROOT}/skills/apple-craft/references/"
    ```
 4. **외부 검색**: 로컬 참조에 없는 API는 `mcp__xcode__DocumentationSearch` 사용
+
+### Concurrency 페어 로딩 규칙
+
+Swift Concurrency 관련 키워드가 매칭되면 **두 파일을 함께** 로드하세요:
+- `references/swift-concurrency.md` (Apple 원본 — Approachable Concurrency 개요, isolated conformances, 기본 사양)
+- `references/swift-concurrency-supplement.md` (oozoofrog 정책 — 차단형 동기화 금지, SE-0461/0466/0433 심화, 검증된 코드 예제, lock 정확한 허용 조건)
+
+`lock` / `semaphore` / `sync` / `Mutex` / `AsyncStream.makeStream` / `DiscardingTaskGroup` / `bounded concurrency` / `nonisolated(nonsending)` / `defaultIsolation` 키워드는 supplement만 단독 로드해도 충분합니다.
 
 ---
 
@@ -294,7 +303,7 @@ Apple 프레임워크 API 설명, 변경 사항 비교, 사용법 안내를 할 
 
 ## 한계 및 주의사항
 
-1. **참조 문서 범위**: Xcode 26.4 번들 문서 20개와 Swift 6.3 보강 문서를 제공합니다. 참조 문서에 없는 프레임워크/API도 일반 지식과 `DocumentationSearch`로 지원합니다.
+1. **참조 문서 범위**: Xcode 26.4 번들 문서 20개와 Swift 6.3 보강 문서, Concurrency Supplement(차단형 동기화 정책 + SE-0461/0466/0433 심화)를 제공합니다. 참조 문서에 없는 프레임워크/API도 일반 지식과 `DocumentationSearch`로 지원합니다.
 2. **베타 API 변동**: 참조 문서의 코드가 컴파일되지 않으면 `mcp__xcode__DocumentationSearch`로 최신 시그니처를 확인하세요.
 3. **컨텍스트 관리**: 참조 문서는 200-800줄입니다. 복합 주제에서 3개 이상을 동시에 로드하면 컨텍스트가 커지므로 가장 관련도 높은 1-2개를 우선 로드하세요.
 4. **Xcode MCP 미연결**: Xcode MCP 서버가 없으면 빌드 검증, 프리뷰를 사용할 수 없습니다. 일반 도구(Bash, Read 등)로 가능한 범위까지 지원하되, "Xcode에서 빌드하여 검증해주세요"라고 안내하세요.
