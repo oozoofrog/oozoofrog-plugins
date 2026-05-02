@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "oozoofrog-plugins",
-  "version": "1.42.0",
+  "version": "1.43.1",
   "description": "oozoofrog의 개인 Claude Code 플러그인 마켓플레이스 — macOS 릴리스 자동화, 컨텍스트 아키텍처, GPT 리서치, Codex CLI 위임, Apple 앱 자동화, Apple 플랫폼 통합 개발 어시스턴트, 플러그인 진단·수정, Git 워크플로우 자동화, 릴리스 라이프사이클",
   "owner": {
     "name": "oozoofrog",
@@ -76,6 +76,16 @@
         "name": "oozoofrog"
       },
       "source": "./plugins/plugin-doctor",
+      "category": "development"
+    },
+    {
+      "name": "session-viewer",
+      "description": "Claude Code 세션 로그(~/.claude/projects/*/*.jsonl) 인터랙티브 TUI 뷰어 — 메시지 + tool 호출 흐름을 세션별로 탐색, 전체/CWD 매칭 토글",
+      "version": "0.1.1",
+      "author": {
+        "name": "oozoofrog"
+      },
+      "source": "./plugins/session-viewer",
       "category": "development"
     },
     {
