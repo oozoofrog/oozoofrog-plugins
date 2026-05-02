@@ -1,6 +1,6 @@
 [package]
 name = "session-viewer"
-version = "0.2.1"
+version = "0.3.0"
 edition = "2021"
 
 [[bin]]
@@ -17,6 +17,7 @@ chrono = { version = "0.4", default-features = false, features = ["clock", "serd
 dirs = "5"
 clap = { version = "4", features = ["derive"] }
 regex = "1"
+tiny_http = "0.12"
 
 [profile.release]
 opt-level = "z"

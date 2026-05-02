@@ -218,33 +218,61 @@ session-viewer query --cwd --text ratatui
 session-viewer query --since 6h --format json
 ```
 
-### `web <session-id>` — Static HTML export
+### `web` — Static HTML export 또는 라이브 HTTP 서버
 
 ```bash
+# 모드 1: 단일 세션 static HTML export
 session-viewer web <SESSION_ID> [-o OUTPUT]
+
+# 모드 2: 모든 세션 라이브 탐색 (v0.3.0+)
+session-viewer web --serve [--port 7878] [--host 127.0.0.1] [--no-open]
 ```
+
+**모드 1 — Static HTML export:**
 
 - `<SESSION_ID>`: 전체 UUID 또는 unique prefix (예: `0532f5f4`). 중복되면 후보 출력 후 종료.
 - `-o, --output <PATH>`: 출력 파일. 생략 시 stdout.
-
-**예시:**
 
 ```bash
 # 세션을 single self-contained HTML로 export 후 브라우저로 열기
 session-viewer web 0532f5f4 -o /tmp/session.html
 open /tmp/session.html
-
-# 또는 stdout 파이프
-session-viewer web 0532f5f4 > out.html
 ```
 
-**HTML 뷰어 기능:**
+**모드 2 — 로컬 HTTP 서버 (v0.3.0):**
+
+- `--serve`: tiny_http 기반 단일 스레드 서버 시작. 기본 `127.0.0.1:7878`.
+- `--port N`, `--host ADDR`: 바인드 변경
+- `--no-open`: 브라우저 자동 오픈 비활성화 (기본은 macOS `open` / Linux `xdg-open` 호출)
+- 종료: `Ctrl+C`
+
+라우트:
+
+| 경로 | 응답 |
+|---|---|
+| `GET /` | 모든 세션 인덱스 페이지 (시간 역순, 클릭 시 detail로) |
+| `GET /session/<id>` | 단일 세션 채팅 뷰 (UUID 또는 prefix) — 상단 "← back to index" 링크 |
+| `GET /api/sessions.json` | 세션 메타데이터 JSON 배열 (id, project_label, modified, msg_count, first_user_text) |
+| `GET /api/session/<id>.json` | 단일 세션 전체 데이터 ({meta, messages}) |
+| 기타 | 404 plain text |
+
+```bash
+# 라이브 모드 — 모든 세션 탐색
+session-viewer web --serve
+# → listening on http://127.0.0.1:7878
+# → 브라우저 자동 오픈, 인덱스 → 세션 클릭 → 채팅 뷰
+```
+
+세션 목록은 매 요청마다 다시 스캔하므로 **새 세션이 생성되면 새로고침만으로 즉시 반영**된다 (Claude Code에서 작업 중 라이브 탐색 가능).
+
+**HTML 뷰어 기능 (양 모드 공통):**
 - 채팅 모방 UI (user/assistant 말풍선, tool 호출은 collapsible 카드)
 - `/` 키로 검색 포커스, 입력 시 본문 substring 매칭 + 하이라이트
 - 상단 chip 필터 (All / User / Assistant / Tool / Result)
 - 다크모드 자동 감지 (`prefers-color-scheme`)
 - 모바일 레이아웃 자연스러움
-- Zero runtime — 인터넷 없이도 동작, 이메일/Slack 공유 가능
+- Static 모드: zero runtime, 인터넷 없이 동작, 이메일/Slack 공유 가능
+- Serve 모드: 모든 세션 탐색 + 라이브 새로고침 (서버 실행 중에만)
 
 ### 빠른 시작 (TUI 외 명령)
 
