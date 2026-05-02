@@ -1,6 +1,6 @@
 {
   "name": "session-viewer",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Claude Code 세션 로그(~/.claude/projects/*/*.jsonl) 인터랙티브 TUI 뷰어 — 메시지 + tool 호출 흐름을 세션별로 탐색, 전체/CWD 매칭 토글",
   "author": {
     "name": "oozoofrog",

@@ -43,7 +43,7 @@ ${CLAUDE_PLUGIN_ROOT}/skills/session-viewer/bin/launch.sh
 2. 없으면 `src/`에서 `cargo build --release`로 즉석 빌드하고 캐시
 3. cargo가 없으면 종료 코드 127로 에러 출력
 
-현재 번들된 바이너리: `bin/session-viewer-darwin-arm64` (Mach-O 64-bit, ~620KB).
+현재 번들된 바이너리: `bin/session-viewer-darwin-arm64` (Mach-O 64-bit, ~1.6MB; clap + regex + 3개 서브커맨드 포함).
 
 ## 키 바인딩
 
