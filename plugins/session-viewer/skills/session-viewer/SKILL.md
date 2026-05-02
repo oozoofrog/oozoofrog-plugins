@@ -22,7 +22,7 @@ Claude Code가 `~/.claude/projects/<encoded-cwd>/<session-uuid>.jsonl`에 기록
 
 ## 빠른 시작
 
-TUI는 alternate screen + raw mode를 사용하므로 **별도 터미널에서 직접 실행**해야 한다 (Claude Code 안 Bash 도구로는 동작하지 않음). Claude Code 안에서는 `! <명령>` 프리픽스로 사용자가 직접 실행할 수 있다.
+TUI는 alternate screen + raw mode를 사용하므로 **반드시 별도 터미널 앱(Terminal.app / iTerm2 / WezTerm 등)에서 직접 실행**해야 한다. Claude Code의 Bash 도구는 물론 `!` 프리픽스 셸 모드도 raw mode TTY를 제공하지 않아 `Error: Device not configured (os error 6)`로 종료된다.
 
 다음 중 환경에 맞는 경로를 사용한다:
 
@@ -126,13 +126,13 @@ encode(p) = p.replace('/', '-').replace('.', '-')
 ## 사용자 흐름
 
 1. 사용자가 "세션 로그 보고 싶다" 류 요청을 함
-2. Claude는 환경에 맞는 launcher 경로를 표시하고 다음 중 하나를 안내:
-   - **권장**: `! ${CLAUDE_PLUGIN_ROOT}/skills/session-viewer/bin/launch.sh` 형태로 알려주기 — 사용자가 Claude Code 프롬프트에 그대로 붙여넣으면 현재 세션의 터미널에서 실행됨
-   - 또는 별도 터미널 창에서 실행하라고 안내 (절대 경로 제공)
-3. 사용자가 TUI에서 세션 탐색·종료
-4. 종료 후 사용자가 본 내용 바탕으로 후속 작업 (예: "그 세션의 X 부분을 다시 분석해줘") 진행
+2. Claude는 다음을 안내:
+   - **별도 터미널 앱**(Terminal.app / iTerm2 / WezTerm 등)을 열라고 명시
+   - 그 터미널에 붙여넣을 launcher의 절대 경로 제공 (예: `~/.claude/plugins/cache/oozoofrog-plugins/session-viewer/<version>/skills/session-viewer/bin/launch.sh`)
+3. 사용자가 별도 터미널에서 TUI 실행 → 탐색 → 종료
+4. 종료 후 사용자가 본 내용 바탕으로 Claude Code 세션에서 후속 작업 (예: "그 세션의 X 부분을 다시 분석해줘") 진행
 
-**왜 별도 실행인가**: TUI는 alternate screen + raw mode + non-blocking event loop를 사용한다. Claude Code의 Bash 도구는 동기 stdout 캡처 모델이라 raw mode 입력을 받을 수 없고, 무한 루프로 보여 timeout된다.
+**왜 별도 터미널이어야 하는가**: TUI는 alternate screen + raw mode + non-blocking event loop를 사용한다. Claude Code 안에서는 Bash 도구도, `!` 프리픽스 셸 모드도 모두 stdout 캡처/파이프 모델이라 raw mode TTY를 제공하지 못하고 `enable_raw_mode()`가 즉시 ENXIO(`Error: Device not configured`, os error 6)로 실패한다. 이는 우회 가능한 제약이 아니라 Claude Code의 모든 셸 실행 경로의 공통 한계다.
 
 ## 재빌드가 필요한 경우
 
