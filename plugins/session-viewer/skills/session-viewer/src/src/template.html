@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>{{TITLE}}</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root {
+  --bg: #fafafa;
+  --fg: #1a1a1a;
+  --muted: #6b6b6b;
+  --border: #e0e0e0;
+  --user: #d4f5d4;
+  --user-fg: #0a4f0a;
+  --assistant: #ffffff;
+  --tool: #f3e8ff;
+  --tool-fg: #6b21a8;
+  --tool-border: #d8b4fe;
+  --result: #f3f4f6;
+  --result-fg: #4b5563;
+  --result-border: #d1d5db;
+  --thinking: #fef3c7;
+  --thinking-fg: #92400e;
+  --hook: #dbeafe;
+  --hook-fg: #1e40af;
+  --system: #f5f5f5;
+  --system-fg: #6b6b6b;
+  --error: #fee2e2;
+  --error-fg: #991b1b;
+  --error-border: #f87171;
+  --code-bg: #f5f5f5;
+  --shell: #1f2937;
+  --shell-fg: #e5e7eb;
+  --shell-prompt: #34d399;
+  --shell-flag: #fbbf24;
+  --shell-path: #93c5fd;
+  --diff-add-bg: #d1fae5;
+  --diff-add-fg: #065f46;
+  --diff-del-bg: #fee2e2;
+  --diff-del-fg: #991b1b;
+  --link: #2563eb;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1a1a1a;
+    --fg: #e5e5e5;
+    --muted: #a0a0a0;
+    --border: #333;
+    --user: #1f4d1f;
+    --user-fg: #b8e6b8;
+    --assistant: #262626;
+    --tool: #2a1840;
+    --tool-fg: #d8b4fe;
+    --tool-border: #6b21a8;
+    --result: #2a2a2a;
+    --result-fg: #b0b0b0;
+    --result-border: #444;
+    --thinking: #4a3a0a;
+    --thinking-fg: #fde68a;
+    --hook: #1e3a5f;
+    --hook-fg: #93c5fd;
+    --system: #2a2a2a;
+    --system-fg: #a0a0a0;
+    --error: #4a1414;
+    --error-fg: #fca5a5;
+    --error-border: #b91c1c;
+    --code-bg: #1f1f1f;
+    --shell: #0d1117;
+    --shell-fg: #e5e7eb;
+    --shell-prompt: #34d399;
+    --shell-flag: #fbbf24;
+    --shell-path: #93c5fd;
+    --diff-add-bg: #064e3b;
+    --diff-add-fg: #a7f3d0;
+    --diff-del-bg: #4c1d24;
+    --diff-del-fg: #fca5a5;
+    --link: #60a5fa;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  margin: 0;
+  padding: 0;
+  line-height: 1.5;
+}
+header {
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+  z-index: 10;
+}
+.meta { display: flex; gap: 12px; flex-wrap: wrap; align-items: baseline; font-size: 13px; }
+.meta strong { font-size: 15px; }
+.meta span.muted { color: var(--muted); }
+.search-row { margin-top: 8px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+input[type=search], input[type=text] {
+  flex: 1; min-width: 200px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--fg);
+  font: inherit;
+}
+.chip-row { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; margin-top: 6px; }
+.filter-chip {
+  font-size: 12px;
+  padding: 3px 8px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--muted);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+.filter-chip.active { color: var(--fg); border-color: var(--fg); background: var(--code-bg); }
+.filter-chip.tool-chip.active { color: var(--tool-fg); border-color: var(--tool-fg); }
+.toggle-btn {
+  font-size: 12px; padding: 3px 8px; border-radius: 6px;
+  border: 1px solid var(--border); background: var(--bg);
+  color: var(--muted); cursor: pointer; user-select: none;
+}
+.toggle-btn.active { color: var(--fg); border-color: var(--fg); background: var(--code-bg); }
+.count { color: var(--muted); font-size: 12px; }
+main { max-width: 1040px; margin: 0 auto; padding: 16px; }
+
+.msg {
+  margin: 10px 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--assistant);
+}
+.msg .who {
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+}
+.msg .body {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 13px;
+}
+.msg.user { background: var(--user); border-color: var(--user); }
+.msg.user .who { color: var(--user-fg); }
+.msg.user .body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+.msg.assistant { background: var(--assistant); }
+.msg.assistant .who { color: var(--muted); }
+.msg.assistant .body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+.msg.tool_use {
+  background: var(--tool); border-color: var(--tool-border);
+  border-left: 3px solid var(--tool-fg);
+}
+.msg.tool_use .who { color: var(--tool-fg); }
+.msg.tool_result {
+  background: var(--result); border-color: var(--result-border);
+  border-left: 3px solid var(--result-fg);
+  margin-top: -6px;
+}
+.msg.tool_result .who { color: var(--result-fg); }
+.msg.tool_result.error {
+  background: var(--error); border-color: var(--error-border);
+  border-left: 3px solid var(--error-border);
+}
+.msg.tool_result.error .who { color: var(--error-fg); }
+.msg.thinking { background: var(--thinking); border-color: var(--thinking); font-style: italic; }
+.msg.thinking .who { color: var(--thinking-fg); font-style: normal; }
+.msg.hook {
+  background: transparent;
+  border: none;
+  border-left: 2px solid var(--hook-fg);
+  border-radius: 0;
+  padding: 4px 10px;
+  margin: 4px 0;
+  font-size: 12px;
+  color: var(--hook-fg);
+}
+.msg.hook .who { color: var(--hook-fg); margin-bottom: 0; font-size: 11px; }
+.msg.hook .body { color: var(--muted); font-size: 12px; }
+.msg.system {
+  background: transparent; border: none;
+  text-align: center; padding: 6px;
+  color: var(--system-fg); font-size: 11px;
+  border-top: 1px dashed var(--border);
+  border-bottom: 1px dashed var(--border);
+  border-radius: 0;
+}
+.msg.system .who { display: none; }
+.msg.system .body { font-family: ui-monospace, monospace; }
+
+.badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--code-bg);
+  color: var(--muted);
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+.badge.tool { background: var(--tool-fg); color: white; }
+.badge.error { background: var(--error-border); color: white; }
+.badge.bg { background: #f59e0b; color: white; }
+.badge.id {
+  font-family: ui-monospace, monospace;
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+
+.shell {
+  background: var(--shell);
+  color: var(--shell-fg);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 13px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.shell .prompt { color: var(--shell-prompt); margin-right: 6px; user-select: none; }
+.shell .desc { color: var(--muted); font-style: italic; }
+.shell .flag { color: var(--shell-flag); }
+.shell .path { color: var(--shell-path); }
+.shell-out {
+  background: var(--shell);
+  color: var(--shell-fg);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-family: ui-monospace, monospace;
+  font-size: 12px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.shell-out .stderr { color: #fca5a5; }
+.shell-out .exit { color: #fbbf24; font-weight: bold; }
+
+.path-ref {
+  font-family: ui-monospace, monospace;
+  color: var(--shell-path);
+  font-size: 13px;
+  background: var(--code-bg);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+.lines-ref { color: var(--muted); font-size: 12px; margin-left: 6px; }
+
+.diff {
+  font-family: ui-monospace, monospace;
+  font-size: 12px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.diff .row { padding: 1px 8px; white-space: pre-wrap; word-break: break-word; }
+.diff .add { background: var(--diff-add-bg); color: var(--diff-add-fg); }
+.diff .del { background: var(--diff-del-bg); color: var(--diff-del-fg); }
+.diff .ctx { color: var(--muted); }
+
+.todo {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 13px;
+}
+.todo li { padding: 2px 0; display: flex; gap: 8px; align-items: baseline; }
+.todo .mark { font-family: ui-monospace, monospace; }
+.todo .pending { color: var(--muted); }
+.todo .in_progress { color: var(--shell-prompt); font-weight: 600; }
+.todo .completed { color: var(--muted); text-decoration: line-through; }
+
+a.ext { color: var(--link); text-decoration: none; }
+a.ext:hover { text-decoration: underline; }
+
+.kv {
+  font-family: ui-monospace, monospace;
+  font-size: 12px;
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 2px 12px;
+}
+.kv .k { color: var(--muted); white-space: nowrap; }
+.kv .v { white-space: pre-wrap; word-break: break-word; }
+
+.collapsible .body { max-height: 9em; overflow: hidden; position: relative; }
+.collapsible.open .body { max-height: none; }
+.collapsible .body::after {
+  content: "";
+  position: absolute; left: 0; right: 0; bottom: 0; height: 2.5em;
+  background: linear-gradient(transparent, var(--result));
+  pointer-events: none;
+}
+.collapsible.tool_use .body::after { background: linear-gradient(transparent, var(--tool)); }
+.collapsible.thinking .body::after { background: linear-gradient(transparent, var(--thinking)); }
+.collapsible.open .body::after { display: none; }
+.collapsible .toggle {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.hidden { display: none !important; }
+mark { background: #fef08a; color: #000; padding: 0 2px; border-radius: 2px; }
+@media (prefers-color-scheme: dark) {
+  mark { background: #854d0e; color: #fef08a; }
+}
+
+details.raw { margin-top: 6px; }
+details.raw summary {
+  cursor: pointer; color: var(--muted); font-size: 11px;
+  user-select: none;
+  font-family: ui-monospace, monospace;
+}
+details.raw pre {
+  margin: 4px 0 0; padding: 8px;
+  background: var(--code-bg);
+  border-radius: 4px;
+  overflow-x: auto;
+  font-size: 11px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+footer {
+  text-align: center; padding: 24px;
+  color: var(--muted); font-size: 12px;
+  border-top: 1px solid var(--border); margin-top: 32px;
+}
+.nav { font-size: 13px; margin-bottom: 6px; }
+.nav a { color: var(--muted); text-decoration: none; }
+.nav a:hover { color: var(--fg); text-decoration: underline; }
+</style>
+</head>
+<body>
+<header>
+  {{NAV}}
+  <div class="meta" id="meta"></div>
+  <div class="search-row">
+    <input type="search" id="search" placeholder="Search messages (substring, /-key to focus)…">
+    <button class="toggle-btn" id="regex-toggle" type="button" title="Toggle regex search">.*</button>
+    <span class="count" id="count"></span>
+  </div>
+  <div class="chip-row" id="role-chips">
+    <span class="filter-chip active" data-filter="all">All</span>
+    <span class="filter-chip" data-filter="user">User</span>
+    <span class="filter-chip" data-filter="assistant">Assistant</span>
+    <span class="filter-chip" data-filter="tool_use">Tool</span>
+    <span class="filter-chip" data-filter="tool_result">Result</span>
+    <span class="filter-chip" data-filter="thinking">Thinking</span>
+    <span class="filter-chip" data-filter="hook">Hook</span>
+  </div>
+  <div class="chip-row" id="tool-chips"></div>
+</header>
+<main id="messages"></main>
+<footer>generated by session-viewer · double-click any tool card to expand</footer>
+<script>
+const DATA = {{DATA_JSON}};
+
+function el(tag, attrs, ...children) {
+  const e = document.createElement(tag);
+  for (const k in attrs) {
+    if (attrs[k] === false || attrs[k] == null) continue;
+    if (k === "class") e.className = attrs[k];
+    else if (k === "data") for (const dk in attrs.data) e.dataset[dk] = attrs.data[dk];
+    else e.setAttribute(k, attrs[k]);
+  }
+  for (const c of children) {
+    if (c == null || c === false) continue;
+    if (typeof c === "string") e.appendChild(document.createTextNode(c));
+    else e.appendChild(c);
+  }
+  return e;
+}
+function shortId(s) { return (s || "").slice(0, 8); }
+function rawDetails(input) {
+  if (input == null) return null;
+  const txt = typeof input === "string" ? input : JSON.stringify(input, null, 2);
+  return el("details", { class: "raw" },
+    el("summary", {}, "{} raw input"),
+    el("pre", {}, txt));
+}
+function rawDetailsResult(body) {
+  return el("details", { class: "raw" },
+    el("summary", {}, "raw output"),
+    el("pre", {}, body || ""));
+}
+
+// Build a shell command line with token-based highlighting (no innerHTML).
+function shellLine(cmd) {
+  const wrap = el("div", { class: "shell" });
+  wrap.appendChild(el("span", { class: "prompt" }, "$"));
+  wrap.appendChild(document.createTextNode(" "));
+  const text = cmd || "";
+  // tokenize on whitespace runs, preserving them
+  const tokens = text.split(/(\s+)/);
+  for (const tok of tokens) {
+    if (!tok) continue;
+    if (/^\s+$/.test(tok)) {
+      wrap.appendChild(document.createTextNode(tok));
+    } else if (/^--?[A-Za-z0-9][\w-]*$/.test(tok)) {
+      wrap.appendChild(el("span", { class: "flag" }, tok));
+    } else if (/^\/[A-Za-z0-9_./-]+$/.test(tok)) {
+      wrap.appendChild(el("span", { class: "path" }, tok));
+    } else {
+      wrap.appendChild(document.createTextNode(tok));
+    }
+  }
+  return wrap;
+}
+
+const TOOL_INPUT = {
+  Bash(input) {
+    const wrap = el("div");
+    if (input.description) wrap.appendChild(el("div", { class: "shell desc" }, "# " + input.description));
+    wrap.appendChild(shellLine(input.command || ""));
+    const meta = [];
+    if (input.run_in_background) meta.push(el("span", { class: "badge bg" }, "background"));
+    if (input.timeout) meta.push(el("span", { class: "badge" }, "timeout " + input.timeout + "ms"));
+    if (meta.length) {
+      const row = el("div", { class: "chip-row" });
+      meta.forEach(m => row.appendChild(m));
+      wrap.appendChild(row);
+    }
+    return wrap;
+  },
+  Read(input) {
+    const path = input.file_path || "";
+    const off = input.offset, lim = input.limit;
+    let lineRef = "";
+    if (off != null && lim != null) lineRef = "L" + off + "–" + (off + lim - 1);
+    else if (off != null) lineRef = "L" + off + "–";
+    else if (lim != null) lineRef = "first " + lim + " lines";
+    return el("div", {},
+      el("span", {}, "📄 "),
+      el("span", { class: "path-ref" }, path),
+      lineRef ? el("span", { class: "lines-ref" }, lineRef) : null);
+  },
+  Edit(input) {
+    return renderEditCard(input.file_path, input.old_string, input.new_string,
+      input.replace_all ? "replace_all" : "");
+  },
+  Write(input) {
+    const path = input.file_path || "";
+    const content = input.content || "";
+    const lines = content.split("\n").length;
+    return el("div", {},
+      el("div", {},
+        el("span", {}, "✎ "),
+        el("span", { class: "path-ref" }, path),
+        el("span", { class: "badge" }, "new"),
+        el("span", { class: "lines-ref" }, lines + " lines, " + content.length + " chars")),
+      el("pre", { class: "shell-out" }, content.length > 800 ? content.slice(0, 800) + "\n…(truncated)" : content));
+  },
+  Glob(input) {
+    return el("div", { class: "kv" },
+      el("span", { class: "k" }, "pattern"),
+      el("code", {}, input.pattern || ""),
+      input.path ? el("span", { class: "k" }, "path") : null,
+      input.path ? el("code", {}, input.path) : null);
+  },
+  Grep(input) {
+    const kv = el("div", { class: "kv" });
+    kv.appendChild(el("span", { class: "k" }, "pattern"));
+    kv.appendChild(el("code", {}, input.pattern || ""));
+    if (input.path) { kv.appendChild(el("span", { class: "k" }, "path")); kv.appendChild(el("code", {}, input.path)); }
+    if (input.glob) { kv.appendChild(el("span", { class: "k" }, "glob")); kv.appendChild(el("code", {}, input.glob)); }
+    if (input.type) { kv.appendChild(el("span", { class: "k" }, "type")); kv.appendChild(el("code", {}, input.type)); }
+    if (input["-i"]) { kv.appendChild(el("span", { class: "k" }, "-i")); kv.appendChild(el("code", {}, "case-insensitive")); }
+    if (input.output_mode) { kv.appendChild(el("span", { class: "k" }, "mode")); kv.appendChild(el("code", {}, input.output_mode)); }
+    return kv;
+  },
+  TodoWrite(input) {
+    const todos = input.todos || [];
+    const ul = el("ul", { class: "todo" });
+    for (const t of todos) {
+      const status = t.status || "pending";
+      const mark = status === "completed" ? "☑" : status === "in_progress" ? "▣" : "☐";
+      ul.appendChild(el("li", {},
+        el("span", { class: "mark " + status }, mark),
+        el("span", { class: status }, t.activeForm && status === "in_progress" ? t.activeForm : (t.content || ""))));
+    }
+    return ul;
+  },
+  Agent(input) {
+    return el("div", {},
+      el("div", {},
+        el("span", {}, "🤖 "),
+        el("span", { class: "badge tool" }, input.subagent_type || "general-purpose"),
+        " ",
+        el("span", { class: "muted" }, input.description || "")),
+      input.prompt ? el("details", { class: "raw" },
+        el("summary", {}, "prompt"),
+        el("pre", {}, input.prompt)) : null);
+  },
+  Task(input) { return TOOL_INPUT.Agent(input); },
+  WebFetch(input) {
+    return el("div", { class: "kv" },
+      el("span", { class: "k" }, "url"),
+      el("a", { class: "ext", href: input.url || "#", target: "_blank", rel: "noopener" }, input.url || ""),
+      input.prompt ? el("span", { class: "k" }, "prompt") : null,
+      input.prompt ? el("span", { class: "v" }, input.prompt) : null);
+  },
+  WebSearch(input) {
+    return el("div", {},
+      el("span", {}, "🔎 "),
+      el("code", {}, input.query || ""));
+  },
+  Skill(input) {
+    return el("div", {},
+      el("span", { class: "badge tool" }, input.skill || "?"),
+      input.args ? el("span", { class: "muted" }, " " + input.args) : null);
+  },
+  ToolSearch(input) {
+    return el("div", { class: "kv" },
+      el("span", { class: "k" }, "query"),
+      el("code", {}, input.query || ""),
+      input.max_results != null ? el("span", { class: "k" }, "max") : null,
+      input.max_results != null ? el("code", {}, "" + input.max_results) : null);
+  },
+  TaskCreate(input) {
+    return el("div", { class: "kv" },
+      el("span", { class: "k" }, "subject"),
+      el("span", { class: "v" }, input.subject || ""),
+      input.description ? el("span", { class: "k" }, "what") : null,
+      input.description ? el("span", { class: "v" }, input.description) : null);
+  },
+  TaskUpdate(input) {
+    return el("div", { class: "kv" },
+      el("span", { class: "k" }, "task"),
+      el("code", {}, "#" + (input.taskId || "?")),
+      input.status ? el("span", { class: "k" }, "status") : null,
+      input.status ? el("span", { class: "v " + input.status }, input.status) : null);
+  },
+  ScheduleWakeup(input) {
+    return el("div", { class: "kv" },
+      el("span", { class: "k" }, "in"),
+      el("code", {}, (input.delaySeconds || "?") + "s"),
+      el("span", { class: "k" }, "reason"),
+      el("span", { class: "v" }, input.reason || ""));
+  },
+};
+
+function renderEditCard(path, oldStr, newStr, badge) {
+  const wrap = el("div");
+  wrap.appendChild(el("div", {},
+    el("span", {}, "✎ "),
+    el("span", { class: "path-ref" }, path || ""),
+    badge ? el("span", { class: "badge" }, badge) : null));
+  wrap.appendChild(unifiedDiff(oldStr || "", newStr || ""));
+  return wrap;
+}
+
+function unifiedDiff(a, b) {
+  const al = a.split("\n");
+  const bl = b.split("\n");
+  const wrap = el("div", { class: "diff" });
+  for (let i = 0; i < al.length; i++) wrap.appendChild(el("div", { class: "row del" }, "- " + al[i]));
+  for (let i = 0; i < bl.length; i++) wrap.appendChild(el("div", { class: "row add" }, "+ " + bl[i]));
+  return wrap;
+}
+
+const TOOL_RESULT = {
+  Bash(body) {
+    const exitMatch = body.match(/\(exit code: ?(\d+)\)/);
+    const wrap = el("div");
+    wrap.appendChild(el("pre", { class: "shell-out" }, body || ""));
+    if (exitMatch && exitMatch[1] !== "0") {
+      wrap.appendChild(el("div", {}, el("span", { class: "badge error" }, "exit " + exitMatch[1])));
+    }
+    return wrap;
+  },
+  Read(body) {
+    return el("pre", { class: "shell-out" }, body || "");
+  },
+  Grep(body) {
+    const lines = (body || "").split("\n").filter(Boolean);
+    const groups = new Map();
+    for (const ln of lines) {
+      const m = ln.match(/^([^:]+):(\d+):(.*)$/);
+      if (!m) {
+        if (!groups.has("(unparsed)")) groups.set("(unparsed)", []);
+        groups.get("(unparsed)").push({ line: "", text: ln });
+        continue;
+      }
+      const file = m[1], line = m[2], text = m[3];
+      if (!groups.has(file)) groups.set(file, []);
+      groups.get(file).push({ line, text });
+    }
+    if (groups.size === 0) return el("div", { class: "muted" }, "(no matches)");
+    const wrap = el("div");
+    for (const entry of groups) {
+      const file = entry[0], hits = entry[1];
+      wrap.appendChild(el("div", { class: "path-ref" }, file));
+      const list = el("div", { class: "shell-out" });
+      for (const h of hits) {
+        list.appendChild(el("div", {},
+          el("span", { class: "muted" }, h.line ? h.line + " │ " : ""),
+          h.text));
+      }
+      wrap.appendChild(list);
+    }
+    return wrap;
+  },
+  Glob(body) {
+    const lines = (body || "").split("\n").filter(Boolean);
+    if (lines.length === 0) return el("div", { class: "muted" }, "(no matches)");
+    const wrap = el("div");
+    for (const ln of lines) wrap.appendChild(el("div", { class: "path-ref" }, ln));
+    return wrap;
+  },
+  TodoWrite() {
+    return el("div", { class: "muted" }, "(todo list updated)");
+  },
+};
+
+function isMcp(name) { return name && name.startsWith("mcp__"); }
+function mcpParts(name) {
+  const stripped = name.replace(/^mcp__/, "");
+  const lastUnder = stripped.lastIndexOf("__");
+  if (lastUnder < 0) return { server: stripped, tool: "" };
+  return { server: stripped.slice(0, lastUnder), tool: stripped.slice(lastUnder + 2) };
+}
+
+function renderToolUseBody(m) {
+  const name = m.tool_name || "";
+  const input = m.input || {};
+  const renderer = TOOL_INPUT[name];
+  if (renderer) {
+    const wrap = el("div");
+    wrap.appendChild(renderer(input));
+    wrap.appendChild(rawDetails(input));
+    return wrap;
+  }
+  if (isMcp(name)) {
+    const parts = mcpParts(name);
+    const head = el("div", {},
+      el("span", {}, "🔌 "),
+      el("span", { class: "badge tool" }, parts.server),
+      " / ",
+      el("code", {}, parts.tool));
+    const kv = el("div", { class: "kv" });
+    for (const k of Object.keys(input)) {
+      kv.appendChild(el("span", { class: "k" }, k));
+      const v = input[k];
+      kv.appendChild(el("span", { class: "v" },
+        typeof v === "string" ? v : JSON.stringify(v)));
+    }
+    return el("div", {}, head, kv, rawDetails(input));
+  }
+  return el("pre", { class: "shell-out" }, JSON.stringify(input, null, 2));
+}
+
+function renderToolResultBody(m) {
+  const name = m.tool_name || "";
+  const renderer = TOOL_RESULT[name];
+  if (renderer) {
+    const wrap = el("div");
+    wrap.appendChild(renderer(m.body, null, null));
+    if ((m.body || "").length > 300) wrap.appendChild(rawDetailsResult(m.body));
+    return wrap;
+  }
+  return el("pre", { class: "shell-out" }, m.body || "");
+}
+
+function renderHookBody(m) {
+  const ev = m.hook_event || "";
+  const txt = (m.body || "").trim();
+  const head = el("div", { class: "who" },
+    el("span", {}, "🔗 " + (m.hook_name || "hook")),
+    ev ? el("span", { class: "badge" }, ev) : null);
+  const summary = txt.length > 0 ? txt.slice(0, 140) + (txt.length > 140 ? "…" : "") : "(no body)";
+  const body = el("div", { class: "body" }, summary);
+  return [head, body];
+}
+
+function renderUserBody(m) { return el("div", { class: "body" }, m.body || ""); }
+function renderAssistantBody(m) { return el("div", { class: "body" }, m.body || ""); }
+
+function renderThinkingBody(m) {
+  const text = m.body || "";
+  const tokenEst = Math.round(text.length / 4);
+  const head = el("div", { class: "who" },
+    el("span", {}, "🧠 Thinking"),
+    el("span", { class: "badge" }, "~" + tokenEst + " tokens"));
+  const body = el("div", { class: "body" }, text);
+  return [head, body];
+}
+
+function renderSystemBody(m) {
+  const head = el("div", { class: "who" }, "system");
+  const body = el("div", { class: "body" }, "🔒 mode: " + (m.body || ""));
+  return [head, body];
+}
+
+function renderToolUseHead(m) {
+  const name = m.tool_name || "?";
+  let label = name;
+  let extra = null;
+  if (isMcp(name)) {
+    const parts = mcpParts(name);
+    label = "mcp";
+    extra = el("span", { class: "muted" }, parts.server + " / " + parts.tool);
+  }
+  return el("div", { class: "who" },
+    el("span", { class: "badge tool" }, label),
+    extra,
+    m.tool_use_id ? el("span", { class: "badge id" }, shortId(m.tool_use_id)) : null);
+}
+
+function renderToolResultHead(m) {
+  const tn = m.tool_name || "?";
+  return el("div", { class: "who" },
+    el("span", {}, "↳ result"),
+    el("span", { class: "badge tool" }, tn),
+    m.is_error ? el("span", { class: "badge error" }, "error") : null,
+    m.tool_use_id ? el("span", { class: "badge id" }, shortId(m.tool_use_id)) : null);
+}
+
+function renderMessage(m) {
+  const role = m.role;
+  let cls = "msg " + role;
+  if (role === "tool_result" && m.is_error) cls += " error";
+  const card = el("div", { class: cls, data: { role: role, order: m.order, tool: m.tool_name || "" } });
+
+  let head, body;
+  if (role === "user") {
+    head = el("div", { class: "who" }, "You");
+    body = renderUserBody(m);
+  } else if (role === "assistant") {
+    head = el("div", { class: "who" }, "Claude");
+    body = renderAssistantBody(m);
+  } else if (role === "tool_use") {
+    head = renderToolUseHead(m);
+    body = el("div", { class: "body" }); body.appendChild(renderToolUseBody(m));
+  } else if (role === "tool_result") {
+    head = renderToolResultHead(m);
+    body = el("div", { class: "body" }); body.appendChild(renderToolResultBody(m));
+  } else if (role === "thinking") {
+    const r = renderThinkingBody(m); head = r[0]; body = r[1];
+  } else if (role === "hook") {
+    const r = renderHookBody(m); head = r[0]; body = r[1];
+  } else if (role === "system") {
+    const r = renderSystemBody(m); head = r[0]; body = r[1];
+  } else {
+    head = el("div", { class: "who" }, role);
+    body = el("div", { class: "body" }, m.body || "");
+  }
+
+  card.appendChild(head);
+  card.appendChild(body);
+
+  const longish = ["tool_use", "tool_result", "thinking"].includes(role) &&
+                  (body.textContent || "").length > 600;
+  if (longish) {
+    card.classList.add("collapsible");
+    const t = el("div", { class: "toggle" }, "▶ click to expand");
+    card.appendChild(t);
+    const toggle = function() {
+      card.classList.toggle("open");
+      t.textContent = card.classList.contains("open") ? "▼ click to collapse" : "▶ click to expand";
+    };
+    t.addEventListener("click", toggle);
+    card.addEventListener("dblclick", toggle);
+  }
+  return card;
+}
+
+function renderMeta() {
+  const m = DATA.meta;
+  const head = document.getElementById("meta");
+  head.replaceChildren();
+  head.append(
+    el("strong", {}, "Session " + m.id.slice(0, 8)),
+    el("span", { class: "muted" }, m.project_label),
+    el("span", { class: "muted" }, new Date(m.modified).toLocaleString()),
+    el("span", { class: "muted" }, m.msg_count + " events"),
+    el("span", { class: "muted" }, m.matches_cwd ? "● cwd-matched" : "")
+  );
+  document.title = "Session " + m.id.slice(0, 8) + " — " + m.project_label;
+}
+
+function buildToolChips() {
+  const used = new Map();
+  for (const m of DATA.messages) {
+    if (m.role === "tool_use" && m.tool_name) {
+      used.set(m.tool_name, (used.get(m.tool_name) || 0) + 1);
+    }
+  }
+  const sorted = Array.from(used.entries()).sort(function(a, b) { return b[1] - a[1]; });
+  const row = document.getElementById("tool-chips");
+  row.replaceChildren();
+  if (sorted.length === 0) return;
+  row.appendChild(el("span", { class: "count" }, "tools:"));
+  for (const entry of sorted) {
+    const name = entry[0], count = entry[1];
+    const display = isMcp(name) ? "mcp/" + mcpParts(name).tool : name;
+    row.appendChild(el("span", {
+      class: "filter-chip tool-chip",
+      data: { tool: name },
+    }, display + " ", el("span", { class: "count" }, "" + count)));
+  }
+}
+
+function renderMessages() {
+  const main = document.getElementById("messages");
+  main.replaceChildren();
+  for (const m of DATA.messages) main.appendChild(renderMessage(m));
+  updateCount();
+}
+
+let currentRoleFilter = "all";
+let currentToolFilter = null;
+let currentSearch = "";
+let regexMode = false;
+
+function makeMatcher(term) {
+  if (!term) return null;
+  if (regexMode) {
+    try { const re = new RegExp(term, "i"); return function(s) { return re.test(s); }; }
+    catch (_) { return function() { return false; }; }
+  }
+  const lower = term.toLowerCase();
+  return function(s) { return s.toLowerCase().indexOf(lower) !== -1; };
+}
+
+function applyFilters() {
+  const cards = document.querySelectorAll("#messages .msg");
+  const matcher = makeMatcher(currentSearch);
+  let shown = 0;
+  for (const card of cards) {
+    const role = card.dataset.role;
+    const tool = card.dataset.tool || "";
+    const text = card.textContent;
+    const roleOk = currentRoleFilter === "all" || role === currentRoleFilter;
+    const toolOk = !currentToolFilter || tool === currentToolFilter;
+    const textOk = !matcher || matcher(text);
+    if (roleOk && toolOk && textOk) {
+      card.classList.remove("hidden");
+      shown += 1;
+      if (matcher && currentSearch && !regexMode) highlightTerm(card, currentSearch.toLowerCase());
+      else clearHighlight(card);
+    } else {
+      card.classList.add("hidden");
+      clearHighlight(card);
+    }
+  }
+  updateCount(shown);
+}
+
+function highlightTerm(card, term) {
+  const body = card.querySelector(".body");
+  if (!body) return;
+  if (body.dataset.original === undefined) body.dataset.original = body.textContent;
+  const text = body.dataset.original;
+  body.replaceChildren();
+  if (!term) { body.appendChild(document.createTextNode(text)); return; }
+  const lower = text.toLowerCase();
+  let idx = lower.indexOf(term), last = 0;
+  if (idx < 0) { body.appendChild(document.createTextNode(text)); return; }
+  while (idx >= 0) {
+    body.appendChild(document.createTextNode(text.slice(last, idx)));
+    const mk = document.createElement("mark");
+    mk.textContent = text.slice(idx, idx + term.length);
+    body.appendChild(mk);
+    last = idx + term.length;
+    idx = lower.indexOf(term, last);
+  }
+  body.appendChild(document.createTextNode(text.slice(last)));
+}
+
+function clearHighlight(card) {
+  const body = card.querySelector(".body");
+  if (!body) return;
+  if (body.dataset.original !== undefined) {
+    const order = +card.dataset.order;
+    const m = DATA.messages.find(function(x) { return x.order === order; });
+    if (m) {
+      const fresh = renderMessage(m);
+      card.replaceWith(fresh);
+    }
+  }
+}
+
+function updateCount(shown) {
+  const total = DATA.messages.length;
+  const c = document.getElementById("count");
+  if (shown === undefined) c.textContent = total + " messages";
+  else c.textContent = shown + " of " + total + " messages";
+}
+
+function init() {
+  renderMeta();
+  buildToolChips();
+  renderMessages();
+  const search = document.getElementById("search");
+  search.addEventListener("input", function(e) {
+    currentSearch = e.target.value;
+    applyFilters();
+  });
+  document.getElementById("regex-toggle").addEventListener("click", function(e) {
+    regexMode = !regexMode;
+    e.currentTarget.classList.toggle("active", regexMode);
+    applyFilters();
+  });
+  for (const chip of document.querySelectorAll("#role-chips .filter-chip")) {
+    chip.addEventListener("click", function() {
+      for (const c of document.querySelectorAll("#role-chips .filter-chip")) c.classList.remove("active");
+      chip.classList.add("active");
+      currentRoleFilter = chip.dataset.filter;
+      applyFilters();
+    });
+  }
+  document.getElementById("tool-chips").addEventListener("click", function(e) {
+    const chip = e.target.closest(".tool-chip");
+    if (!chip) return;
+    const tool = chip.dataset.tool;
+    if (currentToolFilter === tool) {
+      currentToolFilter = null;
+      chip.classList.remove("active");
+    } else {
+      for (const c of document.querySelectorAll(".tool-chip")) c.classList.remove("active");
+      chip.classList.add("active");
+      currentToolFilter = tool;
+    }
+    applyFilters();
+  });
+  document.addEventListener("keydown", function(e) {
+    if (e.key === "/" && document.activeElement !== search) {
+      e.preventDefault();
+      search.focus();
+    } else if (e.key === "Escape" && document.activeElement === search) {
+      search.value = "";
+      currentSearch = "";
+      applyFilters();
+      search.blur();
+    }
+  });
+}
+
+init();
+</script>
+</body>
+</html>

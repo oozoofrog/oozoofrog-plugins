@@ -4,11 +4,25 @@ Claude Code 세션 로그(`~/.claude/projects/*/*.jsonl`)를 인터랙티브 TUI
 
 ## 무엇을 하나
 
-Claude Code는 모든 대화 세션을 작업 디렉토리별로 인코딩된 디렉토리 아래 JSONL 파일로 저장한다. 이 플러그인은 그 로그를 ratatui 기반 TUI로 보여준다:
+Claude Code는 모든 대화 세션을 작업 디렉토리별로 인코딩된 디렉토리 아래 JSONL 파일로 저장한다. 이 플러그인은 그 로그를 다양한 형태로 탐색할 수 있게 한다:
 
-- **세션 목록 뷰** — 시간 역순, 프로젝트 라벨 + 첫 사용자 프롬프트 미리보기
-- **세션 상세 뷰** — 사용자 메시지 / 어시스턴트 응답 / tool 호출 / thinking / hook 이벤트를 색상 구분
-- **CWD 토글** (`t` 키) — 전체 세션 ↔ 현재 작업 디렉토리에서 시작된 세션만
+- **TUI** (ratatui) — 세션 목록 + 도구별 맥락 표시 상세 뷰
+- **CLI 쿼리** (`query`) — 시간/cwd/도구/regex 필터, JSON/JSONL 출력
+- **Web 모드** (`web`) — 단일 세션 static HTML export 또는 `--serve`로 라이브 HTTP 서버
+
+### v0.4.0 — 맥락 우선 UI
+
+raw JSON 대신 **도구 이름별 전용 렌더러**로 표시:
+
+- `Bash` → `$ command` 셸 카드 + description
+- `Read` → `📄 path L120-180`
+- `Edit`/`Write` → ± diff
+- `Grep` → file 그룹 + `path:line │ text`
+- `TodoWrite` → ☐ ▣ ☑ 체크리스트
+- `Agent` → 🤖 subagent 배지
+- `mcp__server__tool` → 🔌 server / tool 분리
+- tool_use ↔ tool_result 시각 페어링, 에러는 빨간 막대
+- web 모드: per-tool 동적 chip 필터 + regex 검색 토글
 
 ## 빠른 시작
 

@@ -43,7 +43,7 @@ ${CLAUDE_PLUGIN_ROOT}/skills/session-viewer/bin/launch.sh
 2. 없으면 `src/`에서 `cargo build --release`로 즉석 빌드하고 캐시
 3. cargo가 없으면 종료 코드 127로 에러 출력
 
-현재 번들된 바이너리: `bin/session-viewer-darwin-arm64` (Mach-O 64-bit, ~1.8MB; clap + regex + tiny_http + 3 서브커맨드 + web --serve 모드 포함).
+현재 번들된 바이너리: `bin/session-viewer-darwin-arm64` (Mach-O 64-bit, ~1.8MB; clap + regex + tiny_http + 3 서브커맨드 + 맥락 우선 UI 렌더러).
 
 ## 키 바인딩
 
@@ -75,15 +75,27 @@ ${CLAUDE_PLUGIN_ROOT}/skills/session-viewer/bin/launch.sh
 | `g` / `G` | 맨 위 / 맨 아래 |
 | `Esc` / `q` / `Backspace` | 목록으로 돌아가기 |
 
-상세 뷰는 JSONL의 시간 순서대로 다음 이벤트들을 색상 구분하여 표시한다:
+상세 뷰는 JSONL의 시간 순서대로 다음 이벤트들을 **도구별 맥락 형식**으로 렌더한다 (v0.4.0+):
 
 - 🟢 **User** (녹색) — 사용자 프롬프트 (system-reminder 등 노이즈는 자동 필터)
 - ⚪ **Assistant** (흰색) — 어시스턴트 응답 텍스트
-- 🟣 **Tool use** (자홍) — 도구 호출 (이름 + input JSON)
-- ⚫ **Tool result** (어두운 회색) — 도구 결과
-- 🟡 **Thinking** (노랑) — extended thinking 블록
-- 🔵 **Hook** (파랑) — SessionStart/UserPromptSubmit 등 hook 이벤트
-- 회색 **system** — permission-mode 변경
+- 🟣 **Tool use** (자홍) — 도구 이름별 전용 렌더링:
+  - `Bash` → `$ command` + description 주석
+  - `Read` → `📄 path L120-180` (line range)
+  - `Edit`/`Write` → ± diff
+  - `Grep`/`Glob` → 패턴 + path/glob/type 키
+  - `TodoWrite` → ☐ ▣ ☑ 체크리스트
+  - `Agent`/`Task` → 🤖 subagent 이름 배지
+  - `WebFetch` → 🌐 URL · `WebSearch` → 🔎 query
+  - `mcp__server__tool` → 🔌 server / tool 분리 표시
+  - 그 외 → generic key-value
+- ⚫ **Tool result** (어두운 회색) — 페어링된 tool 이름과 함께 표시:
+  - `Grep` 결과는 `path:line │ text`로 그룹화
+  - `Bash` 결과는 exit code 배지 (≠ 0 이면 빨강)
+  - 에러는 빨간 막대 + 배지
+- 🟡 **Thinking** (노랑) — `🧠 ~N tokens` 헤더, 긴 본문은 접힘
+- 🔵 **Hook** (파랑) — 한 줄 strip (이벤트 이름 배지 + 본문 미리보기)
+- 회색 **system** — `🔒 mode: ...` 라인 (가는 점선으로 구분)
 
 ## 데이터 소스
 
@@ -265,11 +277,17 @@ session-viewer web --serve
 
 세션 목록은 매 요청마다 다시 스캔하므로 **새 세션이 생성되면 새로고침만으로 즉시 반영**된다 (Claude Code에서 작업 중 라이브 탐색 가능).
 
-**HTML 뷰어 기능 (양 모드 공통):**
-- 채팅 모방 UI (user/assistant 말풍선, tool 호출은 collapsible 카드)
-- `/` 키로 검색 포커스, 입력 시 본문 substring 매칭 + 하이라이트
-- 상단 chip 필터 (All / User / Assistant / Tool / Result)
+**HTML 뷰어 기능 (양 모드 공통, v0.4.0+ 맥락 우선 UI):**
+- 채팅 모방 UI (user/assistant 말풍선)
+- **도구별 전용 렌더러**: Bash 셸 카드, Read 파일 링크, Edit diff, Grep file-grouped, TodoWrite 체크리스트, Agent 배지, MCP `server / tool` 분리 등
+- **tool_use ↔ tool_result 시각 페어링**: 같은 색 좌측 막대 + margin 축소
+- **에러 강조**: `is_error: true` 결과는 빨간 막대 + `error` 배지
+- `/` 키로 검색 포커스, **regex 토글 버튼**(`.*`) 지원
+- **역할 chip 필터** (All/User/Assistant/Tool/Result/Thinking/Hook)
+- **per-tool 동적 chip 필터**: 그 세션에서 호출된 도구만 사용 빈도순으로 자동 노출
 - 다크모드 자동 감지 (`prefers-color-scheme`)
+- 긴 tool 입력/결과/thinking은 접힘 (`▶ click to expand`)
+- raw JSON은 `<details>`로 접근 가능 (재구성/디버깅용)
 - 모바일 레이아웃 자연스러움
 - Static 모드: zero runtime, 인터넷 없이 동작, 이메일/Slack 공유 가능
 - Serve 모드: 모든 세션 탐색 + 라이브 새로고침 (서버 실행 중에만)
