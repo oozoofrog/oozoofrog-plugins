@@ -165,7 +165,93 @@ session-viewer/
 └── src/
     ├── Cargo.toml
     ├── Cargo.lock
-    └── src/main.rs               # ratatui + crossterm 기반 TUI
+    └── src/
+        ├── main.rs               # clap dispatcher
+        ├── data.rs               # JSONL 파싱 + Session/Message 타입 (공통)
+        ├── tui.rs                # ratatui + crossterm TUI
+        ├── query.rs              # 필터 + 텍스트/JSON/JSONL 출력
+        └── web.rs                # 단일 self-contained HTML export
+```
+
+## 서브커맨드 (v0.2.0+)
+
+`session-viewer`는 3개 서브커맨드를 가진 단일 바이너리다:
+
+| 서브커맨드 | 용도 | TTY 필요? |
+|---|---|---|
+| `tui` (default) | 인터랙티브 TUI 탐색 | 예 (별도 터미널) |
+| `query` | 필터 기반 CLI 조회 | 아니오 |
+| `web <id>` | 단일 세션을 self-contained HTML로 export | 아니오 |
+
+`query`와 `web`은 raw mode를 쓰지 않으므로 **Claude Code 안의 Bash 도구로도 실행 가능**하다. TUI만 별도 터미널이 필요.
+
+### `query` — 필터 기반 조회
+
+```bash
+session-viewer query [OPTIONS]
+
+# 필터
+--since <WHEN>      # "2d", "1h", "1w", "2026-05-01" (RFC3339도 OK)
+--until <WHEN>
+--cwd               # 현재 작업 디렉토리에서 시작된 세션만
+--project <PATTERN> # project label/encoded dir 이름 substring
+--tool <REGEX>      # 호출된 도구 이름 정규식 (예: 'Bash|Read')
+--text <STRING>     # user/assistant/tool_result 본문 substring
+--regex <REGEX>     # 같은 본문에서 정규식 매칭
+
+# 출력 형식
+--format summary    # 사람이 읽는 한 줄 요약 (default)
+--format json       # 매칭된 세션 메타데이터 배열
+--format jsonl      # 매칭된 raw JSONL 라인 (또는 메타데이터 한 줄/세션)
+```
+
+**예시:**
+
+```bash
+# 최근 1일 동안, Bash나 Read를 호출한 세션의 raw 라인을 jq로 처리
+session-viewer query --since 1d --tool 'Bash|Read' --format jsonl | jq .
+
+# 현재 프로젝트에서 "ratatui"가 언급된 세션만 요약
+session-viewer query --cwd --text ratatui
+
+# 6시간 이내 모든 세션을 JSON으로 → 스크립트에서 사용
+session-viewer query --since 6h --format json
+```
+
+### `web <session-id>` — Static HTML export
+
+```bash
+session-viewer web <SESSION_ID> [-o OUTPUT]
+```
+
+- `<SESSION_ID>`: 전체 UUID 또는 unique prefix (예: `0532f5f4`). 중복되면 후보 출력 후 종료.
+- `-o, --output <PATH>`: 출력 파일. 생략 시 stdout.
+
+**예시:**
+
+```bash
+# 세션을 single self-contained HTML로 export 후 브라우저로 열기
+session-viewer web 0532f5f4 -o /tmp/session.html
+open /tmp/session.html
+
+# 또는 stdout 파이프
+session-viewer web 0532f5f4 > out.html
+```
+
+**HTML 뷰어 기능:**
+- 채팅 모방 UI (user/assistant 말풍선, tool 호출은 collapsible 카드)
+- `/` 키로 검색 포커스, 입력 시 본문 substring 매칭 + 하이라이트
+- 상단 chip 필터 (All / User / Assistant / Tool / Result)
+- 다크모드 자동 감지 (`prefers-color-scheme`)
+- 모바일 레이아웃 자연스러움
+- Zero runtime — 인터넷 없이도 동작, 이메일/Slack 공유 가능
+
+### 빠른 시작 (TUI 외 명령)
+
+```bash
+# query/web도 launch.sh로 실행 가능 (인자만 추가)
+~/.claude/plugins/cache/oozoofrog-plugins/session-viewer/<version>/skills/session-viewer/bin/launch.sh query --since 1d
+~/.claude/plugins/cache/oozoofrog-plugins/session-viewer/<version>/skills/session-viewer/bin/launch.sh web 0532f5f4 -o /tmp/x.html
 ```
 
 ## 의존성
