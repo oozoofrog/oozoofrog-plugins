@@ -1,6 +1,7 @@
 use anyhow::Result;
 use serde_json::Value;
 use std::{
+    collections::HashMap,
     fs,
     io::{BufRead, BufReader},
     path::{Path, PathBuf},
@@ -23,6 +24,24 @@ pub struct Message {
     pub role: &'static str,
     pub title: String,
     pub body: String,
+    pub tool_name: Option<String>,
+    pub tool_use_id: Option<String>,
+    pub input: Option<Value>,
+    pub is_error: bool,
+}
+
+impl Message {
+    fn plain(role: &'static str, title: impl Into<String>, body: impl Into<String>) -> Self {
+        Self {
+            role,
+            title: title.into(),
+            body: body.into(),
+            tool_name: None,
+            tool_use_id: None,
+            input: None,
+            is_error: false,
+        }
+    }
 }
 
 pub fn encode_path(p: &Path) -> String {
@@ -195,11 +214,7 @@ pub fn load_messages(path: &Path) -> Result<Vec<Message>> {
                 "assistant" => render_assistant(&v, &mut out),
                 "permission-mode" => {
                     if let Some(m) = v.get("permissionMode").and_then(|m| m.as_str()) {
-                        out.push(Message {
-                            role: "system",
-                            title: "permission-mode".into(),
-                            body: m.to_string(),
-                        });
+                        out.push(Message::plain("system", "permission-mode", m));
                     }
                 }
                 _ => {}
@@ -226,14 +241,33 @@ pub fn load_messages(path: &Path) -> Result<Vec<Message>> {
             } else {
                 content.to_string()
             };
-            out.push(Message {
-                role: "hook",
-                title: format!("{} ({})", hook, event),
-                body,
-            });
+            out.push(Message::plain("hook", format!("{} ({})", hook, event), body));
         }
     }
+    pair_tool_results(&mut out);
     Ok(out)
+}
+
+/// Walk the message list and stamp each tool_result with the tool_name
+/// of its matching tool_use (lookup by tool_use_id).
+fn pair_tool_results(messages: &mut [Message]) {
+    let mut id_to_tool: HashMap<String, String> = HashMap::new();
+    for m in messages.iter() {
+        if m.role == "tool_use" {
+            if let (Some(id), Some(name)) = (m.tool_use_id.as_ref(), m.tool_name.as_ref()) {
+                id_to_tool.insert(id.clone(), name.clone());
+            }
+        }
+    }
+    for m in messages.iter_mut() {
+        if m.role == "tool_result" {
+            if let Some(id) = m.tool_use_id.as_ref() {
+                if let Some(name) = id_to_tool.get(id) {
+                    m.tool_name = Some(name.clone());
+                }
+            }
+        }
+    }
 }
 
 fn render_user(v: &Value, out: &mut Vec<Message>) {
@@ -243,11 +277,7 @@ fn render_user(v: &Value, out: &mut Vec<Message>) {
     };
     if let Some(s) = content.as_str() {
         if !is_system_noise(s) {
-            out.push(Message {
-                role: "user",
-                title: "User".into(),
-                body: s.to_string(),
-            });
+            out.push(Message::plain("user", "User", s));
         }
         return;
     }
@@ -258,11 +288,7 @@ fn render_user(v: &Value, out: &mut Vec<Message>) {
                 "text" => {
                     if let Some(text) = blk.get("text").and_then(|t| t.as_str()) {
                         if !is_system_noise(text) {
-                            out.push(Message {
-                                role: "user",
-                                title: "User".into(),
-                                body: text.to_string(),
-                            });
+                            out.push(Message::plain("user", "User", text));
                         }
                     }
                 }
@@ -283,11 +309,19 @@ fn render_user(v: &Value, out: &mut Vec<Message>) {
                         Some(c) => c.to_string(),
                         None => String::new(),
                     };
+                    let is_error = blk
+                        .get("is_error")
+                        .and_then(|b| b.as_bool())
+                        .unwrap_or(false);
                     let short_id: String = id.chars().take(8).collect();
                     out.push(Message {
                         role: "tool_result",
                         title: format!("Tool result ({})", short_id),
                         body,
+                        tool_name: None,
+                        tool_use_id: Some(id.to_string()),
+                        input: None,
+                        is_error,
                     });
                 }
                 _ => {}
@@ -302,11 +336,7 @@ fn render_assistant(v: &Value, out: &mut Vec<Message>) {
         None => return,
     };
     if let Some(s) = content.as_str() {
-        out.push(Message {
-            role: "assistant",
-            title: "Assistant".into(),
-            body: s.to_string(),
-        });
+        out.push(Message::plain("assistant", "Assistant", s));
         return;
     }
     if let Some(arr) = content.as_array() {
@@ -315,32 +345,30 @@ fn render_assistant(v: &Value, out: &mut Vec<Message>) {
             match t {
                 "text" => {
                     if let Some(text) = blk.get("text").and_then(|t| t.as_str()) {
-                        out.push(Message {
-                            role: "assistant",
-                            title: "Assistant".into(),
-                            body: text.to_string(),
-                        });
+                        out.push(Message::plain("assistant", "Assistant", text));
                     }
                 }
                 "tool_use" => {
                     let name = blk.get("name").and_then(|n| n.as_str()).unwrap_or("?");
-                    let input = blk
-                        .get("input")
+                    let id = blk.get("id").and_then(|s| s.as_str()).unwrap_or("");
+                    let input = blk.get("input").cloned();
+                    let body = input
+                        .as_ref()
                         .map(|i| serde_json::to_string_pretty(i).unwrap_or_default())
                         .unwrap_or_default();
                     out.push(Message {
                         role: "tool_use",
                         title: format!("→ {}", name),
-                        body: input,
+                        body,
+                        tool_name: Some(name.to_string()),
+                        tool_use_id: Some(id.to_string()),
+                        input,
+                        is_error: false,
                     });
                 }
                 "thinking" => {
                     if let Some(text) = blk.get("thinking").and_then(|t| t.as_str()) {
-                        out.push(Message {
-                            role: "thinking",
-                            title: "Thinking".into(),
-                            body: text.to_string(),
-                        });
+                        out.push(Message::plain("thinking", "Thinking", text));
                     }
                 }
                 _ => {}

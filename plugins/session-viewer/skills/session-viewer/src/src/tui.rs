@@ -13,6 +13,7 @@ use ratatui::{
     widgets::{Block, Borders, List, ListItem, ListState, Paragraph, Wrap},
     Frame, Terminal,
 };
+use serde_json::Value;
 use std::{
     env,
     io::{self, Stdout},
@@ -246,22 +247,7 @@ fn render_detail(f: &mut Frame, app: &mut App) {
 
     let mut lines: Vec<Line> = Vec::new();
     for m in &detail.messages {
-        let color = match m.role {
-            "user" => Color::Green,
-            "assistant" => Color::White,
-            "tool_use" => Color::Magenta,
-            "tool_result" => Color::DarkGray,
-            "thinking" => Color::Yellow,
-            "hook" => Color::Blue,
-            _ => Color::DarkGray,
-        };
-        lines.push(Line::from(Span::styled(
-            format!("── {} ──", m.title),
-            Style::default().fg(color).add_modifier(Modifier::BOLD),
-        )));
-        for ln in m.body.lines() {
-            lines.push(Line::from(ln.to_string()));
-        }
+        push_message_lines(m, &mut lines);
         lines.push(Line::from(""));
     }
 
@@ -286,6 +272,431 @@ fn render_detail(f: &mut Frame, app: &mut App) {
         Span::raw(" back"),
     ]));
     f.render_widget(help, chunks[2]);
+}
+
+fn role_color(role: &str) -> Color {
+    match role {
+        "user" => Color::Green,
+        "assistant" => Color::White,
+        "tool_use" => Color::Magenta,
+        "tool_result" => Color::DarkGray,
+        "thinking" => Color::Yellow,
+        "hook" => Color::Blue,
+        _ => Color::DarkGray,
+    }
+}
+
+fn push_message_lines(m: &Message, out: &mut Vec<Line<'static>>) {
+    let color = role_color(m.role);
+    match m.role {
+        "tool_use" => push_tool_use(m, color, out),
+        "tool_result" => push_tool_result(m, color, out),
+        "thinking" => {
+            let est = m.body.len() / 4;
+            out.push(Line::from(Span::styled(
+                format!("── 🧠 Thinking (~{} tokens) ──", est),
+                Style::default().fg(color).add_modifier(Modifier::BOLD),
+            )));
+            for ln in m.body.lines().take(20) {
+                out.push(Line::from(Span::styled(
+                    ln.to_string(),
+                    Style::default().fg(color).add_modifier(Modifier::ITALIC),
+                )));
+            }
+            if m.body.lines().count() > 20 {
+                out.push(Line::from(Span::styled(
+                    "… (truncated, expand in web view)".to_string(),
+                    Style::default().fg(Color::DarkGray),
+                )));
+            }
+        }
+        "hook" => {
+            let summary = truncate(&m.body, 140);
+            out.push(Line::from(vec![
+                Span::styled(
+                    format!("🔗 {}", m.title),
+                    Style::default().fg(color).add_modifier(Modifier::BOLD),
+                ),
+                Span::raw("  "),
+                Span::styled(summary, Style::default().fg(Color::DarkGray)),
+            ]));
+        }
+        "system" => {
+            out.push(Line::from(Span::styled(
+                format!("── 🔒 mode: {} ──", m.body),
+                Style::default().fg(Color::DarkGray),
+            )));
+        }
+        _ => {
+            out.push(Line::from(Span::styled(
+                format!("── {} ──", m.title),
+                Style::default().fg(color).add_modifier(Modifier::BOLD),
+            )));
+            for ln in m.body.lines() {
+                out.push(Line::from(ln.to_string()));
+            }
+        }
+    }
+}
+
+fn push_tool_use(m: &Message, color: Color, out: &mut Vec<Line<'static>>) {
+    let name = m.tool_name.as_deref().unwrap_or("?");
+    let id_short: String = m
+        .tool_use_id
+        .as_deref()
+        .unwrap_or("")
+        .chars()
+        .take(8)
+        .collect();
+    let header = Line::from(vec![
+        Span::styled(
+            format!("→ {}", name),
+            Style::default().fg(color).add_modifier(Modifier::BOLD),
+        ),
+        Span::raw("  "),
+        Span::styled(format!("[{}]", id_short), Style::default().fg(Color::DarkGray)),
+    ]);
+    out.push(header);
+    let input = m.input.as_ref();
+    match name {
+        "Bash" => render_bash_input(input, out),
+        "Read" => render_read_input(input, out),
+        "Edit" | "Write" => render_edit_input(name, input, out),
+        "Grep" | "Glob" => render_grep_glob_input(name, input, out),
+        "TodoWrite" => render_todo_input(input, out),
+        "Agent" | "Task" => render_agent_input(input, out),
+        "WebFetch" => render_webfetch_input(input, out),
+        "WebSearch" => render_websearch_input(input, out),
+        n if n.starts_with("mcp__") => render_mcp_input(n, input, out),
+        _ => {
+            // generic: pretty-print first 8 lines
+            for ln in m.body.lines().take(8) {
+                out.push(Line::from(ln.to_string()));
+            }
+            if m.body.lines().count() > 8 {
+                out.push(Line::from(Span::styled(
+                    "… (truncated)",
+                    Style::default().fg(Color::DarkGray),
+                )));
+            }
+        }
+    }
+}
+
+fn render_bash_input(input: Option<&Value>, out: &mut Vec<Line<'static>>) {
+    let v = match input {
+        Some(v) => v,
+        None => return,
+    };
+    if let Some(d) = v.get("description").and_then(|s| s.as_str()) {
+        out.push(Line::from(Span::styled(
+            format!("  # {}", d),
+            Style::default().fg(Color::DarkGray).add_modifier(Modifier::ITALIC),
+        )));
+    }
+    if let Some(c) = v.get("command").and_then(|s| s.as_str()) {
+        out.push(Line::from(vec![
+            Span::styled("  $ ", Style::default().fg(Color::Green)),
+            Span::raw(c.to_string()),
+        ]));
+    }
+    if v.get("run_in_background").and_then(|b| b.as_bool()) == Some(true) {
+        out.push(Line::from(Span::styled(
+            "  [background]",
+            Style::default().fg(Color::Yellow),
+        )));
+    }
+}
+
+fn render_read_input(input: Option<&Value>, out: &mut Vec<Line<'static>>) {
+    let v = match input {
+        Some(v) => v,
+        None => return,
+    };
+    let path = v
+        .get("file_path")
+        .and_then(|s| s.as_str())
+        .unwrap_or("(no path)");
+    let off = v.get("offset").and_then(|n| n.as_i64());
+    let lim = v.get("limit").and_then(|n| n.as_i64());
+    let line_ref = match (off, lim) {
+        (Some(o), Some(l)) => format!("L{}–{}", o, o + l - 1),
+        (Some(o), None) => format!("L{}–", o),
+        (None, Some(l)) => format!("first {} lines", l),
+        _ => String::new(),
+    };
+    out.push(Line::from(vec![
+        Span::styled("  📄 ", Style::default().fg(Color::Cyan)),
+        Span::styled(path.to_string(), Style::default().fg(Color::Blue)),
+        Span::raw("  "),
+        Span::styled(line_ref, Style::default().fg(Color::DarkGray)),
+    ]));
+}
+
+fn render_edit_input(name: &str, input: Option<&Value>, out: &mut Vec<Line<'static>>) {
+    let v = match input {
+        Some(v) => v,
+        None => return,
+    };
+    let path = v
+        .get("file_path")
+        .and_then(|s| s.as_str())
+        .unwrap_or("(no path)");
+    out.push(Line::from(vec![
+        Span::styled("  ✎ ", Style::default().fg(Color::Magenta)),
+        Span::styled(path.to_string(), Style::default().fg(Color::Blue)),
+        Span::raw("  "),
+        Span::styled(
+            if name == "Write" { "[new]" } else { "[edit]" },
+            Style::default().fg(Color::DarkGray),
+        ),
+    ]));
+    if name == "Edit" {
+        if let Some(s) = v.get("old_string").and_then(|s| s.as_str()) {
+            for ln in s.lines().take(5) {
+                out.push(Line::from(Span::styled(
+                    format!("  - {}", ln),
+                    Style::default().fg(Color::Red),
+                )));
+            }
+            if s.lines().count() > 5 {
+                out.push(Line::from(Span::styled(
+                    "  - … (truncated)",
+                    Style::default().fg(Color::DarkGray),
+                )));
+            }
+        }
+        if let Some(s) = v.get("new_string").and_then(|s| s.as_str()) {
+            for ln in s.lines().take(5) {
+                out.push(Line::from(Span::styled(
+                    format!("  + {}", ln),
+                    Style::default().fg(Color::Green),
+                )));
+            }
+            if s.lines().count() > 5 {
+                out.push(Line::from(Span::styled(
+                    "  + … (truncated)",
+                    Style::default().fg(Color::DarkGray),
+                )));
+            }
+        }
+    }
+}
+
+fn render_grep_glob_input(_name: &str, input: Option<&Value>, out: &mut Vec<Line<'static>>) {
+    let v = match input {
+        Some(v) => v,
+        None => return,
+    };
+    if let Some(p) = v.get("pattern").and_then(|s| s.as_str()) {
+        out.push(Line::from(vec![
+            Span::styled("  pattern  ", Style::default().fg(Color::DarkGray)),
+            Span::styled(p.to_string(), Style::default().fg(Color::Yellow)),
+        ]));
+    }
+    if let Some(p) = v.get("path").and_then(|s| s.as_str()) {
+        out.push(Line::from(vec![
+            Span::styled("  path     ", Style::default().fg(Color::DarkGray)),
+            Span::styled(p.to_string(), Style::default().fg(Color::Blue)),
+        ]));
+    }
+    if let Some(p) = v.get("glob").and_then(|s| s.as_str()) {
+        out.push(Line::from(vec![
+            Span::styled("  glob     ", Style::default().fg(Color::DarkGray)),
+            Span::styled(p.to_string(), Style::default().fg(Color::Yellow)),
+        ]));
+    }
+    if let Some(p) = v.get("type").and_then(|s| s.as_str()) {
+        out.push(Line::from(vec![
+            Span::styled("  type     ", Style::default().fg(Color::DarkGray)),
+            Span::styled(p.to_string(), Style::default().fg(Color::Yellow)),
+        ]));
+    }
+}
+
+fn render_todo_input(input: Option<&Value>, out: &mut Vec<Line<'static>>) {
+    let v = match input {
+        Some(v) => v,
+        None => return,
+    };
+    let todos = match v.get("todos").and_then(|t| t.as_array()) {
+        Some(a) => a,
+        None => return,
+    };
+    for t in todos {
+        let status = t.get("status").and_then(|s| s.as_str()).unwrap_or("pending");
+        let content = t.get("content").and_then(|s| s.as_str()).unwrap_or("");
+        let active = t.get("activeForm").and_then(|s| s.as_str()).unwrap_or("");
+        let mark = match status {
+            "completed" => "☑",
+            "in_progress" => "▣",
+            _ => "☐",
+        };
+        let color = match status {
+            "completed" => Color::DarkGray,
+            "in_progress" => Color::Green,
+            _ => Color::Gray,
+        };
+        let label = if status == "in_progress" && !active.is_empty() {
+            active
+        } else {
+            content
+        };
+        out.push(Line::from(vec![
+            Span::styled(format!("  {} ", mark), Style::default().fg(color)),
+            Span::styled(label.to_string(), Style::default().fg(color)),
+        ]));
+    }
+}
+
+fn render_agent_input(input: Option<&Value>, out: &mut Vec<Line<'static>>) {
+    let v = match input {
+        Some(v) => v,
+        None => return,
+    };
+    let st = v
+        .get("subagent_type")
+        .and_then(|s| s.as_str())
+        .unwrap_or("general-purpose");
+    let desc = v.get("description").and_then(|s| s.as_str()).unwrap_or("");
+    out.push(Line::from(vec![
+        Span::styled("  🤖 ", Style::default().fg(Color::Cyan)),
+        Span::styled(
+            st.to_string(),
+            Style::default().fg(Color::Magenta).add_modifier(Modifier::BOLD),
+        ),
+        Span::raw("  "),
+        Span::styled(desc.to_string(), Style::default().fg(Color::White)),
+    ]));
+}
+
+fn render_webfetch_input(input: Option<&Value>, out: &mut Vec<Line<'static>>) {
+    let v = match input {
+        Some(v) => v,
+        None => return,
+    };
+    if let Some(u) = v.get("url").and_then(|s| s.as_str()) {
+        out.push(Line::from(vec![
+            Span::styled("  🌐 ", Style::default().fg(Color::Cyan)),
+            Span::styled(u.to_string(), Style::default().fg(Color::Blue)),
+        ]));
+    }
+    if let Some(p) = v.get("prompt").and_then(|s| s.as_str()) {
+        out.push(Line::from(Span::styled(
+            format!("  prompt: {}", truncate(p, 100)),
+            Style::default().fg(Color::DarkGray),
+        )));
+    }
+}
+
+fn render_websearch_input(input: Option<&Value>, out: &mut Vec<Line<'static>>) {
+    let v = match input {
+        Some(v) => v,
+        None => return,
+    };
+    if let Some(q) = v.get("query").and_then(|s| s.as_str()) {
+        out.push(Line::from(vec![
+            Span::styled("  🔎 ", Style::default().fg(Color::Cyan)),
+            Span::styled(q.to_string(), Style::default().fg(Color::Yellow)),
+        ]));
+    }
+}
+
+fn render_mcp_input(name: &str, input: Option<&Value>, out: &mut Vec<Line<'static>>) {
+    let stripped = name.strip_prefix("mcp__").unwrap_or(name);
+    let (server, tool) = match stripped.rfind("__") {
+        Some(idx) => (&stripped[..idx], &stripped[idx + 2..]),
+        None => (stripped, ""),
+    };
+    out.push(Line::from(vec![
+        Span::styled("  🔌 ", Style::default().fg(Color::Cyan)),
+        Span::styled(
+            server.to_string(),
+            Style::default().fg(Color::Magenta).add_modifier(Modifier::BOLD),
+        ),
+        Span::raw(" / "),
+        Span::styled(tool.to_string(), Style::default().fg(Color::Yellow)),
+    ]));
+    if let Some(v) = input.and_then(|i| i.as_object()) {
+        for (k, val) in v.iter().take(6) {
+            let val_str = match val {
+                Value::String(s) => s.clone(),
+                _ => val.to_string(),
+            };
+            out.push(Line::from(vec![
+                Span::styled(format!("    {}: ", k), Style::default().fg(Color::DarkGray)),
+                Span::raw(truncate(&val_str, 100)),
+            ]));
+        }
+    }
+}
+
+fn push_tool_result(m: &Message, color: Color, out: &mut Vec<Line<'static>>) {
+    let tn = m.tool_name.as_deref().unwrap_or("?");
+    let id_short: String = m
+        .tool_use_id
+        .as_deref()
+        .unwrap_or("")
+        .chars()
+        .take(8)
+        .collect();
+    let mut header_spans = vec![
+        Span::styled(
+            "↳ result ",
+            Style::default().fg(color).add_modifier(Modifier::BOLD),
+        ),
+        Span::styled(format!("[{}]", tn), Style::default().fg(Color::Magenta)),
+        Span::raw("  "),
+        Span::styled(format!("[{}]", id_short), Style::default().fg(Color::DarkGray)),
+    ];
+    if m.is_error {
+        header_spans.insert(
+            0,
+            Span::styled(
+                "⚠ ",
+                Style::default()
+                    .fg(Color::Red)
+                    .add_modifier(Modifier::BOLD),
+            ),
+        );
+    }
+    out.push(Line::from(header_spans));
+
+    let body_color = if m.is_error { Color::Red } else { Color::Gray };
+    // For Grep result, group by file path
+    if tn == "Grep" {
+        for ln in m.body.lines().take(20) {
+            if let Some((file, rest)) = ln.split_once(':') {
+                if let Some((line_no, text)) = rest.split_once(':') {
+                    out.push(Line::from(vec![
+                        Span::styled(file.to_string(), Style::default().fg(Color::Blue)),
+                        Span::raw(":"),
+                        Span::styled(line_no.to_string(), Style::default().fg(Color::Yellow)),
+                        Span::raw(" │ "),
+                        Span::styled(text.to_string(), Style::default().fg(body_color)),
+                    ]));
+                    continue;
+                }
+            }
+            out.push(Line::from(Span::styled(
+                ln.to_string(),
+                Style::default().fg(body_color),
+            )));
+        }
+    } else {
+        for ln in m.body.lines().take(20) {
+            out.push(Line::from(Span::styled(
+                ln.to_string(),
+                Style::default().fg(body_color),
+            )));
+        }
+    }
+    if m.body.lines().count() > 20 {
+        out.push(Line::from(Span::styled(
+            "… (truncated, view full in web mode)",
+            Style::default().fg(Color::DarkGray),
+        )));
+    }
 }
 
 fn shorten(s: &str, max: usize) -> String {
