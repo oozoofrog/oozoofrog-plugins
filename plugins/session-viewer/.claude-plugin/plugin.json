@@ -1,6 +1,6 @@
 {
   "name": "session-viewer",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Claude Code 세션 로그(~/.claude/projects/*/*.jsonl) 다목적 뷰어 — 맥락 우선 UI (tool별 전용 렌더러), tool_use↔result 페어링, TUI/CLI/web 3모드, per-tool 필터 + regex 검색",
   "author": {
     "name": "oozoofrog",

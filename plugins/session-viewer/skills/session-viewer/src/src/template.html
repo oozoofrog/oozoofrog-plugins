@@ -852,8 +852,8 @@ function applyFilters() {
     if (roleOk && toolOk && textOk) {
       card.classList.remove("hidden");
       shown += 1;
+      clearHighlight(card);
       if (matcher && currentSearch && !regexMode) highlightTerm(card, currentSearch.toLowerCase());
-      else clearHighlight(card);
     } else {
       card.classList.add("hidden");
       clearHighlight(card);
@@ -862,38 +862,56 @@ function applyFilters() {
   updateCount(shown);
 }
 
+// Walk text nodes inside a subtree, skipping any text already inside <mark>.
+function walkTextNodes(root, fn) {
+  const nodes = [];
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode: function(n) {
+      let p = n.parentNode;
+      while (p && p !== root) {
+        if (p.tagName === "MARK") return NodeFilter.FILTER_REJECT;
+        p = p.parentNode;
+      }
+      return NodeFilter.FILTER_ACCEPT;
+    },
+  });
+  let n;
+  while ((n = walker.nextNode())) nodes.push(n);
+  for (const node of nodes) fn(node);
+}
+
 function highlightTerm(card, term) {
   const body = card.querySelector(".body");
-  if (!body) return;
-  if (body.dataset.original === undefined) body.dataset.original = body.textContent;
-  const text = body.dataset.original;
-  body.replaceChildren();
-  if (!term) { body.appendChild(document.createTextNode(text)); return; }
-  const lower = text.toLowerCase();
-  let idx = lower.indexOf(term), last = 0;
-  if (idx < 0) { body.appendChild(document.createTextNode(text)); return; }
-  while (idx >= 0) {
-    body.appendChild(document.createTextNode(text.slice(last, idx)));
-    const mk = document.createElement("mark");
-    mk.textContent = text.slice(idx, idx + term.length);
-    body.appendChild(mk);
-    last = idx + term.length;
-    idx = lower.indexOf(term, last);
-  }
-  body.appendChild(document.createTextNode(text.slice(last)));
+  if (!body || !term) return;
+  walkTextNodes(body, function(node) {
+    const text = node.nodeValue;
+    const lower = text.toLowerCase();
+    let idx = lower.indexOf(term);
+    if (idx < 0) return;
+    const frag = document.createDocumentFragment();
+    let last = 0;
+    while (idx >= 0) {
+      if (idx > last) frag.appendChild(document.createTextNode(text.slice(last, idx)));
+      const mk = document.createElement("mark");
+      mk.textContent = text.slice(idx, idx + term.length);
+      frag.appendChild(mk);
+      last = idx + term.length;
+      idx = lower.indexOf(term, last);
+    }
+    if (last < text.length) frag.appendChild(document.createTextNode(text.slice(last)));
+    node.parentNode.replaceChild(frag, node);
+  });
 }
 
 function clearHighlight(card) {
   const body = card.querySelector(".body");
   if (!body) return;
-  if (body.dataset.original !== undefined) {
-    const order = +card.dataset.order;
-    const m = DATA.messages.find(function(x) { return x.order === order; });
-    if (m) {
-      const fresh = renderMessage(m);
-      card.replaceWith(fresh);
-    }
+  const marks = body.querySelectorAll("mark");
+  for (const mk of marks) {
+    const text = document.createTextNode(mk.textContent);
+    mk.parentNode.replaceChild(text, mk);
   }
+  if (marks.length > 0) body.normalize();
 }
 
 function updateCount(shown) {
