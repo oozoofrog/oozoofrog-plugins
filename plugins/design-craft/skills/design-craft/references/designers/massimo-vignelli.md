@@ -1,119 +1,119 @@
-# Massimo Vignelli -- 디자인 토큰 사전
+# Massimo Vignelli -- Design Token Dictionary
 
-## 프로필
-- **활동 기간**: 1954-2014, 핵심기 1965-1990 (Vignelli Associates)
-- **주요 소속**: Unimark International 공동 창립(1965), Vignelli Associates(1971-2014)
-- **핵심 공헌**: NYC 지하철 사인 시스템(1972), American Airlines 로고(1967), Knoll 가구 아이덴티티, IBM 그래픽 표준, National Park Service Unigrid 시스템, Bloomingdale's 쇼핑백
-- **디자인 계보**: 밀라노 폴리테크니코 → 스위스 모더니즘 → 미국 기업 아이덴티티 체계화
+## Profile
+- **Active period**: 1954-2014, core period 1965-1990 (Vignelli Associates)
+- **Main affiliations**: Co-founded Unimark International (1965), Vignelli Associates (1971-2014)
+- **Key contributions**: NYC subway signage system (1972), American Airlines logo (1967), Knoll furniture identity, IBM graphic standards, National Park Service Unigrid system, Bloomingdale's shopping bag
+- **Design lineage**: Politecnico di Milano → Swiss modernism → systematization of American corporate identity
 
-## 디자인 철학 (정량화 가능한 원칙)
+## Design Philosophy (quantifiable principles)
 
-| 원칙 | 정량 변환 | UI 메트릭 |
+| Principle | Quantitative translation | UI metric |
 |------|----------|----------|
-| 서체는 6개면 충분 | 서체 수 ≤ 6종 (실제 사용 3종 이하) | 앱 전체 폰트 패밀리 ≤ 3 |
-| 그리드는 절대적 | 모든 요소 그리드 정렬률 100% | 비정렬 요소 0개 |
-| 의미 있는 형태 (Semantics) | 형태-기능 일치율 100% | 장식 전용 요소 0개 |
-| 시각적 힘 (Visual Power) | 대비 비율 최소 4.5:1 | WCAG AA 이상 |
-| 영속성 (Timelessness) | 트렌드 의존 요소 0% | 5년 후 시각 노후화 0% |
-| 질서 (Discipline) | 정렬축 일관성 100% | 수직·수평축 최대 3개/화면 |
+| Six typefaces are enough | Typeface count ≤ 6 (3 or fewer in actual use) | Font families across the app ≤ 3 |
+| The grid is absolute | Grid alignment rate of all elements 100% | Unaligned elements 0 |
+| Meaningful form (Semantics) | Form-function match rate 100% | Purely decorative elements 0 |
+| Visual Power | Minimum contrast ratio 4.5:1 | WCAG AA or above |
+| Timelessness | Trend-dependent elements 0% | Visual obsolescence after 5 years 0% |
+| Discipline | Alignment-axis consistency 100% | Max 3 vertical/horizontal axes per screen |
 
-## 정량적 디자인 토큰
+## Quantitative Design Tokens
 
-### 레이아웃 & 간격
+### Layout & Spacing
 
-| 토큰명 | 값/범위 | 출처 | 신뢰도 |
+| Token | Value/range | Source | Confidence |
 |--------|---------|------|--------|
-| grid-system | 2열, 3열, 6열 분할 (6의 배수 기반) | "The Vignelli Canon" (2010) p.44 | S |
-| unigrid | 12-unit 그리드, 10개 기본 포맷 | National Park Service Unigrid System (1977) | S |
-| margin-ratio | 전체 면적의 10-15% | Vignelli Canon 레이아웃 분석 | A |
-| column-gutter | 컬럼 폭의 1/12 ~ 1/8 | Vignelli Canon 그리드 시스템 | A |
-| content-area | 85-90% (마진 제외 콘텐츠 영역) | Vignelli Associates 프로젝트 실측 | B |
-| alignment-axes | 수직·수평 정렬축 최대 3개/면 | Vignelli Canon p.36 | S |
-| modular-scale | 기본 단위의 정수배만 허용 | Vignelli Canon 그리드 원칙 | S |
-| grid-base-ui | 8pt (디지털 변환) | Vignelli 6단위 그리드의 UI 스케일링 | F |
-| hierarchy-levels | 최대 3단계 (대제목-소제목-본문) | Vignelli Canon p.52 타이포 위계 | S |
+| grid-system | 2-column, 3-column, 6-column division (based on multiples of 6) | "The Vignelli Canon" (2010) p.44 | S |
+| unigrid | 12-unit grid, 10 base formats | National Park Service Unigrid System (1977) | S |
+| margin-ratio | 10-15% of total area | Vignelli Canon layout analysis | A |
+| column-gutter | 1/12 ~ 1/8 of column width | Vignelli Canon grid system | A |
+| content-area | 85-90% (content area excluding margins) | Vignelli Associates project measurements | B |
+| alignment-axes | Max 3 vertical/horizontal alignment axes per page | Vignelli Canon p.36 | S |
+| modular-scale | Integer multiples of the base unit only | Vignelli Canon grid principle | S |
+| grid-base-ui | 8pt (digital translation) | UI scaling of Vignelli's 6-unit grid | F |
+| hierarchy-levels | Max 3 levels (heading-subheading-body) | Vignelli Canon p.52 typographic hierarchy | S |
 
-### 타이포그래피
+### Typography
 
-| 토큰명 | 값/범위 | 출처 | 신뢰도 |
+| Token | Value/range | Source | Confidence |
 |--------|---------|------|--------|
-| font-family-primary | Helvetica (산세리프 기본) | Vignelli Canon p.54 "6 typefaces" | S |
-| font-family-serif | Bodoni (세리프 기본), Garamond | Vignelli Canon p.54 | S |
-| font-family-count | ≤ 6종 (실무 2-3종) | "The Vignelli Canon" 선언 | S |
-| font-weight | Light(300), Regular(400), Bold(700) — 3종 | Vignelli 타이포 체계 | A |
-| font-size-scale | 기본 크기의 1.5배, 2배, 3배 (단순 정수배) | Vignelli Canon p.56 | A |
-| line-height | 1.2-1.4 (타이트한 행간) | NYC 지하철 사인 실측 | B |
-| letter-spacing | 표준 (0) ~ 약간 넓음 (+2%) | Vignelli 인쇄물 분석 | B |
-| text-transform | 대문자(uppercase) 선호 — 사인 시스템 | NYC 지하철 사인 분석 (Helvetica 대문자) | S |
-| subway-sign-size | 역명 높이 4인치(10.2cm), 방향 표시 2인치 | NYC Transit Authority 매뉴얼 (1970) | S |
-| font-size-ui | 14-16pt (본문), 24-32pt (제목) | 8pt 그리드 기반 UI 변환 | F |
+| font-family-primary | Helvetica (sans-serif default) | Vignelli Canon p.54 "6 typefaces" | S |
+| font-family-serif | Bodoni (serif default), Garamond | Vignelli Canon p.54 | S |
+| font-family-count | ≤ 6 (2-3 in practice) | "The Vignelli Canon" declaration | S |
+| font-weight | Light(300), Regular(400), Bold(700) — 3 | Vignelli typographic system | A |
+| font-size-scale | 1.5x, 2x, 3x of base size (simple integer multiples) | Vignelli Canon p.56 | A |
+| line-height | 1.2-1.4 (tight leading) | NYC subway signage measurements | B |
+| letter-spacing | Standard (0) ~ slightly wide (+2%) | Vignelli print analysis | B |
+| text-transform | Prefers uppercase — signage system | NYC subway signage analysis (Helvetica uppercase) | S |
+| subway-sign-size | Station name height 4 inches (10.2cm), direction indicator 2 inches | NYC Transit Authority manual (1970) | S |
+| font-size-ui | 14-16pt (body), 24-32pt (heading) | UI translation based on 8pt grid | F |
 
-### 색상 & 표면
+### Color & Surface
 
-| 토큰명 | 값/범위 | 출처 | 신뢰도 |
+| Token | Value/range | Source | Confidence |
 |--------|---------|------|--------|
-| palette-subway | 흑(#000), 백(#FFF), 빨강·파랑·녹색·노랑·주황·갈색·보라·회색 | NYC 지하철 노선 컬러 체계 (1972) | S |
-| color-functional | 색상 = 노선/카테고리 구분 용도 | NYC 지하철 컬러 코딩 시스템 | S |
-| accent-count | 카테고리당 1색, 전체 ≤ 8색 | NYC 지하철 노선 컬러 분석 | S |
-| background | 순백(#FFFFFF) 또는 순흑(#000000) | Vignelli 포스터/인쇄물 배경 | A |
-| contrast-ratio | 최소 7:1 (사인 시스템) | NYC 지하철 사인 가독성 기준 | A |
-| color-count-per-layout | 3-4색 (흑·백 + 악센트 1-2) | Vignelli Canon 컬러 원칙 | A |
-| surface | 무광 단색, 텍스처 없음 | Vignelli "flat color" 원칙 | A |
-| gradient | 사용 안 함 — 단색 면 분할 | Vignelli 포스터 분석 | A |
+| palette-subway | Black (#000), white (#FFF), red·blue·green·yellow·orange·brown·purple·gray | NYC subway line color system (1972) | S |
+| color-functional | Color = used for line/category distinction | NYC subway color-coding system | S |
+| accent-count | 1 color per category, ≤ 8 colors total | NYC subway line color analysis | S |
+| background | Pure white (#FFFFFF) or pure black (#000000) | Vignelli poster/print backgrounds | A |
+| contrast-ratio | Minimum 7:1 (signage system) | NYC subway signage legibility standard | A |
+| color-count-per-layout | 3-4 colors (black·white + 1-2 accents) | Vignelli Canon color principle | A |
+| surface | Matte solid color, no texture | Vignelli "flat color" principle | A |
+| gradient | Not used — solid color plane division | Vignelli poster analysis | A |
 
-### 형태 & 곡률
+### Form & Curvature
 
-| 토큰명 | 값/범위 | 출처 | 신뢰도 |
+| Token | Value/range | Source | Confidence |
 |--------|---------|------|--------|
-| corner-radius | 0px (완전 직각) | Vignelli 그리드 기반 직선 형태 | A |
-| form-geometry | 직사각형 95%+, 원형 ≤ 5% | Vignelli 포스터/사인 형태 분석 | A |
-| icon-style | 기하학적 단순 형태, 최소 선 | NYC 지하철 픽토그램 | A |
-| line-weight | 균일 두께, 1-2pt @1x | Vignelli 사인 시스템 선 분석 | B |
-| shape-vocabulary | 사각형, 원, 삼각형 — 3종 기본 형태만 | Vignelli Canon p.30 | S |
-| aspect-ratio | A 시리즈(1:√2 = 1:1.414) 선호 | Vignelli Canon p.44 "A paper sizes" | S |
-| border | 0px 또는 1px 실선 — 2종만 | Vignelli 레이아웃 경계 분석 | A |
+| corner-radius | 0px (perfect right angles) | Vignelli grid-based straight-line forms | A |
+| form-geometry | Rectangle 95%+, circle ≤ 5% | Vignelli poster/signage form analysis | A |
+| icon-style | Geometric simple forms, minimal lines | NYC subway pictograms | A |
+| line-weight | Uniform thickness, 1-2pt @1x | Vignelli signage system line analysis | B |
+| shape-vocabulary | Square, circle, triangle — 3 base forms only | Vignelli Canon p.30 | S |
+| aspect-ratio | Prefers A series (1:√2 = 1:1.414) | Vignelli Canon p.44 "A paper sizes" | S |
+| border | 0px or 1px solid line — 2 types only | Vignelli layout boundary analysis | A |
 
-### 인터랙션 & 모션
+### Interaction & Motion
 
-| 토큰명 | 값/범위 | 출처 | 신뢰도 |
+| Token | Value/range | Source | Confidence |
 |--------|---------|------|--------|
-| transition-duration | 0.15-0.2s (절제된 전환) | Vignelli "영속적 디자인" 원칙 UI 해석 | F |
-| animation | 없음 — 정적 레이아웃 우선 | Vignelli 인쇄 매체 기반 철학 | D |
-| hover-feedback | 색상 반전 (흑↔백) | Vignelli 고대비 원칙의 인터랙션 변환 | F |
-| state-indicator | 색상 변경만 — 형태 변형 없음 | Vignelli "형태 일관성" 원칙 해석 | F |
-| scroll-behavior | 페이지 단위 스냅 스크롤 | 그리드 기반 페이지 레이아웃 해석 | F |
-| wayfinding | 색상 코딩 + 방향 화살표 | NYC 지하철 사인 시스템 | S |
+| transition-duration | 0.15-0.2s (restrained transitions) | UI interpretation of Vignelli's "timeless design" principle | F |
+| animation | None — static layout first | Vignelli print-media-based philosophy | D |
+| hover-feedback | Color inversion (black↔white) | Interaction translation of Vignelli's high-contrast principle | F |
+| state-indicator | Color change only — no form deformation | Interpretation of Vignelli's "form consistency" principle | F |
+| scroll-behavior | Page-unit snap scrolling | Interpretation of grid-based page layout | F |
+| wayfinding | Color coding + directional arrows | NYC subway signage system | S |
 
-## 시대별 변화
+## Changes Over Time
 
-| 시기 | 전환점 | 주요 수치 변화 |
+| Period | Turning point | Key numeric changes |
 |------|--------|---------------|
-| 1954-1964 | 밀라노 교육기 → 미국 이주 | 유럽 스위스 스타일 흡수, Helvetica 채택 |
-| 1965-1970 | Unimark International 창립 | 기업 아이덴티티 체계 확립, NYC 지하철 프로젝트 착수 |
-| 1971-1980 | Vignelli Associates 독립 | Unigrid 시스템, 12단위 그리드 확립, 대문자 사용 일관화 |
-| 1981-2000 | 성숙기 — 가구·제품까지 확장 | 3D 영역으로 그리드 확장, 형태 어휘 3종 고정 |
-| 2001-2014 | 디지털 전환기 + Canon 발표(2010) | 원칙을 디지털 매체로 재해석, 2010 Vignelli Canon 공개 |
+| 1954-1964 | Milan education period → emigration to the US | Absorbed European Swiss style, adopted Helvetica |
+| 1965-1970 | Founded Unimark International | Established corporate identity system, started NYC subway project |
+| 1971-1980 | Independent Vignelli Associates | Unigrid system, established 12-unit grid, consistent use of uppercase |
+| 1981-2000 | Maturity — expansion into furniture/products | Extended grid into 3D domain, fixed form vocabulary to 3 types |
+| 2001-2014 | Digital transition + Canon release (2010) | Reinterpreted principles for digital media, published the 2010 Vignelli Canon |
 
-## 영향 관계
+## Influence Relationships
 
-- **스위스 타이포그래피 → Vignelli**: Max Miedinger(Helvetica), Emil Ruder(타이포그래피 교육)
-- **Müller-Brockmann → Vignelli**: 스위스 그리드 체계를 미국 기업 환경에 이식
-- **Vignelli → NYC 지하철**: 세계 최대 규모 공공 사인 시스템 표준화
-- **Vignelli → Michael Bierut**: Pentagram 파트너로서 Vignelli 방법론 계승
-- **Vignelli → Material Design**: 그리드 엄수, 제한된 서체, 기능적 색상 체계의 DNA
-- **주요 참고 문헌**: "The Vignelli Canon" (Massimo Vignelli, 2010), "Design: Vignelli" (2014)
+- **Swiss typography → Vignelli**: Max Miedinger (Helvetica), Emil Ruder (typography education)
+- **Müller-Brockmann → Vignelli**: Transplanted the Swiss grid system into the American corporate environment
+- **Vignelli → NYC subway**: Standardized the world's largest-scale public signage system
+- **Vignelli → Michael Bierut**: As a Pentagram partner, carried on Vignelli's methodology
+- **Vignelli → Material Design**: DNA of strict grids, limited typefaces, and functional color systems
+- **Key references**: "The Vignelli Canon" (Massimo Vignelli, 2010), "Design: Vignelli" (2014)
 
-## UI 적용 매핑
+## UI Application Mapping
 
-| Vignelli 원칙 | 현대 UI 토큰 변환 규칙 |
+| Vignelli principle | Modern UI token translation rule |
 |--------------|----------------------|
-| 6 서체 법칙 | `font-family` 변수 ≤ 3개, 시스템 서체 + 1 웹폰트 |
-| 절대적 그리드 | `display: grid`, 12-column 레이아웃, 모든 요소 그리드 스냅 |
-| A 비율 선호 | 카드/모달 비율 `1:1.414`, `aspect-ratio: 1 / 1.414` |
-| 기능적 색상 | 색상 = 카테고리/상태 의미, 장식적 색상 0개 |
-| 고대비 텍스트 | `color: #000; background: #FFF` — 대비 21:1, WCAG AAA |
-| 완전 직각 | `border-radius: 0`, 둥글림 일체 없음 |
-| 대문자 제목 | `text-transform: uppercase` + `letter-spacing: 0.05em` |
-| Unigrid 시스템 | 반응형 12-column 그리드, 브레이크포인트 3단계 |
-| 정적 레이아웃 | 불필요한 애니메이션 0개, `prefers-reduced-motion` 존중 |
-| 웨이파인딩 | 탭바·사이드바에 컬러 코딩 적용, 아이콘+텍스트 병용 |
+| Six-typeface law | `font-family` variables ≤ 3, system typeface + 1 web font |
+| Absolute grid | `display: grid`, 12-column layout, all elements snap to grid |
+| A-ratio preference | Card/modal ratio `1:1.414`, `aspect-ratio: 1 / 1.414` |
+| Functional color | Color = category/state meaning, decorative colors 0 |
+| High-contrast text | `color: #000; background: #FFF` — contrast 21:1, WCAG AAA |
+| Perfect right angles | `border-radius: 0`, no rounding whatsoever |
+| Uppercase headings | `text-transform: uppercase` + `letter-spacing: 0.05em` |
+| Unigrid system | Responsive 12-column grid, 3 breakpoint tiers |
+| Static layout | Unnecessary animations 0, respect `prefers-reduced-motion` |
+| Wayfinding | Apply color coding to tab bars/sidebars, use icons + text together |

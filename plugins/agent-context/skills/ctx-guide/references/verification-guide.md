@@ -1,26 +1,26 @@
-# 3단계 컨텍스트 검증 가이드
+# 3-Stage Context Verification Guide
 
-## 개요
+## Overview
 
-계층적 컨텍스트 아키텍처의 무결성을 유지하기 위해 주기적으로 3단계 검증을 수행한다. 각 단계는 독립적으로 실행 가능하며, 전체 검증은 순차적으로 수행한다.
+To maintain the integrity of the hierarchical context architecture, run 3-stage verification periodically. Each stage can run independently; full verification runs the stages sequentially.
 
 ---
 
-## Stage 1: 참조 무결성 (Reference Integrity)
+## Stage 1: Reference Integrity
 
-### 목적
+### Purpose
 
-컨텍스트 파일(CLAUDE.md, CONTEXT.md, `.claude/rules/`) 간의 링크가 유효한지, 고립된 파일이 없는지 확인한다.
+Confirm that links between context files (CLAUDE.md, CONTEXT.md, `.claude/rules/`) are valid and that no files are orphaned.
 
-### 검증 항목
+### Checks
 
-1. **링크 유효성**: 컨텍스트 파일 내 `[텍스트](경로)` 형식의 모든 링크가 실제 파일을 가리키는지 확인
-2. **`@` import 유효성**: CLAUDE.md 내 `@path/to/file` 참조가 실제 파일을 가리키는지 확인
-3. **고립 파일 탐지**: 어떤 상위 파일에서도 참조되지 않는 컨텍스트 파일 탐지
-4. **순환 참조 탐지**: 컨텍스트 파일 간의 순환 참조 여부 확인
-5. **CLAUDE.md 존재 여부**: 프로젝트 루트에 CLAUDE.md가 존재하는지 확인
+1. **Link validity**: Confirm that every `[text](path)` link inside context files points to an actual file
+2. **`@` import validity**: Confirm that `@path/to/file` references inside CLAUDE.md point to actual files
+3. **Orphan detection**: Detect context files not referenced by any parent file
+4. **Circular reference detection**: Check for circular references between context files
+5. **CLAUDE.md presence**: Confirm that CLAUDE.md exists at the project root
 
-### 검증 절차
+### Procedure
 
 ```
 1. 프로젝트 전체에서 컨텍스트 파일 목록 수집 (CLAUDE.md, CONTEXT.md, .claude/rules/*.md)
@@ -30,7 +30,7 @@
 5. 링크 그래프에서 순환 탐지
 ```
 
-### 리포트 형식
+### Report Format
 
 ```markdown
 ## 참조 무결성 검증 결과
@@ -53,19 +53,19 @@
 
 ---
 
-## Stage 2: 코드 참조 검증 (Code Reference Validation)
+## Stage 2: Code Reference Validation
 
-### 목적
+### Purpose
 
-컨텍스트 문서에서 언급하는 파일 경로, 디렉토리 구조, 클래스/함수명이 실제 코드와 일치하는지 확인한다.
+Confirm that file paths, directory structures, and class/function names mentioned in context documents match the actual code.
 
-### 검증 항목
+### Checks
 
-1. **파일 경로 유효성**: `handler.ts`, `middleware/` 등 언급된 경로가 실제 존재하는지
-2. **디렉토리 구조 정합성**: Key Files 섹션의 구조가 실제와 일치하는지
-3. **코드 식별자 유효성**: 언급된 함수명, 클래스명이 실제 코드에 존재하는지
+1. **File path validity**: Whether mentioned paths such as `handler.ts`, `middleware/` actually exist
+2. **Directory structure consistency**: Whether the structure in the Key Files section matches reality
+3. **Code identifier validity**: Whether mentioned function names and class names exist in the actual code
 
-### 검증 절차
+### Procedure
 
 ```
 1. CONTEXT.md/CLAUDE.md에서 코드 블록, 파일 경로 패턴 추출
@@ -75,16 +75,16 @@
 5. 불일치 항목 리포트 생성
 ```
 
-### 경로 추출 패턴
+### Path Extraction Patterns
 
-다음 패턴으로 컨텍스트 문서에서 코드 참조를 추출한다:
+Extract code references from context documents using the following patterns:
 
-- 백틱 내 경로: `` `src/api/handler.ts` ``
-- 마크다운 링크: `[handler](./handler.ts)`
-- Key Files 리스트: `- handler.ts — 설명`
-- 코드 블록 내 import: `import { X } from './module'`
+- Path inside backticks: `` `src/api/handler.ts` ``
+- Markdown link: `[handler](./handler.ts)`
+- Key Files list: `- handler.ts — description`
+- Import inside code block: `import { X } from './module'`
 
-### 리포트 형식
+### Report Format
 
 ```markdown
 ## 코드 참조 검증 결과
@@ -103,20 +103,20 @@
 
 ---
 
-## Stage 3: 내용 정확성 (Content Accuracy)
+## Stage 3: Content Accuracy
 
-### 목적
+### Purpose
 
-컨텍스트 문서의 기술적 주장이 현재 코드의 실제 구현과 일치하는지 검증한다.
+Verify that the technical claims in context documents match the actual implementation in the current code.
 
-### 검증 항목
+### Checks
 
-1. **아키텍처 주장 검증**: "Redux 사용"이라고 기술했는데 실제로는 Zustand인 경우
-2. **패턴 주장 검증**: "RORO 패턴 준수"라고 기술했는데 실제로는 다른 패턴인 경우
-3. **의존성 주장 검증**: 명시된 라이브러리가 실제 의존성에 존재하는지
-4. **명령어 주장 검증**: 빌드/테스트 명령이 실제로 실행 가능한지
+1. **Architecture claim verification**: e.g., documented as "uses Redux" but actually Zustand
+2. **Pattern claim verification**: e.g., documented as "follows the RORO pattern" but actually a different pattern
+3. **Dependency claim verification**: Whether a stated library actually exists in the dependencies
+4. **Command claim verification**: Whether build/test commands are actually runnable
 
-### 검증 절차
+### Procedure
 
 ```
 1. 컨텍스트 문서에서 기술적 주장(claims) 추출
@@ -126,24 +126,24 @@
 5. 심각도 분류 (Critical: 완전 불일치, Warning: 부분 불일치, Info: 검증 불가)
 ```
 
-### 자동 검증 가능 항목
+### Automatically Verifiable Items
 
-| 주장 유형 | 검증 방법 |
+| Claim Type | Verification Method |
 |-----------|-----------|
-| 패키지 의존성 | package.json, Cargo.toml 등에서 확인 |
-| 빌드 명령 | package.json scripts, Makefile 타겟 확인 |
-| 파일 구조 | 디렉토리 실제 구조와 비교 |
-| import 패턴 | 코드 내 실제 import 구문 분석 |
+| Package dependency | Check in package.json, Cargo.toml, etc. |
+| Build command | Check package.json scripts, Makefile targets |
+| File structure | Compare with actual directory structure |
+| Import pattern | Analyze actual import statements in code |
 
-### 수동 검증 필요 항목
+### Items Requiring Manual Verification
 
-| 주장 유형 | 이유 |
+| Claim Type | Reason |
 |-----------|------|
-| 아키텍처 패턴 | 패턴 해석에 판단 필요 |
-| 설계 의도 | 코드만으로 의도 파악 불가 |
-| 성능 특성 | 벤치마크 필요 |
+| Architecture pattern | Pattern interpretation requires judgment |
+| Design intent | Intent cannot be determined from code alone |
+| Performance characteristics | Benchmark required |
 
-### 리포트 형식
+### Report Format
 
 ```markdown
 ## 내용 정확성 검증 결과
@@ -166,9 +166,9 @@
 
 ---
 
-## 종합 리포트
+## Comprehensive Report
 
-3단계 검증을 모두 완료하면 종합 리포트를 생성한다:
+After completing all 3 stages of verification, generate a comprehensive report:
 
 ```markdown
 # 컨텍스트 아키텍처 검증 종합 리포트

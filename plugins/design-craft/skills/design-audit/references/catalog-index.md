@@ -1,33 +1,33 @@
-# awesome-design-md 카탈로그 인덱스
+# awesome-design-md Catalog Index
 
-VoltAgent [awesome-design-md](https://github.com/VoltAgent/awesome-design-md)의 **전체 DESIGN.md 본문 69개**를 스킬 내부(`references/designs/*.md`)에 내재화하여 그대로 사용하는 인덱스. 원본 npm 패키지 `getdesign@0.6.8` tarball을 복제하였으며 라이선스·귀속은 `references/designs/ATTRIBUTION.md` 참조.
+Index that internalizes all **69 full DESIGN.md bodies** from VoltAgent [awesome-design-md](https://github.com/VoltAgent/awesome-design-md) inside the skill (`references/designs/*.md`) for direct use. The original npm package `getdesign@0.6.8` tarball was cloned; see `references/designs/ATTRIBUTION.md` for license and attribution.
 
-## 핵심 원칙
+## Core Principles
 
-- **동등 경험**: getdesign CLI로 설치한 DESIGN.md를 사용하는 경험과 본 스킬 사용 경험은 동일해야 한다. 정확한 hex, 폰트, 수치, 컴포넌트 스펙이 모두 보존되어 있다.
-- **바이트 수준 복제**: 원본과 동일 파일명·동일 내용. 요약·재구성하지 않았다. sha256 해시는 `references/designs/manifest.json`에 보존.
-- **본문 로드 경로**: Phase 3에서 Top-3 선정 후 `Read` 도구로 `$REF/designs/{slug}.md`(스킬 상대 경로)를 즉시 로드한다. 실제 호출 시에는 SKILL.md가 위치한 절대 경로를 기반으로 경로를 구성해야 하며, 리포지토리 기준 `plugins/...` 경로는 설치 환경에서 동작하지 않는다.
+- **Equivalent experience**: Using DESIGN.md installed via the getdesign CLI and using this skill must yield the same experience. Exact hex values, fonts, numbers, and component specs are all preserved.
+- **Byte-level replication**: Identical filenames and identical content to the original. Not summarized or restructured. sha256 hashes are preserved in `references/designs/manifest.json`.
+- **Body load path**: After selecting the Top-3 in Phase 3, immediately load `$REF/designs/{slug}.md` (skill-relative path) with the `Read` tool. At actual call time, construct the path from the absolute path where SKILL.md is located; the repository-relative `plugins/...` path will not work in an installed environment.
 
-## 스키마
+## Schema
 
-각 엔트리는 다음 필드를 가진다:
+Each entry has the following fields:
 
-| 필드 | 설명 |
-|------|------|
-| `slug` | URL 및 파일명 (예: `stripe`, `linear.app`, `x.ai`) |
-| `brand` | 표기명 |
-| `category` | 9개 카테고리 중 하나 |
-| `file` | 로컬 본문 경로 — `references/designs/{slug}.md` |
-| `one_liner` | manifest.json 기반 1줄 설명 |
-| `traits` | 매칭용 키워드 (one_liner + 본문 첫 문단에서 추출) |
+| Field | Description |
+|-------|-------------|
+| `slug` | URL and filename (e.g., `stripe`, `linear.app`, `x.ai`) |
+| `brand` | Display name |
+| `category` | One of 9 categories |
+| `file` | Local body path — `references/designs/{slug}.md` |
+| `one_liner` | One-line description from manifest.json |
+| `traits` | Matching keywords (extracted from one_liner + first paragraph of body) |
 
-## 접근 경로
+## Access Paths
 
-- **스킬 내부 (권장)**: `Read $REF/designs/{slug}.md` — 로그인 불필요, 즉시 접근. Claude는 SKILL.md 로드 시점의 절대 경로를 기반으로 Read 호출을 구성한다. Bash 호출 시에는 `$CLAUDE_PLUGIN_ROOT/skills/design-audit/references/designs/{slug}.md` 또는 `scripts/fetch-design-md.sh <slug>` 사용.
-- **npm 설치 (대안)**: `npx getdesign@latest add <slug>` — 프로젝트 루트에 원본 설치
-- **웹 확인**: `https://getdesign.md/<slug>/design-md`
+- **Inside the skill (recommended)**: `Read $REF/designs/{slug}.md` — no login required, instant access. Claude constructs the Read call from the absolute path at SKILL.md load time. For Bash calls, use `$CLAUDE_PLUGIN_ROOT/skills/design-audit/references/designs/{slug}.md` or `scripts/fetch-design-md.sh <slug>`.
+- **npm install (alternative)**: `npx getdesign@latest add <slug>` — installs the original at the project root
+- **Web view**: `https://getdesign.md/<slug>/design-md`
 
-URL·파일명에는 점이 포함된 슬러그가 있다: `linear.app`, `mistral.ai`, `x.ai`, `opencode.ai`, `together.ai` — 파일도 정확히 `linear.app.md`로 저장.
+Some slugs contain dots in their URL/filename: `linear.app`, `mistral.ai`, `x.ai`, `opencode.ai`, `together.ai` — the file is saved exactly as `linear.app.md`.
 
 ---
 
@@ -147,7 +147,7 @@ URL·파일명에는 점이 포함된 슬러그가 있다: `linear.app`, `mistra
 
 ---
 
-## 카테고리 카운트 (총 69)
+## Category Counts (total 69)
 
 - AI & LLM Platforms: 12
 - Developer Tools & IDEs: 7
@@ -159,9 +159,9 @@ URL·파일명에는 점이 포함된 슬러그가 있다: `linear.app`, `mistra
 - Media & Consumer Tech: 11
 - Automotive: 6
 
-## Trait 키워드 사전
+## Trait Keyword Dictionary
 
-매칭 시 아래 키워드 사전으로 사용자 trait와 브랜드 traits를 정규화하라:
+When matching, normalize user traits and brand traits with the dictionary below:
 
 - **Color family**: `black`, `white`, `mono`, `gray`, `red`, `orange`, `yellow`, `green`, `emerald`, `mint`, `blue`, `cyan`, `purple`, `pink`, `gold`, `cream`, `coral`, `terracotta`, `neon`
 - **Mood**: `minimal`, `editorial`, `cinematic`, `playful`, `bold`, `premium`, `friendly`, `clean`, `structured`, `urban`, `futuristic`, `warm`, `austere`, `sparse`
@@ -169,11 +169,11 @@ URL·파일명에는 점이 포함된 슬러그가 있다: `linear.app`, `mistra
 - **Typography**: `serif`, `sans`, `mono`, `uppercase`, `tight-type`, `geist`, `futura`, `neo-grotesk`, `sohne-var`, `sf-pro`
 - **Context**: `developer`, `enterprise`, `fintech`, `gaming`, `automotive`, `retail`, `marketing`, `dashboard`, `docs`, `terminal`
 
-Phase 2 매칭에서는 one_liner·traits·본문 발췌를 모두 활용할 수 있다. 1차 스크리닝은 traits로, 정밀 재평가는 Top-5 후보에 대해 `references/designs/{slug}.md`의 섹션 1~3(Visual Theme / Color Palette / Typography)을 읽어 수행하라.
+In Phase 2 matching, you may use one_liner, traits, and body excerpts together. Do first-pass screening with traits, then perform precise re-evaluation on the Top-5 candidates by reading sections 1–3 (Visual Theme / Color Palette / Typography) of `references/designs/{slug}.md`.
 
-## 본문 내재화 확인 체크리스트
+## Body Internalization Checklist
 
-- [x] 69개 `.md` 파일이 `references/designs/` 에 존재 (`ls` 확인)
-- [x] `references/designs/manifest.json` 에 69개 엔트리 (해시·커밋·갱신일 보존)
-- [x] `references/designs/ATTRIBUTION.md` 에 MIT 라이선스·출처 명시
-- [x] 파일명·본문 바이트 원본과 동일 (getdesign@0.6.8 기준)
+- [x] 69 `.md` files exist in `references/designs/` (verified with `ls`)
+- [x] `references/designs/manifest.json` has 69 entries (hashes, commits, update dates preserved)
+- [x] `references/designs/ATTRIBUTION.md` states MIT license and source
+- [x] Filenames and body bytes identical to the original (per getdesign@0.6.8)

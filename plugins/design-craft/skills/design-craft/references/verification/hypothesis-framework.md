@@ -1,42 +1,42 @@
-# 가설-검증 프레임워크
+# Hypothesis-Verification Framework
 
-design-research 리서치 팀의 verification-scientist가 사용하는 가설 수립 및 검증 프레임워크.
+The hypothesis formulation and verification framework used by the verification-scientist in the design-research research team.
 
-## 가설 구조
+## Hypothesis Structure
 
-각 디자인 토큰에 대해 다음 형식의 가설을 수립한다:
+For each design token, formulate a hypothesis in the following form:
 
 ```
-H: [토큰명]을 [값/범위]로 설정하면 [측정 가능한 결과]가 발생한다.
-출처: [1차/2차 출처 명시]
-검증 방법: [측정 방법]
-반증 조건: [이 조건이면 가설 기각]
+H: Setting [token-name] to [value/range] produces [measurable outcome].
+출처: [primary/secondary source]
+검증 방법: [measurement method]
+반증 조건: [reject hypothesis if this condition holds]
 ```
 
-## 출처 신뢰도 등급
+## Source Confidence Grades
 
-| 등급 | 출처 유형 | 신뢰도 |
-|------|----------|--------|
-| **S** | 공식 가이드라인 (HIG, Material Design, WCAG) | 최고 — 수치 그대로 채택 |
-| **A** | 공식 SDK/프레임워크 기본값 (UIKit, Compose) | 높음 — 구현 기본값으로 채택 |
-| **B** | 플랫폼 공식 앱 실측값 | 높음 — 교차 검증 후 채택 |
-| **C** | 학술 논문 (peer-reviewed) | 중간 — 재현 가능성 확인 후 |
-| **D** | 디자이너 인터뷰/강연/저서 | 중간 — 정성적 참고 |
-| **F** | 블로그/커뮤니티/추정 | 낮음 — 2개 이상 교차 검증 필수 |
+| Grade | Source Type | Confidence |
+|-------|-------------|------------|
+| **S** | Official guidelines (HIG, Material Design, WCAG) | Highest — adopt values as-is |
+| **A** | Official SDK/framework defaults (UIKit, Compose) | High — adopt as implementation defaults |
+| **B** | Measured values from official platform apps | High — adopt after cross-verification |
+| **C** | Academic papers (peer-reviewed) | Medium — after confirming reproducibility |
+| **D** | Designer interviews/talks/books | Medium — qualitative reference |
+| **F** | Blogs/community/estimates | Low — cross-verify against 2 or more sources |
 
-## 검증 방법
+## Verification Methods
 
-### 정량 검증
-- **실측 비교**: 공식 앱의 실제 수치를 측정하여 토큰값과 비교
-- **가이드라인 대조**: 공식 문서의 명시적 수치와 비교
-- **SDK 기본값 확인**: 프레임워크 소스/문서에서 기본값 추출
+### Quantitative Verification
+- **Measurement comparison**: measure actual values from official apps and compare against token values
+- **Guideline cross-check**: compare against explicit values in official documentation
+- **SDK default check**: extract defaults from framework source/documentation
 
-### 정성 검증
-- **휴리스틱 평가**: Nielsen의 10가지 휴리스틱 기준 평가
-- **전문가 리뷰**: 디자인 원칙 준수 여부 판단
-- **A/B 비교**: 토큰 적용/미적용 시안 비교
+### Qualitative Verification
+- **Heuristic evaluation**: evaluate against Nielsen's 10 heuristics
+- **Expert review**: judge adherence to design principles
+- **A/B comparison**: compare mockups with and without the token applied
 
-## 검증 리포트 형식
+## Verification Report Format
 
 ```markdown
 ## 토큰: {token-name}

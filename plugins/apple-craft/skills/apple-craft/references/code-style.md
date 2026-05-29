@@ -1,57 +1,57 @@
 # Apple Code Style & Xcode MCP Tool Integration
 
-## Apple Code Style (Xcode Agent 가이드 기반)
+## Apple Code Style (based on the Xcode Agent guide)
 
-Xcode의 내장 AI 에이전트가 사용하는 코드 스타일 규칙입니다:
+Code style rules used by Xcode's built-in AI agent:
 
-- **Naming**: PascalCase(타입), camelCase(프로퍼티/메서드)
-- **State**: `@State private var`(SwiftUI 상태), `let`(상수)
+- **Naming**: PascalCase (types), camelCase (properties/methods)
+- **State**: `@State private var` (SwiftUI state), `let` (constants)
 - **Indentation**: 4-space
-- **Concurrency**: Swift Concurrency(async/await, actors) 우선, **Combine 지양**
-- **Testing**: Swift Testing 프레임워크 (`@Test`, `#expect`, `try #require()`)
-- **Preview**: `#Preview` 매크로 (PreviewProvider 아닌)
-- **Types**: 강한 타입 시스템 활용, force unwrap 금지
-- **Imports**: 파일 상단에 간결하게 (SwiftUI, Foundation)
-- **Comments**: 복잡한 로직에만 설명 주석 추가
+- **Concurrency**: prefer Swift Concurrency (async/await, actors), **avoid Combine**
+- **Testing**: Swift Testing framework (`@Test`, `#expect`, `try #require()`)
+- **Preview**: `#Preview` macro (not PreviewProvider)
+- **Types**: leverage the strong type system, no force unwrap
+- **Imports**: keep concise at the top of the file (SwiftUI, Foundation)
+- **Comments**: add explanatory comments only for complex logic
 
 ## Swift 6.3 Practical Notes
 
-- **C Interop**: C 호출 지점이 필요하면 일반 Swift 함수에 기대지 말고 `@c`를 사용합니다.
-- **Module Selectors**: `Module::symbol` 문법은 충돌 해소나 의미 명확화가 필요할 때만 사용합니다.
-- **Optimization Attributes**: `@specialize`, `@inline(always)`, `@export(implementation)`은 측정 근거가 있을 때만 사용합니다.
-- **Testing Diagnostics**: 비치명적 테스트 진단은 `Issue.record(..., severity: .warning)`을 우선 검토합니다.
-- **Test Cancellation**: 실행 중 전제가 깨지면 무리하게 계속하지 말고 `try Test.cancel()` 사용을 검토합니다.
+- **C Interop**: when a C call site is needed, use `@c` instead of relying on a plain Swift function.
+- **Module Selectors**: use the `Module::symbol` syntax only when conflict resolution or semantic disambiguation is required.
+- **Optimization Attributes**: use `@specialize`, `@inline(always)`, `@export(implementation)` only with measured justification.
+- **Testing Diagnostics**: for non-fatal test diagnostics, prefer `Issue.record(..., severity: .warning)`.
+- **Test Cancellation**: if a precondition breaks during execution, consider `try Test.cancel()` rather than forcing continuation.
 
 ## Xcode MCP Tool Integration
 
-Xcode MCP 서버가 연결되어 있으면 다음 도구를 활용하세요:
+When the Xcode MCP server is connected, use the following tools:
 
-### 문서 & 탐색
-- **`mcp__xcode__DocumentationSearch`**: 로컬 참조 21개에 없는 Apple API 검색. 최신 API는 여기서 찾기
+### Documentation & Navigation
+- **`mcp__xcode__DocumentationSearch`**: search Apple APIs not in the 21 local references. Find the latest APIs here.
 
-### 빌드 & 실행
-- **`mcp__xcode__BuildProject`**: 코드 작성 후 빌드 검증 (시간이 오래 걸릴 수 있음)
-- **`mcp__xcode__XcodeRefreshCodeIssuesInFile`**: 특정 파일의 빠른 컴파일 진단 (2초 이내, 빌드보다 훨씬 빠름)
-- **`mcp__xcode__GetBuildLog`**: 빌드 로그로 컴파일 에러 진단
-- **`mcp__xcode__XcodeListNavigatorIssues`**: 현재 경고/에러 목록
-- **`mcp__xcode__ExecuteSnippet`**: 소스 파일 컨텍스트에서 코드 스니펫 실행 (API 검증에 유용)
+### Build & Run
+- **`mcp__xcode__BuildProject`**: build verification after writing code (may take a long time)
+- **`mcp__xcode__XcodeRefreshCodeIssuesInFile`**: fast compile diagnostics for a specific file (under 2 seconds, much faster than a build)
+- **`mcp__xcode__GetBuildLog`**: diagnose compile errors from the build log
+- **`mcp__xcode__XcodeListNavigatorIssues`**: list of current warnings/errors
+- **`mcp__xcode__ExecuteSnippet`**: run a code snippet in the context of a source file (useful for API verification)
 
-### 프리뷰 & UI
-- **`mcp__xcode__RenderPreview`**: SwiftUI 프리뷰 렌더링 (Liquid Glass, Charts 3D, Toolbar 등 시각적 기능 검증 필수)
+### Preview & UI
+- **`mcp__xcode__RenderPreview`**: render SwiftUI previews (essential for verifying visual features like Liquid Glass, Charts 3D, Toolbar, etc.)
 
-### 파일 탐색
-- **`mcp__xcode__XcodeRead`** / **`XcodeWrite`** / **`XcodeUpdate`**: Xcode 프로젝트 내 파일 읽기/쓰기
-- **`mcp__xcode__XcodeGrep`** / **`XcodeGlob`**: 프로젝트 검색
+### File Navigation
+- **`mcp__xcode__XcodeRead`** / **`XcodeWrite`** / **`XcodeUpdate`**: read/write files within the Xcode project
+- **`mcp__xcode__XcodeGrep`** / **`XcodeGlob`**: search the project
 
-### 도구 선택 Quick Guide
+### Tool Selection Quick Guide
 
 ```
-검증 필요?
-├─ 빠른 문법 체크 → XcodeRefreshCodeIssuesInFile (2초)
-├─ 전체 빌드 → BuildProject (느림, 정확)
-├─ 코드 실행 테스트 → ExecuteSnippet (빠름, 임시)
-├─ UI 확인 → RenderPreview
-└─ API 검색 → DocumentationSearch
+Need verification?
+├─ Quick syntax check → XcodeRefreshCodeIssuesInFile (2s)
+├─ Full build → BuildProject (slow, accurate)
+├─ Code execution test → ExecuteSnippet (fast, temporary)
+├─ UI check → RenderPreview
+└─ API search → DocumentationSearch
 ```
 
-> Xcode MCP 서버가 연결되지 않은 경우에도 참조 문서만으로 코딩 가이드를 제공하세요.
+> Even when the Xcode MCP server is not connected, provide the coding guide using the reference documents alone.

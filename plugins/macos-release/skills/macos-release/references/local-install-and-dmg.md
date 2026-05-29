@@ -1,27 +1,27 @@
 # Local install and DMG verification
 
-GUI macOS 앱 릴리스에서는 DMG/ZIP를 만든 뒤 **로컬 설치 검증**을 먼저 거치는 것이 안전합니다.
+For GUI macOS app releases, it is safer to build the DMG/ZIP and then run a **local install verification** first.
 
-## 목표
-- 빌드는 성공했지만 실제 설치 결과가 깨진 경우를 publish 전에 발견
-- 올바른 앱 번들이 덮어써졌는지 확인
-- 잘못된 빌드 경로나 오래된 앱 실행 문제를 조기에 차단
+## Goals
+- Catch cases where the build succeeded but the actual installed result is broken, before publish
+- Confirm that the correct app bundle was overwritten
+- Block wrong build paths or stale-app launch problems early
 
-## 기본 순서
-1. 실행 중인 앱 종료
-2. DMG 마운트 또는 ZIP 추출
-3. 기존 설치 앱 제거/덮어쓰기
-4. 새 앱 실행
-5. 최소 smoke test 확인
-6. publish 단계로 진행
+## Basic sequence
+1. Quit the running app
+2. Mount the DMG or extract the ZIP
+3. Remove/overwrite the existing installed app
+4. Launch the new app
+5. Confirm a minimal smoke test
+6. Proceed to the publish step
 
-## 앱 종료 절차
-보통 다음 순서가 안전합니다.
-- `pkill -x "$APP_NAME"` 로 정상 종료 시도
-- 몇 초 대기 후 살아 있으면 재시도
-- 정말 남아 있으면 마지막 수단으로 강제 종료
+## App quit procedure
+The following order is usually safe.
+- Attempt a graceful quit with `pkill -x "$APP_NAME"`
+- Wait a few seconds, then retry if it is still alive
+- If it really remains, force-kill as a last resort
 
-예시:
+Example:
 ```bash
 pkill -x "$APP_NAME" || true
 sleep 1
@@ -29,7 +29,7 @@ for i in {1..5}; do pgrep -x "$APP_NAME" || break; sleep 1; done
 pgrep -x "$APP_NAME" && pkill -9 -x "$APP_NAME"
 ```
 
-## DMG 설치 예시
+## DMG install example
 ```bash
 DMG_MOUNT=$(hdiutil attach "$DMG" -nobrowse -noverify -noautoopen | grep "/Volumes/" | awk '{print $NF}')
 rm -rf "$INSTALLED_APP"
@@ -38,25 +38,25 @@ hdiutil detach "$DMG_MOUNT" -quiet
 open "$INSTALLED_APP"
 ```
 
-주의:
-- 이미 같은 볼륨명이 마운트돼 있지 않은지 확인
-- `ditto` 또는 동등한 복사 수단으로 번들 구조를 유지
-- 설치 대상 경로와 빌드 산출물 경로를 혼동하지 않기
+Notes:
+- Check that the same volume name is not already mounted
+- Preserve the bundle structure with `ditto` or an equivalent copy method
+- Do not confuse the install target path with the build artifact path
 
-## ZIP 기반 검증
-- 임시 디렉터리에 압축 해제
-- `.app` 번들 존재 확인
-- 기존 설치 위치에 복사
-- launch 후 기본 기능 확인
+## ZIP-based verification
+- Extract into a temporary directory
+- Confirm the `.app` bundle exists
+- Copy to the existing install location
+- Confirm basic functionality after launch
 
-## CLI 배포와의 차이
-CLI는 보통 DMG 로컬 설치보다 아래가 더 중요합니다.
-- binary 실행 확인
-- `--help` / version 출력 확인
-- Homebrew Formula install/test 확인
+## Difference from CLI distribution
+For a CLI, the following usually matter more than DMG local install.
+- Confirm the binary runs
+- Confirm `--help` / version output
+- Confirm Homebrew Formula install/test
 
-## 최소 검증 예시
-- 앱 실행 여부
-- 메뉴바/기본 창 표시 여부
-- 크래시 없이 초기화되는지
-- 버전 표기가 기대값인지
+## Minimal verification example
+- Whether the app launches
+- Whether the menu bar / main window is displayed
+- Whether it initializes without crashing
+- Whether the version label is the expected value

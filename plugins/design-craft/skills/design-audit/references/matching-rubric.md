@@ -1,13 +1,13 @@
-# Matching Rubric — Trait 벡터 vs 카탈로그 매칭 스코어링
+# Matching Rubric — Trait vector vs catalog matching scoring
 
-**두 단계 매칭 구조**:
+**Two-stage matching structure**:
 
-- **Phase 2 (인덱스 스크리닝)**: `catalog-index.md`의 one_liner·traits만으로 Top-5 후보를 산출한다. 값싼 키워드 매칭.
-- **Phase 3 (본문 정밀 검증)**: Top-5 각각에 대해 `references/designs/{slug}.md`의 Section 2~3을 Read로 로드해 palette·typography를 재스코어링한다. 인덱스와 본문이 불일치하면 본문을 우선.
+- **Phase 2 (index screening)**: derive the Top-5 candidates using only the one_liner and traits from `catalog-index.md`. Cheap keyword matching.
+- **Phase 3 (body-level precise verification)**: for each of the Top-5, load Sections 2–3 of `references/designs/{slug}.md` via Read and re-score palette and typography. If the index and the body disagree, prefer the body.
 
-아래 공식은 두 단계 모두 적용되나, Phase 3에서는 palette_match·typography_fit의 가중치가 실제 hex·폰트명에 근거해 더 엄밀하게 계산된다.
+The formula below applies to both stages, but in Phase 3 the weights of palette_match and typography_fit are computed more strictly based on the actual hex values and font names.
 
-## 스코어 공식
+## Score formula
 
 ```
 score(brand) = 0.30 * palette_match
@@ -17,42 +17,42 @@ score(brand) = 0.30 * palette_match
              + 0.10 * density_fit
 ```
 
-각 서브점수는 `[0, 1]` 구간. 가중치 합은 1.0.
+Each sub-score is in the `[0, 1]` range. The weights sum to 1.0.
 
-## 서브 스코어 산출
+## Computing the sub-scores
 
 ### palette_match (0.30)
 
-**Phase 2 (인덱스 기반)**: 사용자 palette 색상가족을 정규화하고 브랜드 traits에서 색상 키워드와 대조:
+**Phase 2 (index-based)**: normalize the user's palette color families and compare them against the color keywords in the brand traits:
 
-| 일치 단계 | 점수 |
+| Match level | Score |
 |-----------|------|
-| 주 포인트색 가족 정확 일치 (purple ↔ purple) | 1.0 |
-| 유사 색상가족 (purple ↔ violet, pink-purple) | 0.7 |
-| 보조색 수준의 부분 일치 | 0.4 |
-| 서브 명도(dark/light) 일치만 있음 | 0.3 |
-| 불일치 | 0.0 |
+| Primary accent color family exact match (purple ↔ purple) | 1.0 |
+| Similar color family (purple ↔ violet, pink-purple) | 0.7 |
+| Partial match at the secondary-color level | 0.4 |
+| Only sub-lightness (dark/light) matches | 0.3 |
+| No match | 0.0 |
 
-**Phase 3 (본문 기반 정밀 재계산)**: `references/designs/{slug}.md` Section 2의 실제 hex 값을 파싱하여 사용자 palette와 HSL 거리로 재계산한다:
+**Phase 3 (body-based precise recomputation)**: parse the actual hex values from Section 2 of `references/designs/{slug}.md` and recompute the HSL distance against the user's palette:
 
 ```
-distance(userHex, brandHex) = |ΔH|/180 + |ΔS|/100 + |ΔL|/100  # 각 구성요소 정규화
-# 1.0 - min(distance, 1.0) 을 가중합해 palette_match 재산출
+distance(userHex, brandHex) = |ΔH|/180 + |ΔS|/100 + |ΔL|/100  # normalize each component
+# weight-sum 1.0 - min(distance, 1.0) to re-derive palette_match
 ```
 
-Phase 3 재계산 결과가 Phase 2 점수와 `±0.15` 이상 다르면 본문 기반 값을 채택하고 재랭킹한다. 예: 인덱스에서 `purple`로 태그된 Stripe가 본문에서 `#533afd`(순도 높은 violet)임이 드러나면 사용자의 "soft lavender"와는 예상보다 거리가 멀어 점수가 하향될 수 있다.
+If the Phase 3 recomputation differs from the Phase 2 score by `±0.15` or more, adopt the body-based value and re-rank. Example: if Stripe is tagged `purple` in the index but the body reveals `#533afd` (a high-purity violet), it is farther than expected from the user's "soft lavender" and the score may be lowered.
 
-**주의**: 사용자가 "다크 + 중성"이면 `mono` 기반 브랜드(`uber`, `spacex`, `x.ai`)가 높게, "다크 + 포인트"면 `supabase`(emerald), `linear.app`(purple), `kraken`(purple)가 높게 나와야 한다.
+**Note**: if the user is "dark + neutral", `mono`-based brands (`uber`, `spacex`, `x.ai`) should score high; if "dark + accent", `supabase` (emerald), `linear.app` (purple), `kraken` (purple) should score high.
 
 ### mood_match (0.25)
 
-사용자 mood 키워드와 브랜드 traits 키워드의 Jaccard 유사도 × 1.0:
+Jaccard similarity of the user's mood keywords and the brand's traits keywords × 1.0:
 
 ```
 mood_match = |user_mood ∩ brand_traits| / |user_mood ∪ brand_traits|
 ```
 
-키워드는 `catalog-index.md`의 Mood 사전으로 정규화한 뒤 비교한다. `minimal` ≡ `austere` ≡ `sparse`, `premium` ≡ `elegant` 같은 동의어는 사전에서 묶어라:
+Normalize keywords using the Mood dictionary in `catalog-index.md` before comparing. Group synonyms like `minimal` ≡ `austere` ≡ `sparse` and `premium` ≡ `elegant` in the dictionary:
 
 - `minimal` = {minimal, austere, sparse, subtraction}
 - `premium` = {premium, elegant, luxury}
@@ -63,16 +63,16 @@ mood_match = |user_mood ∩ brand_traits| / |user_mood ∪ brand_traits|
 
 ### category_fit (0.20)
 
-| 일치 단계 | 점수 |
+| Match level | Score |
 |-----------|------|
-| 동일 카테고리 | 1.0 |
-| 인접 카테고리 (developer-tool ↔ backend-devops) | 0.7 |
-| 무관 카테고리 | 0.3 |
-| `unknown` | 0.5 (페널티 없음) |
+| Same category | 1.0 |
+| Adjacent category (developer-tool ↔ backend-devops) | 0.7 |
+| Unrelated category | 0.3 |
+| `unknown` | 0.5 (no penalty) |
 
-**인접 카테고리 테이블**:
+**Adjacent category table**:
 
-| 카테고리 | 인접 |
+| Category | Adjacent |
 |----------|------|
 | AI & LLM | Developer Tools, Backend |
 | Developer Tools | AI & LLM, Backend |
@@ -86,55 +86,55 @@ mood_match = |user_mood ∩ brand_traits| / |user_mood ∪ brand_traits|
 
 ### typography_fit (0.15)
 
-**Phase 2 (인덱스 기반)**:
+**Phase 2 (index-based)**:
 
-| 사용자 typography | 브랜드 키워드 | 점수 |
+| User typography | Brand keywords | Score |
 |-------------------|--------------|------|
-| mono 계열 | `mono`, `geist`, `terminal` | 1.0 |
-| sans (모던) | `geist`, `neo-grotesk`, `sans` | 1.0 |
+| mono family | `mono`, `geist`, `terminal` | 1.0 |
+| sans (modern) | `geist`, `neo-grotesk`, `sans` | 1.0 |
 | serif | `serif`, `editorial`, `magazine` | 1.0 |
 | uppercase heavy | `uppercase`, `monumental`, `bold` | 1.0 |
-| 불일치 | | 0.3 |
+| No match | | 0.3 |
 | `unknown` | | 0.5 |
 
-**Phase 3 (본문 기반 정밀 재계산)**: `references/designs/{slug}.md` Section 3의 실제 font-family 문자열을 파싱. 동일 패밀리명이 있으면 1.0, 동일 카테고리(둘 다 mono/sans/serif)면 0.7, 다르면 0.3. 예: 사용자 앱이 `Geist`를 쓰고 Vercel 본문에도 `Geist`가 명시되면 최고점.
+**Phase 3 (body-based precise recomputation)**: parse the actual font-family string from Section 3 of `references/designs/{slug}.md`. Same family name → 1.0, same category (both mono/sans/serif) → 0.7, different → 0.3. Example: if the user's app uses `Geist` and Vercel's body also specifies `Geist`, it gets the top score.
 
 ### density_fit (0.10)
 
-| 사용자 density | 궁합 브랜드 특성 | 점수 |
+| User density | Compatible brand trait | Score |
 |----------------|-----------------|------|
 | loose | `minimal`, `premium`, `sparse`, `cinematic` | 1.0 |
 | moderate | `clean`, `structured`, `editorial` | 1.0 |
 | dense | `dashboard`, `data-dense`, `trading`, `docs` | 1.0 |
-| 반대 특성 | | 0.2 |
+| Opposite trait | | 0.2 |
 | `unknown` | | 0.5 |
 
-## Top-3 선정 후처리
+## Top-3 selection post-processing
 
-1. **카테고리 편향 방지**: Top-3가 같은 카테고리로만 채워지면 2위를 인접 카테고리 후보로 교체 검토. 단 2위와 신규 후보의 점수 차이가 `0.05` 이내여야 한다.
-2. **동점 tiebreaker**: 동점이 나오면 사용자 palette의 주 포인트색이 brand traits에 직접 명시된 쪽을 우선.
-3. **대비 브랜드 제시**: Top-3와 무드·색상이 정반대인 브랜드 1개를 "Contrast reference"로 추가 제공. 예: Top-3가 모두 `dark/minimal`이면 `zapier`(warm orange friendly)를 대비로.
+1. **Prevent category bias**: if the Top-3 are filled only with the same category, consider replacing the 2nd-place entry with an adjacent-category candidate. But the score gap between the 2nd place and the new candidate must be within `0.05`.
+2. **Tie tiebreaker**: on a tie, prefer the side whose brand traits explicitly list the user's primary accent color.
+3. **Provide a contrast brand**: additionally provide one brand whose mood and color are the polar opposite of the Top-3 as a "Contrast reference". Example: if the Top-3 are all `dark/minimal`, use `zapier` (warm orange friendly) as the contrast.
 
-## 근거(근거 문장) 요건
+## Rationale (justification sentence) requirements
 
-각 Top-3 매칭에 아래 3개 문장을 반드시 포함하라:
+Each Top-3 match must include the following 3 sentences:
 
-1. **Match**: "사용자 trait의 X가 브랜드 trait Y와 일치 (score: 0.XX)"
-2. **Gain**: "이 브랜드를 채택하면 얻는 특성 1개"
-3. **Loss**: "이 브랜드를 채택하면 희생되는 특성 1개"
+1. **Match**: "User trait X matches brand trait Y (score: 0.XX)"
+2. **Gain**: "One trait gained by adopting this brand"
+3. **Loss**: "One trait sacrificed by adopting this brand"
 
-Loss 문장이 비어있으면 매칭의 회의적 검토가 부족하다는 신호다. 억지로라도 트레이드오프를 1개 기술하라.
+An empty Loss sentence is a signal that the match's skeptical review is insufficient. State at least one trade-off, even if you have to force it.
 
-## 실패 케이스 처리
+## Failure case handling
 
-- **전체 후보 점수 < 0.4**: 카탈로그 내 적합 브랜드가 없다는 뜻. 리포트에 "카탈로그 내 강한 매칭 없음"을 명시하고 사용자에게 다음 경로를 제시:
-  - 범위 확장: `--platform any` 또는 카테고리 제약 해제
-  - 대안: `design-research` 스킬(디자이너/화가 기반) 사용
-- **점수 상위 3개가 0.05 이내로 밀집**: "어느 쪽이든 큰 차이 없음, 선택은 브랜드 선호로" 명시.
+- **All candidate scores < 0.4**: this means there is no suitable brand in the catalog. State "No strong match in catalog" in the report and offer the user the following paths:
+  - Expand scope: `--platform any` or remove the category constraint
+  - Alternative: use the `design-research` skill (designer/painter based)
+- **Top 3 scores cluster within 0.05**: state "No meaningful difference either way; choice comes down to brand preference."
 
-## 샘플 계산
+## Sample calculation
 
-사용자 trait:
+User trait:
 - palette: `["#0A0A0A", "#8B5CF6", "#F5F5F4"]` (dark + purple)
 - mood: `["minimal", "developer"]`
 - category: `developer-tool`
@@ -142,24 +142,24 @@ Loss 문장이 비어있으면 매칭의 회의적 검토가 부족하다는 신
 - density: `moderate`
 - surface: `dark`
 
-후보 `linear.app` (traits: minimal, purple, precise / category: Productivity / typography: sans / density: moderate):
+Candidate `linear.app` (traits: minimal, purple, precise / category: Productivity / typography: sans / density: moderate):
 
-- palette_match = 1.0 (purple 정확 일치) × 0.30 = **0.30**
+- palette_match = 1.0 (purple exact match) × 0.30 = **0.30**
 - mood_match = |{minimal} ∩ {minimal, precise}| / |{minimal, developer} ∪ {minimal, precise}| = 1/3 ≈ 0.33 × 0.25 = **0.08**
-- category_fit = 0.7 (인접) × 0.20 = **0.14**
+- category_fit = 0.7 (adjacent) × 0.20 = **0.14**
 - typography_fit = 0.3 (mono ≠ sans) × 0.15 = **0.045**
-- density_fit = 1.0 (moderate 직접 일치) × 0.10 = **0.10**
+- density_fit = 1.0 (moderate direct match) × 0.10 = **0.10**
 
 **total = 0.665**
 
-후보 `supabase` (dark, emerald, code / Backend / mono / moderate):
+Candidate `supabase` (dark, emerald, code / Backend / mono / moderate):
 
-- palette_match = 0.3 (dark만 일치, emerald ≠ purple) × 0.30 = **0.09**
-- mood_match = |{developer}∩{code}|(code≡developer 사전 매핑 시 1/2=0.5) × 0.25 = **0.125**
+- palette_match = 0.3 (only dark matches, emerald ≠ purple) × 0.30 = **0.09**
+- mood_match = |{developer}∩{code}| (with code≡developer dictionary mapping, 1/2=0.5) × 0.25 = **0.125**
 - category_fit = 0.7 × 0.20 = **0.14**
 - typography_fit = 1.0 × 0.15 = **0.15**
 - density_fit = 1.0 × 0.10 = **0.10**
 
 **total = 0.605**
 
-두 후보 모두 0.6대. 리포트에 둘 다 포함하고 Loss/Gain으로 구분한다.
+Both candidates are in the 0.6 range. Include both in the report and differentiate them with Loss/Gain.

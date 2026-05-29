@@ -1,17 +1,17 @@
-# Common Mistakes (참조 문서 기반)
+# Common Mistakes (based on reference docs)
 
-각 프레임워크에서 자주 발생하는 실수와 올바른 패턴입니다.
+Common mistakes and correct patterns for each framework.
 
 ## Liquid Glass
 
 ```swift
-// ❌ Wrong: GlassEffectContainer 없이 여러 뷰에 개별 glassEffect
+// ❌ Wrong: individual glassEffect on multiple views without GlassEffectContainer
 VStack {
     Text("A").glassEffect()
     Text("B").glassEffect()
 }
 
-// ✅ Correct: GlassEffectContainer로 감싸서 morphing 지원
+// ✅ Correct: wrap in GlassEffectContainer to support morphing
 GlassEffectContainer {
     VStack {
         Text("A").glassEffect()
@@ -23,10 +23,10 @@ GlassEffectContainer {
 ## FoundationModels
 
 ```swift
-// ❌ Wrong: 가용성 체크 없이 바로 세션 생성
+// ❌ Wrong: creating a session directly without checking availability
 let session = LanguageModelSession()
 
-// ✅ Correct: 반드시 가용성 체크 후 사용
+// ✅ Correct: always check availability before use
 let model = SystemLanguageModel.default
 guard case .available = model.availability else { return }
 let session = LanguageModelSession()
@@ -35,12 +35,12 @@ let session = LanguageModelSession()
 ## Swift 6.3 C Interop
 
 ```swift
-// ❌ Wrong: plain Swift 함수를 C에서 바로 호출할 수 있다고 가정
+// ❌ Wrong: assuming a plain Swift function can be called directly from C
 func callFromC() {
     print("Hello")
 }
 
-// ✅ Correct: C entry point가 필요하면 @c로 명시
+// ✅ Correct: use @c to declare a C entry point when one is needed
 @c(MyLibrary_callFromC)
 func callFromC() {
     print("Hello")
@@ -50,13 +50,13 @@ func callFromC() {
 ## Swift 6.3 Module Selectors
 
 ```swift
-// ❌ Wrong: 동일 이름 API가 여러 모듈에 있을 때 암묵적 해석에 의존
+// ❌ Wrong: relying on implicit resolution when an API of the same name exists in multiple modules
 import ModuleA
 import ModuleB
 
 let value = getValue()
 
-// ✅ Correct: 충돌 지점에서 모듈 선택자를 명시
+// ✅ Correct: specify a module selector at the conflict point
 let valueA = ModuleA::getValue()
 let valueB = ModuleB::getValue()
 ```
@@ -64,30 +64,30 @@ let valueB = ModuleB::getValue()
 ## Swift 6.2 Concurrency
 
 ```swift
-// ❌ Wrong (Swift 6.1): nonisolated async 함수가 백그라운드에서 실행된다고 가정
+// ❌ Wrong (Swift 6.1): assuming a nonisolated async function runs in the background
 class PhotoProcessor {
-    func process() async { /* 이제 호출자의 actor에서 실행됨 */ }
+    func process() async { /* now runs on the caller's actor */ }
 }
 
-// ✅ Correct (Swift 6.2): 백그라운드 실행이 필요하면 @concurrent 명시
+// ✅ Correct (Swift 6.2): use @concurrent when background execution is required
 class PhotoProcessor {
     @concurrent
-    func process() async { /* 명시적으로 백그라운드 스레드 풀에서 실행 */ }
+    func process() async { /* explicitly runs on the background thread pool */ }
 }
 ```
 
-### DispatchSemaphore / NSLock — actor로 전환
+### DispatchSemaphore / NSLock — migrate to actor
 
 ```swift
-// ❌ Wrong: future-work를 동기 차단 (협력적 풀 데드락 위험)
+// ❌ Wrong: synchronously blocking on future work (cooperative pool deadlock risk)
 final class ResourcePool {
     private let semaphore = DispatchSemaphore(value: 3)
     func acquire() {
-        semaphore.wait()   // 다른 Task의 signal()을 동기 대기
+        semaphore.wait()   // synchronously waits for another Task's signal()
     }
 }
 
-// ✅ Correct: actor로 비동기 게이팅
+// ✅ Correct: async gating with an actor
 actor ResourcePool {
     private var available: Int = 3
     private var waiters: [CheckedContinuation<Void, Never>] = []
@@ -103,36 +103,36 @@ actor ResourcePool {
 }
 ```
 
-근거: John McCall (Swift Core Team) — "single scheduled thread만으로도 데드락 가능". 상세는 `references/swift-concurrency-supplement.md` § 1 참조.
+Rationale: John McCall (Swift Core Team) — "single scheduled thread만으로도 데드락 가능". See `references/swift-concurrency-supplement.md` § 1 for details.
 
-### AsyncStream — bufferingPolicy 미지정
+### AsyncStream — bufferingPolicy unspecified
 
 ```swift
-// ❌ Wrong: 기본 .unbounded → producer 빠를 때 메모리 폭주
+// ❌ Wrong: default .unbounded → memory blowup when producer is fast
 let stream = AsyncStream<Event> { continuation in
     legacy.onEvent = { continuation.yield($0) }
 }
 
-// ✅ Correct: 항상 bufferingPolicy 명시
+// ✅ Correct: always specify bufferingPolicy
 let (stream, continuation) = AsyncStream.makeStream(
     of: Event.self,
-    bufferingPolicy: .bufferingNewest(64)   // 또는 .bufferingOldest(n)
+    bufferingPolicy: .bufferingNewest(64)   // or .bufferingOldest(n)
 )
 ```
 
-상세: `references/swift-concurrency-supplement.md` § 4
+Details: `references/swift-concurrency-supplement.md` § 4
 
-### withTaskGroup 결과 미소비 — DiscardingTaskGroup으로
+### withTaskGroup results unconsumed — use DiscardingTaskGroup
 
 ```swift
-// ❌ Wrong: 결과를 안 쓰면서 일반 TaskGroup → 메모리 누적
+// ❌ Wrong: plain TaskGroup while not using results → memory accumulation
 await withTaskGroup(of: Void.self) { group in
     for client in connections {
         group.addTask { await handle(client) }
     }
 }
 
-// ✅ Correct (iOS 18+): 자식 완료 즉시 release
+// ✅ Correct (iOS 18+): release children immediately on completion
 await withDiscardingTaskGroup { group in
     for client in connections {
         group.addTask { await handle(client) }
@@ -140,12 +140,12 @@ await withDiscardingTaskGroup { group in
 }
 ```
 
-⚠️ `DiscardingTaskGroup`은 `next()` 메서드 자체가 없어 결과 수집 불가. 결과가 필요하면 일반 `withTaskGroup` 사용.
+⚠️ `DiscardingTaskGroup` has no `next()` method, so it cannot collect results. Use a plain `withTaskGroup` if you need results.
 
-### lock을 await 가로질러 보유
+### holding a lock across an await
 
 ```swift
-// ❌ Wrong: lock 유지한 채 await — forward-progress 위반 위험
+// ❌ Wrong: awaiting while holding a lock — forward-progress violation risk
 let lock = NSLock()
 func update() async {
     lock.lock()
@@ -154,7 +154,7 @@ func update() async {
     state.merge(data)
 }
 
-// ✅ Correct: lock 밖에서 await, lock은 짧은 critical section만
+// ✅ Correct: await outside the lock, keep the lock for a short critical section only
 func update() async {
     let data = await fetchRemote()
     lock.lock()
@@ -162,7 +162,7 @@ func update() async {
     state.merge(data)
 }
 
-// ✅ 더 나은 선택: actor로 전환
+// ✅ Better choice: migrate to an actor
 actor StateStore {
     var state: State = .init()
     func update() async {
@@ -172,27 +172,27 @@ actor StateStore {
 }
 ```
 
-근거: WWDC21 10254 — "you should be careful not to hold locks across an await". 상세: `references/swift-concurrency-supplement.md` § 1.1 Tier 2
+Rationale: WWDC21 10254 — "you should be careful not to hold locks across an await". Details: `references/swift-concurrency-supplement.md` § 1.1 Tier 2
 
 ## Swift Testing (6.3)
 
 ```swift
-// ❌ Wrong: 비치명적 진단까지 테스트 실패로 처리
+// ❌ Wrong: treating even non-fatal diagnostics as test failures
 #expect(cacheMisses.isEmpty)
 
-// ✅ Correct: 결과는 남기되 실패로 만들고 싶지 않으면 warning issue 사용
+// ✅ Correct: record the result but use a warning issue if you don't want it to fail
 Issue.record("Cache miss detected during warm-up", severity: .warning)
 ```
 
 ## SwiftData Inheritance
 
 ```swift
-// ❌ Wrong: 깊은 상속 계층
+// ❌ Wrong: deep inheritance hierarchy
 @Model class A { }
 @Model class B: A { }
-@Model class C: B { }  // 3단계 이상 → 지양
+@Model class C: B { }  // 3 levels or more → avoid
 
-// ✅ Correct: 얕은 IS-A 관계만
+// ✅ Correct: shallow IS-A relationships only
 @Model class Trip { var name: String }
 @Model class BusinessTrip: Trip { var company: String }
 ```
@@ -200,10 +200,10 @@ Issue.record("Cache miss detected during warm-up", severity: .warning)
 ## WebKit + SwiftUI
 
 ```swift
-// ❌ Wrong: URL만으로 WebView 생성 후 상태 관리 불가
+// ❌ Wrong: creating a WebView from a URL only — no state management
 WebView(url: URL(string: "https://example.com")!)
 
-// ✅ Correct: WebPage로 상태 관리
+// ✅ Correct: state management with WebPage
 @State private var page = WebPage()
 // ...
 WebView(page)

@@ -8,8 +8,8 @@ doc_count: 22
 
 # apple-craft Reference Index
 
-Xcode 26.4 (build 24909) AdditionalDocumentation sync 결과.
-Manual supplement 문서도 함께 인덱싱합니다.
+Result of the Xcode 26.4 (build 24909) AdditionalDocumentation sync.
+Manual supplement docs are indexed here as well.
 
 | Local File | Xcode Original | Lines | SHA256 |
 |------------|---------------|-------|--------|

@@ -1,39 +1,39 @@
-# Extraction Guide — 앱 디자인 상태 추출
+# Extraction Guide — App Design State Extraction
 
-Phase 1 단계에서 사용하는 플랫폼별·소스별 추출 전략. 입력 타입을 먼저 분기한 뒤 해당 섹션만 따른다.
+Platform- and source-specific extraction strategies used in Phase 1. Branch on the input type first, then follow only the matching section.
 
-## 공통 원칙
+## Common Principles
 
-- 추측하지 말고 **실측값만** trait 벡터에 기입한다. 불확실한 필드는 `unknown`.
-- 추출 반경은 앱의 **진짜 사용 색상/폰트**에 국한한다. `Assets.xcassets/AppIcon.appiconset` 같은 브랜드 에셋은 제외해도 되지만 핵심 팔레트 파일(`Colors`, `tokens`)은 반드시 포함한다.
-- 대량 파일 스캔은 Explore 서브에이전트로 위임한다. 서브에이전트에게는 "Top 5 색상 + 폰트 패밀리 + 간격 스케일만 요약, 200단어 이내"로 요청한다.
+- Do not guess; record **measured values only** in the trait vector. Use `unknown` for uncertain fields.
+- Limit extraction scope to the app's **actual in-use colors/fonts**. Brand assets like `Assets.xcassets/AppIcon.appiconset` may be excluded, but core palette files (`Colors`, `tokens`) must be included.
+- Delegate large file scans to the Explore subagent. Ask the subagent for "only the Top 5 colors + font families + spacing scale, summarized in under 200 words".
 
-## iOS / macOS 모드
+## iOS / macOS Mode
 
-### 탐색 경로 (우선순위 순)
+### Search Paths (priority order)
 
-1. **Asset Catalog 색상 세트**: `**/*.xcassets/**/Contents.json` 중 `"colors"` 키 포함
-2. **디자인 토큰 Swift 파일**: `**/*Color*.swift`, `**/*Token*.swift`, `**/*Palette*.swift`, `**/*Theme*.swift`
-3. **Font 정의**: `**/*Font*.swift`, `Info.plist`의 `UIAppFonts`
-4. **SwiftUI 호출부** (필요 시): `.font(...)`, `Color(...)`, `.foregroundColor(...)` 사용 위치
+1. **Asset Catalog color sets**: `**/*.xcassets/**/Contents.json` containing the `"colors"` key
+2. **Design token Swift files**: `**/*Color*.swift`, `**/*Token*.swift`, `**/*Palette*.swift`, `**/*Theme*.swift`
+3. **Font definitions**: `**/*Font*.swift`, `UIAppFonts` in `Info.plist`
+4. **SwiftUI call sites** (if needed): locations using `.font(...)`, `Color(...)`, `.foregroundColor(...)`
 
-### 추출 패턴
+### Extraction Patterns
 
 ```
-# 색상 검색
+# color search
 rg "Color\((red|\.sRGB|#)" --glob '*.swift'
 rg "Color\(\"[^\"]+\"\)" --glob '*.swift'
 rg "UIColor\((red|displayP3|named:)" --glob '*.{swift,m}'
 
-# 폰트 검색
+# font search
 rg "Font\.(custom|system)" --glob '*.swift'
 rg "\.font\(" --glob '*.swift' | head -50
 
-# Asset Catalog 색상 hex
+# Asset Catalog color hex
 find . -name "Contents.json" -path "*.colorset*" | head -30
 ```
 
-Asset Catalog의 `Contents.json` 내부는 JSON이다:
+The inside of an Asset Catalog `Contents.json` is JSON:
 
 ```json
 "components" : {
@@ -41,33 +41,33 @@ Asset Catalog의 `Contents.json` 내부는 JSON이다:
 }
 ```
 
-16진수를 10진수로 정규화하여 hex로 변환하라(`0xFF 0x80 0x00` → `#FF8000`).
+Normalize hexadecimal to decimal and convert to hex (`0xFF 0x80 0x00` → `#FF8000`).
 
-### 필드 매핑
+### Field Mapping
 
-| trait 필드 | 추출 소스 | 정규화 규칙 |
+| trait field | extraction source | normalization rule |
 |------------|----------|-------------|
-| palette | Top 5 사용 빈도 색상(hex) | 명도로 내림차순 정렬 |
-| typography | `Font.custom("...")` 인자 + system 기본값 | 커스텀 > 시스템 우선 |
-| density | 상위 5개 `.padding()` 값의 중앙값 | `<8` dense, `8~20` moderate, `>20` loose |
-| mood | 색상 hex의 채도·명도 분포 + 폰트 특성 | `minimal`/`bold`/`playful`/`premium` 중 선택 |
-| surface | `.background(.ultraThinMaterial)`, `.shadow`, gradient 사용 빈도 | flat/elevated/gradient |
-| category | 앱 이름·README에서 추정 | 9개 카테고리 중 1개 또는 `unknown` |
+| palette | Top 5 colors by usage frequency (hex) | sort descending by brightness |
+| typography | `Font.custom("...")` argument + system default | custom > system priority |
+| density | median of the top 5 `.padding()` values | `<8` dense, `8~20` moderate, `>20` loose |
+| mood | saturation/brightness distribution of color hex + font characteristics | choose among `minimal`/`bold`/`playful`/`premium` |
+| surface | usage frequency of `.background(.ultraThinMaterial)`, `.shadow`, gradient | flat/elevated/gradient |
+| category | inferred from app name / README | 1 of 9 categories or `unknown` |
 
-## Web 모드
+## Web Mode
 
-### 탐색 경로 (우선순위 순)
+### Search Paths (priority order)
 
-1. **CSS 변수**: `:root {`, `--color-`, `--font-`, `--space-` 선언
-2. **Tailwind 설정**: `tailwind.config.{js,ts,cjs,mjs}`의 `theme.extend.colors`
+1. **CSS variables**: `:root {`, `--color-`, `--font-`, `--space-` declarations
+2. **Tailwind config**: `theme.extend.colors` in `tailwind.config.{js,ts,cjs,mjs}`
 3. **Design tokens JSON**: `design-tokens.json`, `tokens.yaml`, `**/*.tokens.*`
-4. **전역 스타일**: `app/globals.css`, `styles/theme.*`, `src/styles/*`
-5. **컴포넌트 라이브러리 설정**: `shadcn`/`chakra`/`mantine` 테마 파일
+4. **Global styles**: `app/globals.css`, `styles/theme.*`, `src/styles/*`
+5. **Component library config**: `shadcn`/`chakra`/`mantine` theme files
 
-### 추출 패턴
+### Extraction Patterns
 
 ```
-# CSS 변수
+# CSS variables
 rg "^\s*--color-" --glob '*.{css,scss,sass}' | head -40
 rg "^\s*--font-|--text-" --glob '*.{css,scss,sass}' | head -20
 
@@ -79,26 +79,26 @@ rg "extend:\s*\{" --glob 'tailwind.config.*' -A 60
 fd -e json -e yaml -e yml . -t f | rg -i 'token|palette|theme' | head -20
 ```
 
-### 필드 매핑
+### Field Mapping
 
-| trait 필드 | 추출 소스 | 정규화 규칙 |
+| trait field | extraction source | normalization rule |
 |------------|----------|-------------|
-| palette | CSS 변수 `--color-*` 값의 상위 5개 | 의미 이름(`primary`, `surface`) 우선 |
-| typography | `--font-*`, `font-family` 선언 | 실제 body/heading에 사용된 것만 |
-| density | Tailwind `spacing` 스케일 또는 `--space-*` | 기본 단위가 `4px` 이하 dense |
-| mood | 배경색 명도 + 포인트색 채도 | |
-| surface | `box-shadow` 변수·gradient 사용 | |
+| palette | top 5 of CSS variable `--color-*` values | prioritize semantic names (`primary`, `surface`) |
+| typography | `--font-*`, `font-family` declarations | only those actually used in body/heading |
+| density | Tailwind `spacing` scale or `--space-*` | dense if base unit is `4px` or less |
+| mood | background brightness + accent color saturation | |
+| surface | `box-shadow` variable / gradient usage | |
 | category | `package.json` name + README | |
 
-## Android (Jetpack Compose) 모드
+## Android (Jetpack Compose) Mode
 
-### 탐색 경로
+### Search Paths
 
 1. **Material3 Theme**: `**/ui/theme/Color.kt`, `Theme.kt`, `Type.kt`
 2. **colors.xml**: `app/src/main/res/values/colors.xml`, `values-night/colors.xml`
-3. **Typography 리소스**: `font/*.xml`, `res/values/fonts.xml`
+3. **Typography resources**: `font/*.xml`, `res/values/fonts.xml`
 
-### 추출 패턴
+### Extraction Patterns
 
 ```
 rg "val\s+\w+\s*=\s*Color\(0x[0-9A-Fa-f]{8}\)" --glob '*.kt'
@@ -106,73 +106,73 @@ rg "<color name=" --glob 'colors.xml'
 rg "TextStyle\(" --glob 'Type.kt' -A 5
 ```
 
-`0xFF2563EB` → `#2563EB`로 변환(앞 2자리 alpha 버림).
+Convert `0xFF2563EB` → `#2563EB` (drop the leading 2 alpha digits).
 
-### 필드 매핑
+### Field Mapping
 
-Compose `ColorScheme`의 `primary`, `secondary`, `surface`, `background`를 trait.palette 상위 4개로 채택. `Typography`의 `bodyLarge`, `headlineLarge` 폰트가 주 typography.
+Adopt the Compose `ColorScheme`'s `primary`, `secondary`, `surface`, `background` as the top 4 of trait.palette. The `Typography`'s `bodyLarge`, `headlineLarge` fonts are the primary typography.
 
-## 플랫폼 무관 / Design Tokens 모드
+## Platform-Agnostic / Design Tokens Mode
 
-### 지원 포맷
+### Supported Formats
 
-- [Design Tokens Community Group](https://design-tokens.github.io/community-group/) JSON 포맷 (`$value`, `$type`)
-- Style Dictionary 구조 (`color.primary.value`)
-- Tailwind config (위 Web 모드 참조)
+- [Design Tokens Community Group](https://design-tokens.github.io/community-group/) JSON format (`$value`, `$type`)
+- Style Dictionary structure (`color.primary.value`)
+- Tailwind config (see Web Mode above)
 - Figma Tokens Studio export
 
-### 탐색 패턴
+### Search Pattern
 
 ```
 fd -e json -e yaml -e yml | rg -i 'tokens|design-tokens|palette'
 ```
 
-### 필드 매핑
+### Field Mapping
 
-토큰 파일에서 `color.primary`, `color.surface.background`, `typography.heading.fontFamily`, `size.spacing.md` 같은 경로를 직접 읽어 trait 벡터에 매핑한다. 의미 이름이 있으면 `palette[0]`에 `primary`를 배치한다.
+Read paths like `color.primary`, `color.surface.background`, `typography.heading.fontFamily`, `size.spacing.md` directly from the token file and map them to the trait vector. If a semantic name exists, place `primary` at `palette[0]`.
 
-## 스크린샷 모드
+## Screenshot Mode
 
-Read 도구로 이미지를 열고 다음 순서로 관찰하라:
+Open the image with the Read tool and observe in this order:
 
-1. **배경 명도 판정**: 다크(#000~#2A) / 라이트(#F0~#FF) / 미드톤
-2. **포인트 색상 식별**: 가장 채도 높은 색 1~2개의 대략 hex
-3. **타이포 계열**: serif(세리프 돌출) / sans(균등 굵기) / mono(균등 폭)
-4. **컴포넌트 밀도**: 화면에 보이는 주요 요소 수와 여백 비율
-5. **무드 판정**: editorial(여백 많음·텍스트 중심) / functional(정보 밀도·대시보드) / cinematic(고채도·풀블리드) / playful(라운드·일러스트)
+1. **Background brightness judgment**: dark (#000~#2A) / light (#F0~#FF) / midtone
+2. **Accent color identification**: approximate hex of the 1~2 most saturated colors
+3. **Typography family**: serif (serif protrusions) / sans (uniform stroke weight) / mono (uniform width)
+4. **Component density**: number of major elements visible on screen and whitespace ratio
+5. **Mood judgment**: editorial (lots of whitespace, text-centric) / functional (information density, dashboard) / cinematic (high saturation, full-bleed) / playful (rounded, illustration)
 
-여러 스크린샷이 있으면 **공통 trait를 우선**하고 화면별 차이는 `notes`에 기록하라.
+If there are multiple screenshots, **prioritize common traits** and record per-screen differences in `notes`.
 
-### hex 근사치 허용
+### Hex Approximation Allowed
 
-스크린샷에서 정확한 hex를 추출할 수 없으므로 `#2E2A2B` 같은 2자리 정밀도로 충분하다. 단 **명도·채도·색상가족**은 분명하게 분류하라:
+Since exact hex cannot be extracted from a screenshot, 2-digit precision like `#2E2A2B` is sufficient. However, classify **brightness, saturation, and color family** clearly:
 
-- "다크 뉴트럴" vs "다크 웜" 구분(`#1A1A1A` vs `#1F1815`)
-- "세추레이티드 퍼플" vs "소프트 라벤더" 구분
+- distinguish "dark neutral" vs "dark warm" (`#1A1A1A` vs `#1F1815`)
+- distinguish "saturated purple" vs "soft lavender"
 
-## 서술형 모드
+## Descriptive Mode
 
-자연어 설명에서 아래 패턴을 찾아 trait를 채워라:
+Find the patterns below in the natural-language description and fill in traits:
 
-| 입력 키워드 예시 | 매핑 필드 |
+| input keyword example | mapped field |
 |-----------------|-----------|
-| "다크", "어두운", "야간" | surface=dark, mood에 `dark` 추가 |
-| "미니멀", "심플", "여백" | mood에 `minimal`, density=loose |
-| "보라", "퍼플" | palette에 purple 계열 추가 |
-| "개발자 도구", "IDE" | category=developer-tool |
-| "프리미엄", "고급" | mood에 `premium` 추가 |
-| "친근", "귀여운", "둥글" | mood에 `playful`/`friendly`, surface에 rounded |
-| "시네마틱", "영화적" | mood에 `cinematic` |
-| "에디토리얼", "매거진" | mood에 `editorial`, typography에 serif 가능성 |
+| "dark", "nighttime" | surface=dark, add `dark` to mood |
+| "minimal", "simple", "whitespace" | add `minimal` to mood, density=loose |
+| "purple" | add purple family to palette |
+| "developer tool", "IDE" | category=developer-tool |
+| "premium", "high-end" | add `premium` to mood |
+| "friendly", "cute", "rounded" | add `playful`/`friendly` to mood, rounded to surface |
+| "cinematic" | add `cinematic` to mood |
+| "editorial", "magazine" | add `editorial` to mood, serif possibility in typography |
 
-서술에서 누락된 필드가 3개 이상이면 사용자에게 최대 2개 보강 질문만 하고, 나머지는 `unknown`으로 진행한다.
+If 3 or more fields are missing from the description, ask the user at most 2 follow-up questions and proceed with `unknown` for the rest.
 
-## 결과 검증
+## Result Verification
 
-trait 벡터가 완성되면 **자체 체크**를 수행하라:
+Once the trait vector is complete, perform a **self-check**:
 
-- palette에 hex가 3개 이상 있는가?
-- mood가 최소 1개 이상 있는가?
-- surface와 density가 모순되지 않는가? (예: dense + 라인만 있는 편집자형은 불일치 가능)
+- Does palette have 3 or more hex values?
+- Does mood have at least 1 entry?
+- Are surface and density not contradictory? (e.g., dense + line-only editorial type may be inconsistent)
 
-모순이 있으면 Phase 2 매칭 전에 사용자에게 확인한다.
+If there is a contradiction, confirm with the user before Phase 2 matching.

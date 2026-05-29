@@ -1,6 +1,6 @@
 # Response Templates
 
-## implement 모드 응답 템플릿
+## implement mode response template
 
 ```markdown
 ## <Feature Name> 구현
@@ -24,7 +24,7 @@
 - [ ] 프리뷰 확인 (UI 관련 시)
 ```
 
-## explore 모드 응답 템플릿
+## explore mode response template
 
 ```markdown
 ## <API/Feature Name>
@@ -61,7 +61,7 @@
 - `RelatedType` — <관계 설명>
 ```
 
-## troubleshoot 모드 응답 템플릿
+## troubleshoot mode response template
 
 ```markdown
 ## 에러 분석

@@ -1,140 +1,141 @@
-# Walkthrough: Liquid Glass 설정 화면 구현
+# Walkthrough: Liquid Glass Settings Screen Implementation
 
-apple-harness의 Plan→Build→Evaluate 루프를 사용하여 SwiftUI 설정 화면에
-Liquid Glass 디자인을 적용하는 전체 과정입니다. 10개 기능(기본 5 + 차별화 5)을
-4축 다차원 평가로 검증하는 개선된 하네스 흐름을 시연합니다.
+The full process of applying Liquid Glass design to a SwiftUI settings screen
+using apple-harness's Plan→Build→Evaluate loop. It demonstrates the improved
+harness flow that verifies 10 features (5 core + 5 differentiating) via 4-axis
+multi-dimensional evaluation.
 
-> **참고**: 이 워크스루는 **Pencil MCP 미연결 환경**에서의 실행 예시입니다.
-> Phase 2(DESIGN)은 Pencil MCP가 사용 가능할 때만 실행되므로, 여기서는 자동 스킵됩니다.
-> Phase 번호는 스킵된 Phase를 제외한 실제 실행 순서를 따릅니다.
+> **Note**: This walkthrough is an execution example in an environment **without Pencil MCP connected**.
+> Phase 2 (DESIGN) runs only when Pencil MCP is available, so it is auto-skipped here.
+> Phase numbers follow the actual execution order, excluding skipped phases.
 
 ---
 
-## 사용자 요청
+## User Request
 
-> "처음부터 Liquid Glass를 적용한 설정 화면을 만들어줘. 프로필, 알림, 테마 설정 섹션이 필요해."
+> "Build a settings screen with Liquid Glass applied from scratch. I need profile, notification, and theme settings sections."
 
 ---
 
 ## Phase 1: PLAN (harness-planner)
 
-### Step 0: 설계 원칙 숙지
+### Step 0: Internalize Design Principles
 
-Planner가 `harness-design-principles.md`를 Read하여 핵심 원칙을 확인합니다:
-- **최소 복잡성**: 모델이 스스로 할 수 없는 것에 대한 가정만 인코딩
-- **Generator-Evaluator 분리**: 자기평가 편향 제거
-- **Planner 유지 이유**: 전체 비용의 0.4%로 가장 높은 ROI
+The Planner Reads `harness-design-principles.md` to confirm the core principles:
+- **Minimal complexity**: encode only assumptions about what the model cannot do on its own
+- **Generator-Evaluator separation**: removes self-evaluation bias
+- **Why keep the Planner**: highest ROI at 0.4% of total cost
 
-### Step 1: AskUserQuestion으로 사용자 맥락 수집
+### Step 1: Gather User Context via AskUserQuestion
 
-Planner가 4개 질문으로 맥락을 수집합니다. 이후 자율 진행의 기반입니다.
+The Planner gathers context with 4 questions. This is the foundation for subsequent autonomous progress.
 
 ```
-Q1: 이 설정 화면의 주 사용자는 누구인가요?
-A1: 일반 소비자용 소셜 앱. 20-30대, 디자인 감도가 높은 사용자층.
+Q1: Who are the primary users of this settings screen?
+A1: A social app for general consumers. People in their 20s-30s, a design-conscious user base.
 
-Q2: 기존 프로젝트에 추가하나요? 아키텍처 패턴은?
-A2: 기존 SwiftUI 프로젝트, MVVM + @Observable 매크로.
+Q2: Adding to an existing project? What architecture pattern?
+A2: Existing SwiftUI project, MVVM + @Observable macro.
 
-Q3: 기본 설정 화면 외에 특별히 원하는 기능이 있나요?
-A3: FoundationModels 자연어 검색 + VoiceOver 접근성 지원.
+Q3: Any features you specifically want beyond the basic settings screen?
+A3: FoundationModels natural-language search + VoiceOver accessibility support.
 
-Q4: 테스트 환경은?
-A4: iPhone 16 Pro 시뮬레이터, iOS 26 beta.
+Q4: Test environment?
+A4: iPhone 16 Pro simulator, iOS 26 beta.
 ```
 
-### Step 2: {HARNESS_DIR}/harness-spec.md 생성
+### Step 2: Create {HARNESS_DIR}/harness-spec.md
 
 ```markdown
-# 제품 스펙: Liquid Glass 설정 화면
+# Product Spec: Liquid Glass Settings Screen
 
-## 개요
-SwiftUI Liquid Glass 설정 화면. 프로필/알림/테마 3개 섹션 + 접근성, AI 검색,
-haptic, 다크모드 전환, 에러 처리까지 포괄.
+## Overview
+SwiftUI Liquid Glass settings screen. 3 sections (profile/notification/theme) + accessibility, AI search,
+haptic, dark mode transition, and error handling.
 
-## 사용자 맥락
-- 대상: 20-30대 디자인 감도 높은 일반 소비자
-- 아키텍처: MVVM + @Observable
-- 차별화 요구: FoundationModels 자연어 검색, VoiceOver 접근성
-- 테스트 환경: iPhone 16 Pro 시뮬레이터, iOS 26 beta
+## User Context
+- Target: design-conscious general consumers in their 20s-30s
+- Architecture: MVVM + @Observable
+- Differentiating requirements: FoundationModels natural-language search, VoiceOver accessibility
+- Test environment: iPhone 16 Pro simulator, iOS 26 beta
 
-## 차별화 기능
-1. FoundationModels 자연어 설정 검색
-2. VoiceOver accessibilityLabel 전체 적용
-3. 설정 변경 시 haptic feedback
-4. 다크모드/라이트모드 전환 애니메이션
-5. 데이터 로딩 실패 시 에러 상태 UI
+## Differentiating Features
+1. FoundationModels natural-language settings search
+2. VoiceOver accessibilityLabel applied throughout
+3. haptic feedback on settings change
+4. dark/light mode transition animation
+5. error-state UI on data load failure
 
-## 대상 플랫폼
+## Target Platform
 iOS 26+ / SwiftUI + Liquid Glass, FoundationModels, MVVM + @Observable
 ```
 
-### Step 3: {HARNESS_DIR}/features.json 생성
+### Step 3: Create {HARNESS_DIR}/features.json
 
-10개 기능. Planner가 verification_steps를 초기 작성합니다.
+10 features. The Planner drafts the initial verification_steps.
 
-| ID | category | description | verification_steps (요약) | reference |
+| ID | category | description | verification_steps (summary) | reference |
 |----|----------|-------------|--------------------------|-----------|
-| F001 | config | SettingsView 기본 구조 | build -> launch -> screenshot | liquid-glass-swiftui.md |
+| F001 | config | SettingsView base structure | build -> launch -> screenshot | liquid-glass-swiftui.md |
 | F002 | ui | glassEffect() + GlassEffectContainer | render_preview -> screenshot | liquid-glass-swiftui.md |
-| F003 | ui | 프로필 -- 아바타 + 편집 + .buttonStyle(.glass) | tap 편집 -> type_text 이름 | liquid-glass-swiftui.md |
-| F004 | ui | 알림 설정 -- Toggle + Glass 배경 | tap 토글 -> screenshot | liquid-glass-swiftui.md |
-| F005 | ui | 테마 -- Glass 카드 + @Namespace morphing | tap 다크 카드 -> morphing | liquid-glass-swiftui.md |
-| F006 | ui | 접근성 -- VoiceOver accessibilityLabel | analyze_ui 접근성 트리 | liquid-glass-swiftui.md |
-| F007 | logic | FoundationModels 자연어 설정 검색 | tap 검색 -> type "알림 끄기" | foundation-models.md |
-| F008 | ui | 설정 변경 시 haptic feedback | tap 토글 -> code_review | liquid-glass-swiftui.md |
-| F009 | ui | 다크모드/라이트모드 전환 애니메이션 | tap 라이트 -> 전환 확인 | liquid-glass-swiftui.md |
-| F010 | ui | 에러 상태 -- 로딩 실패 시 안내 | simulate_error -> screenshot | liquid-glass-swiftui.md |
+| F003 | ui | Profile -- avatar + edit + .buttonStyle(.glass) | tap edit -> type_text name | liquid-glass-swiftui.md |
+| F004 | ui | Notification settings -- Toggle + Glass background | tap toggle -> screenshot | liquid-glass-swiftui.md |
+| F005 | ui | Theme -- Glass card + @Namespace morphing | tap dark card -> morphing | liquid-glass-swiftui.md |
+| F006 | ui | Accessibility -- VoiceOver accessibilityLabel | analyze_ui accessibility tree | liquid-glass-swiftui.md |
+| F007 | logic | FoundationModels natural-language settings search | tap search -> type "turn off notifications" | foundation-models.md |
+| F008 | ui | haptic feedback on settings change | tap toggle -> code_review | liquid-glass-swiftui.md |
+| F009 | ui | dark/light mode transition animation | tap light -> confirm transition | liquid-glass-swiftui.md |
+| F010 | ui | Error state -- guidance on load failure | simulate_error -> screenshot | liquid-glass-swiftui.md |
 
-모든 기능의 status: "pending". priority: F001(1) ~ F010(10).
+All features status: "pending". priority: F001(1) ~ F010(10).
 
-### 사용자 확인 (마지막 확인점)
+### User Confirmation (final checkpoint)
 
-> {HARNESS_DIR}/harness-spec.md: 10개 기능, iOS 26+, MVVM + @Observable
-> {HARNESS_DIR}/features.json: F001-F010 (기본 5 + 차별화 5)
-> "이 스펙으로 진행할까요?" -> 사용자: "좋아요, 진행해주세요."
+> {HARNESS_DIR}/harness-spec.md: 10 features, iOS 26+, MVVM + @Observable
+> {HARNESS_DIR}/features.json: F001-F010 (5 core + 5 differentiating)
+> "Proceed with this spec?" -> User: "Sounds good, go ahead."
 
 ---
 
 ## Phase 1.5: VERIFICATION REVIEW (harness-evaluator)
 
-Evaluator가 VERIFICATION_REVIEW 모드로 호출. **사용자 확인 없이 자율 진행.**
+The Evaluator is invoked in VERIFICATION_REVIEW mode. **Proceeds autonomously without user confirmation.**
 
-**F003 보강** -- "편집 -> 저장 -> 반영" 시나리오 추가:
+**F003 reinforcement** -- add an "edit -> save -> reflect" scenario:
 ```json
-[{"action":"tap","target":"편집 버튼","expect":"편집 화면 전환"},
- {"action":"type_text","target":"이름 필드","text":"새이름","expect":"입력 반영"},
- {"action":"tap","target":"저장 버튼","expect":"설정 화면 복귀"},
- {"action":"screenshot","expect":"변경된 이름이 프로필 섹션에 표시"}]
+[{"action":"tap","target":"edit button","expect":"transition to edit screen"},
+ {"action":"type_text","target":"name field","text":"new name","expect":"input reflected"},
+ {"action":"tap","target":"save button","expect":"return to settings screen"},
+ {"action":"screenshot","expect":"changed name shown in profile section"}]
 ```
 
-**F006 보강** -- analyze_ui 접근성 트리 확인 추가:
+**F006 reinforcement** -- add an analyze_ui accessibility tree check:
 ```json
-[{"action":"analyze_ui","expect":"접근성 트리에 모든 요소 label 존재"},
- {"action":"analyze_ui","target":"편집 버튼","expect":"label: '프로필 편집'"},
- {"action":"analyze_ui","target":"테마 카드","expect":"label + hint 존재"},
- {"action":"voiceover_navigate","expect":"순차 탐색 시 모든 요소 읽힘"}]
+[{"action":"analyze_ui","expect":"label present on every element in accessibility tree"},
+ {"action":"analyze_ui","target":"edit button","expect":"label: 'Edit Profile'"},
+ {"action":"analyze_ui","target":"theme card","expect":"label + hint present"},
+ {"action":"voiceover_navigate","expect":"all elements read aloud during sequential navigation"}]
 ```
 
-**F007 보강** -- FoundationModels 인터랙션 + 코드 검증:
+**F007 reinforcement** -- FoundationModels interaction + code verification:
 ```json
-[{"action":"tap","target":"검색 바","expect":"키보드 활성화"},
- {"action":"type_text","text":"알림 끄기","expect":"알림 설정 항목 표시"},
- {"action":"tap","target":"검색 결과","expect":"해당 섹션으로 이동"},
- {"action":"type_text","text":"의미없는문자열","expect":"결과 없음 안내"},
+[{"action":"tap","target":"search bar","expect":"keyboard activated"},
+ {"action":"type_text","text":"turn off notifications","expect":"notification settings item shown"},
+ {"action":"tap","target":"search result","expect":"navigate to the relevant section"},
+ {"action":"type_text","text":"meaningless string","expect":"no-results notice"},
  {"action":"code_review","target":"SettingsSearchView.swift",
-  "expect":"SystemLanguageModel.default 가용성 체크 존재"}]
+  "expect":"SystemLanguageModel.default availability check present"}]
 ```
 
-자동 진행 -- Phase 2: BUILD로 이동.
+Auto-advance -- move to Phase 2: BUILD.
 
 ---
 
 ## Phase 2: BUILD (harness-builder)
 
-Builder가 priority 순서대로 10개 기능을 순차 구현합니다.
+The Builder implements the 10 features sequentially in priority order.
 
-### F001: SettingsView 기본 구조
+### F001: SettingsView base structure
 
 ```swift
 struct SettingsView: View {
@@ -148,19 +149,19 @@ struct SettingsView: View {
                     ThemeSectionView()
                 }.padding()
             }
-            .navigationTitle("설정")
-            .searchable(text: $searchText, prompt: "설정 검색")
+            .navigationTitle("Settings")
+            .searchable(text: $searchText, prompt: "Search settings")
         }
     }
 }
 ```
 
-빌드: 성공 | 커밋: `feat(F001): SettingsView 기본 구조`
+Build: success | Commit: `feat(F001): SettingsView base structure`
 
-### F002: Liquid Glass 적용
+### F002: Apply Liquid Glass
 
 ```swift
-// SettingsView body 수정 — GlassEffectContainer 래핑
+// SettingsView body modification — wrap in GlassEffectContainer
 ScrollView {
     GlassEffectContainer {
         VStack(spacing: 16) {
@@ -172,36 +173,36 @@ ScrollView {
 }
 ```
 
-빌드: 성공 | 프리뷰 확인 | 커밋: `feat(F002): glassEffect + GlassEffectContainer`
+Build: success | Preview confirmed | Commit: `feat(F002): glassEffect + GlassEffectContainer`
 
-### F003: 프로필 섹션
+### F003: Profile section
 
 ```swift
 struct ProfileSectionView: View {
-    @State private var userName = "사용자"
+    @State private var userName = "User"
     @State private var isEditing = false
     var body: some View {
         HStack {
             Image(systemName: "person.circle.fill")
                 .font(.system(size: 48)).foregroundStyle(.secondary)
-                .accessibilityLabel("프로필 사진")
+                .accessibilityLabel("Profile photo")
             VStack(alignment: .leading) {
                 Text(userName).font(.headline)
-                Text("프로필 편집").font(.caption).foregroundStyle(.secondary)
+                Text("Edit Profile").font(.caption).foregroundStyle(.secondary)
             }
             Spacer()
-            Button("편집") { isEditing = true }
+            Button("Edit") { isEditing = true }
                 .buttonStyle(.glass)
-                .accessibilityLabel("프로필 편집")
+                .accessibilityLabel("Edit Profile")
         }.padding()
         .sheet(isPresented: $isEditing) { ProfileEditView(userName: $userName) }
     }
 }
 ```
 
-빌드: 성공 | 커밋: `feat(F003): 프로필 섹션 -- Glass 버튼 + 편집 시트`
+Build: success | Commit: `feat(F003): profile section -- Glass button + edit sheet`
 
-### F004: 알림 설정
+### F004: Notification settings
 
 ```swift
 struct NotificationSectionView: View {
@@ -210,29 +211,29 @@ struct NotificationSectionView: View {
     @State private var badgeEnabled = false
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Label("알림 설정", systemImage: "bell.fill").font(.headline)
-            Toggle("푸시 알림", isOn: $pushEnabled)
-                .accessibilityValue(pushEnabled ? "켜짐" : "꺼짐")
-            Toggle("소리", isOn: $soundEnabled)
-            Toggle("배지", isOn: $badgeEnabled)
+            Label("Notification settings", systemImage: "bell.fill").font(.headline)
+            Toggle("Push notifications", isOn: $pushEnabled)
+                .accessibilityValue(pushEnabled ? "On" : "Off")
+            Toggle("Sound", isOn: $soundEnabled)
+            Toggle("Badge", isOn: $badgeEnabled)
         }.padding()
     }
 }
 ```
 
-빌드: 성공 | 커밋: `feat(F004): 알림 설정 -- Toggle 컨트롤`
+Build: success | Commit: `feat(F004): notification settings -- Toggle controls`
 
-### F005: 테마 선택
+### F005: Theme selection
 
 ```swift
 struct ThemeSectionView: View {
     @State private var selectedTheme = "system"
     @Namespace private var themeNamespace
-    let themes = [("system","자동","circle.lefthalf.filled"),
-                  ("light","라이트","sun.max.fill"),("dark","다크","moon.fill")]
+    let themes = [("system","Auto","circle.lefthalf.filled"),
+                  ("light","Light","sun.max.fill"),("dark","Dark","moon.fill")]
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Label("테마", systemImage: "paintpalette.fill").font(.headline)
+            Label("Theme", systemImage: "paintpalette.fill").font(.headline)
             HStack(spacing: 12) {
                 ForEach(themes, id: \.0) { id, name, icon in
                     Button {
@@ -251,11 +252,11 @@ struct ThemeSectionView: View {
 }
 ```
 
-빌드: 성공 | morphing 확인 | 커밋: `feat(F005): 테마 선택 -- Glass 카드 + morphing`
+Build: success | morphing confirmed | Commit: `feat(F005): theme selection -- Glass card + morphing`
 
-### F006-F010: 차별화 기능 (핵심 코드)
+### F006-F010: Differentiating features (core code)
 
-**F006: 접근성 VoiceOver** -- 전체 UI에 accessibilityLabel/Hint/Value 적용 + 유틸리티:
+**F006: Accessibility VoiceOver** -- apply accessibilityLabel/Hint/Value across the entire UI + utility:
 
 ```swift
 extension View {
@@ -263,12 +264,12 @@ extension View {
         self.accessibilityLabel(label).accessibilityHint(hint ?? "")
     }
 }
-// 모든 인터랙티브 요소에 적용, 섹션 헤더에 .isHeader trait 추가
+// applied to every interactive element, .isHeader trait added to section headers
 ```
 
-커밋: `feat(F006): VoiceOver 접근성 전체 적용`
+Commit: `feat(F006): VoiceOver accessibility applied throughout`
 
-**F007: FoundationModels 검색** -- ViewModel + 가용성 체크 + 폴백:
+**F007: FoundationModels search** -- ViewModel + availability check + fallback:
 
 ```swift
 @Observable class SettingsSearchViewModel {
@@ -276,21 +277,21 @@ extension View {
     func search(query: String) async {
         guard !query.isEmpty else { searchResults = []; return }
         guard SystemLanguageModel.default.isAvailable else {
-            searchResults = allSettings.filter { /* 키워드 폴백 */ }; return
+            searchResults = allSettings.filter { /* keyword fallback */ }; return
         }
         do {
             let session = LanguageModelSession()
-            // TODO: FoundationModels 실제 호출 로직
-        } catch { /* 에러 처리 */ }
+            // TODO: actual FoundationModels call logic
+        } catch { /* error handling */ }
     }
 }
 ```
 
-> Builder가 호출부를 TODO로 남김. Phase 3에서 탐지 예정.
+> The Builder left the call site as a TODO. To be detected in Phase 3.
 
-커밋: `feat(F007): FoundationModels 검색 -- UI + ViewModel 스텁`
+Commit: `feat(F007): FoundationModels search -- UI + ViewModel stub`
 
-**F008: haptic feedback** -- HapticManager + onChange/action 연결:
+**F008: haptic feedback** -- HapticManager + onChange/action wiring:
 
 ```swift
 enum HapticManager {
@@ -298,25 +299,25 @@ enum HapticManager {
         let g = UIImpactFeedbackGenerator(style: style); g.prepare(); g.impactOccurred()
     }
 }
-// Toggle.onChange, Button.action에서 HapticManager.impact() 호출
+// call HapticManager.impact() in Toggle.onChange and Button.action
 ```
 
-커밋: `feat(F008): haptic feedback`
+Commit: `feat(F008): haptic feedback`
 
-**F009: 다크모드 전환** -- preferredColorScheme + easeInOut 애니메이션:
+**F009: Dark mode transition** -- preferredColorScheme + easeInOut animation:
 
 ```swift
 @State private var colorSchemeOverride: ColorScheme? = nil
-// 테마 선택 시:
+// on theme selection:
 withAnimation(.easeInOut(duration: 0.5)) {
     colorSchemeOverride = id == "dark" ? .dark : id == "light" ? .light : nil
 }
 // SettingsView: .preferredColorScheme(colorSchemeOverride)
 ```
 
-커밋: `feat(F009): 다크모드 전환 애니메이션`
+Commit: `feat(F009): dark mode transition animation`
 
-**F010: 에러 상태** -- ErrorStateView + Glass 효과 + 재시도:
+**F010: Error state** -- ErrorStateView + Glass effect + retry:
 
 ```swift
 struct ErrorStateView: View {
@@ -324,17 +325,17 @@ struct ErrorStateView: View {
     var body: some View {
         VStack(spacing: 16) {
             Image(systemName: "exclamationmark.triangle.fill").font(.system(size: 48))
-            Text("문제가 발생했어요").font(.headline)
+            Text("Something went wrong").font(.headline)
             Text(message).font(.subheadline).foregroundStyle(.secondary)
-            Button("다시 시도", action: retryAction).buttonStyle(.glass)
+            Button("Try again", action: retryAction).buttonStyle(.glass)
         }.padding().glassEffect(in: .rect(cornerRadius: 16))
     }
 }
 ```
 
-커밋: `feat(F010): 에러 상태 처리 -- ErrorStateView`
+Commit: `feat(F010): error-state handling -- ErrorStateView`
 
-### 시뮬레이터 배포
+### Simulator Deployment
 
 ```
 baepsae install_app --udid "UDID" --app-path "build/Debug-iphonesimulator/LiquidSettings.app"
@@ -345,209 +346,210 @@ baepsae launch_app --udid "UDID" --bundle-id "com.example.LiquidSettings"
 
 ## Phase 3: EVALUATE (harness-evaluator)
 
-**이 섹션이 가장 중요합니다.** 4축 다차원 평가를 상세히 시연합니다.
+**This section is the most important.** It demonstrates 4-axis multi-dimensional evaluation in detail.
 
-### Step 0: 도구 탐지 + 참조 문서
+### Step 0: Tool Detection + Reference Docs
 
 ```
-mcp-baepsae: 탐지 성공 -> RUNTIME_TOOL = "baepsae"
-axe-simulator: 탐지 성공 (보조)
-Xcode MCP: BuildProject, RenderPreview 사용 가능
-Read: common-mistakes.md -> FoundationModels 가용성 체크 필수
-Read: harness-design-principles.md -> 4축 평가 가중치
+mcp-baepsae: detection succeeded -> RUNTIME_TOOL = "baepsae"
+axe-simulator: detection succeeded (auxiliary)
+Xcode MCP: BuildProject, RenderPreview available
+Read: common-mistakes.md -> FoundationModels availability check required
+Read: harness-design-principles.md -> 4-axis evaluation weights
 ```
 
-### 4축 평가 기준
+### 4-Axis Evaluation Criteria
 
-| 축 | 가중치 | 설명 |
+| Axis | Weight | Description |
 |----|--------|------|
-| 기능 완성도 | 35% | 핵심 기능이 의도대로 동작하는가 |
-| 코드 품질 | 25% | Best Practices, 안티패턴 부재 |
-| UI 품질 | 25% | 레이아웃, 색상, 타이포, 다크모드 |
-| 인터랙션 | 15% | 터치 반응, 전환, 접근성 |
+| Functional completeness | 35% | Does the core functionality behave as intended |
+| Code quality | 25% | Best Practices, absence of anti-patterns |
+| UI quality | 25% | Layout, color, typography, dark mode |
+| Interaction | 15% | Touch response, transitions, accessibility |
 
 ---
 
-### F001: SettingsView -- 상세 평가
+### F001: SettingsView -- detailed evaluation
 
-| 축 | 점수 | 근거 |
+| Axis | Score | Rationale |
 |----|------|------|
-| 기능 완성도 | 9/10 | NavigationStack + ScrollView 정상. 3개 섹션 모두 표시 |
-| 코드 품질 | 9/10 | @State private var 일관. MVVM 준수 |
-| UI 품질 | 8/10 | 레이아웃 정상이나 다크모드 대비 미검증 |
-| 인터랙션 | 8/10 | 스크롤 정상. 각 섹션 탭 반응 |
+| Functional completeness | 9/10 | NavigationStack + ScrollView correct. All 3 sections shown |
+| Code quality | 9/10 | @State private var consistent. MVVM compliant |
+| UI quality | 8/10 | Layout correct but dark-mode contrast unverified |
+| Interaction | 8/10 | Scroll correct. Each section taps respond |
 
-가중 평균: (9x0.3)+(9x0.2)+(8x0.3)+(8x0.2) = **8.5 -> PASS**
+Weighted average: (9x0.3)+(9x0.2)+(8x0.3)+(8x0.2) = **8.5 -> PASS**
 
-baepsae: launch_app 성공, screenshot -> 3개 섹션 + "설정" 타이틀 확인
+baepsae: launch_app success, screenshot -> 3 sections + "Settings" title confirmed
 
 ---
 
-### F005: 테마 선택 -- 상세 평가
+### F005: Theme selection -- detailed evaluation
 
-| 축 | 점수 | 근거 |
+| Axis | Score | Rationale |
 |----|------|------|
-| 기능 완성도 | 7/10 | morphing 동작하나 선택 피드백이 약함 |
-| 코드 품질 | 8/10 | @Namespace 올바르게 사용 |
-| UI 품질 | 6/10 | **접근성 label 누락** -- analyze_ui로 탐지 |
-| 인터랙션 | 7/10 | 탭 선택 가능하나 현재 선택 시각적 구분 약함 |
+| Functional completeness | 7/10 | morphing works but selection feedback is weak |
+| Code quality | 8/10 | @Namespace used correctly |
+| UI quality | 6/10 | **accessibility label missing** -- detected via analyze_ui |
+| Interaction | 7/10 | Tap selection works but visual distinction of current selection is weak |
 
-가중 평균: (7x0.3)+(8x0.2)+(6x0.3)+(7x0.2) = **6.9 -> PARTIAL**
+Weighted average: (7x0.3)+(8x0.2)+(6x0.3)+(7x0.2) = **6.9 -> PARTIAL**
 
-baepsae: `analyze_ui -> 카드 접근성 트리: "button"(label 없음) x 3`
+baepsae: `analyze_ui -> card accessibility tree: "button"(no label) x 3`
 
-개선 권고: `.accessibilityLabel("\(name) 테마")` + `.accessibilityValue` 추가.
-선택 카드에 border overlay로 시각적 강조 추가.
+Improvement recommendation: add `.accessibilityLabel("\(name) theme")` + `.accessibilityValue`.
+Add a border overlay on the selected card for visual emphasis.
 
 ---
 
-### F007: FoundationModels 검색 -- 상세 평가 (FAIL)
+### F007: FoundationModels search -- detailed evaluation (FAIL)
 
-| 축 | 점수 | 근거 |
+| Axis | Score | Rationale |
 |----|------|------|
-| 기능 완성도 | 4/10 | **핵심 검색 로직 TODO** -- import만 있고 실제 호출 미구현 |
-| 코드 품질 | 3/10 | common-mistakes.md "가용성 체크" 준수. do-catch 내부 빈 상태 |
-| UI 품질 | 5/10 | 검색 바 UI 존재하나 결과 화면 없음 |
-| 인터랙션 | 2/10 | 검색 입력 후 반응 없음 -- verification_steps 전체 실패 |
+| Functional completeness | 4/10 | **core search logic is TODO** -- only the import exists, actual call unimplemented |
+| Code quality | 3/10 | common-mistakes.md "availability check" complied with. Empty body inside do-catch |
+| UI quality | 5/10 | Search bar UI exists but no results screen |
+| Interaction | 2/10 | No response after search input -- all verification_steps fail |
 
-가중 평균: (4x0.3)+(3x0.2)+(5x0.3)+(2x0.2) = **3.7 -> FAIL**
+Weighted average: (4x0.3)+(3x0.2)+(5x0.3)+(2x0.2) = **3.7 -> FAIL**
 
-baepsae 검증:
+baepsae verification:
 ```
-tap "검색 바" -> 키보드 활성화 성공
-type_text "알림 끄기" -> 입력 성공, 결과 영역 비어 있음 (FAIL)
-tap "검색 결과 항목" -> 탭 대상 없음 (FAIL)
-코드: SettingsSearchView.swift:28 -> "// TODO: FoundationModels 실제 호출 로직"
+tap "search bar" -> keyboard activation succeeded
+type_text "turn off notifications" -> input succeeded, results area empty (FAIL)
+tap "search result item" -> no tap target (FAIL)
+code: SettingsSearchView.swift:28 -> "// TODO: actual FoundationModels call logic"
 ```
 
-수정 지침:
-> 1. `SettingsSearchView.swift:28` -- TODO 제거, `session.respond(to:)` 구현
-> 2. references/foundation-models.md "Generating Text" 섹션 참조
-> 3. `SettingsSearchResultsView` 신규 작성 -- 결과 리스트 + 섹션 이동
-> 4. 폴백 경로(키워드 검색)도 동일 UI에 연결
+Fix instructions:
+> 1. `SettingsSearchView.swift:28` -- remove TODO, implement `session.respond(to:)`
+> 2. Refer to references/foundation-models.md "Generating Text" section
+> 3. Write new `SettingsSearchResultsView` -- results list + section navigation
+> 4. Wire the fallback path (keyword search) into the same UI
 
 ---
 
-### 나머지 기능 요약
+### Summary of Remaining Features
 
-| ID | 기능 | 기능완성 | 코드품질 | UI품질 | 인터랙션 | 가중평균 | 판정 |
+| ID | Feature | Func.compl. | Code qual. | UI qual. | Interaction | Weighted avg | Verdict |
 |----|------|---------|---------|--------|---------|---------|------|
 | F002 | glassEffect + Container | 9 | 9 | 9 | 8 | 8.8 | PASS |
-| F003 | 프로필 섹션 | 8 | 8 | 8 | 8 | 8.0 | PASS |
-| F004 | 알림 설정 | 9 | 8 | 8 | 9 | 8.5 | PASS |
-| F006 | 접근성 VoiceOver | 8 | 9 | 7 | 8 | 7.9 | PASS |
+| F003 | Profile section | 8 | 8 | 8 | 8 | 8.0 | PASS |
+| F004 | Notification settings | 9 | 8 | 8 | 9 | 8.5 | PASS |
+| F006 | Accessibility VoiceOver | 8 | 9 | 7 | 8 | 7.9 | PASS |
 | F008 | haptic feedback | 8 | 9 | N/A | 8 | 8.2 | PASS |
-| F009 | 다크모드 전환 | 8 | 7 | 8 | 8 | 7.8 | PASS |
-| F010 | 에러 상태 처리 | 8 | 8 | 8 | 7 | 7.8 | PASS |
+| F009 | Dark mode transition | 8 | 7 | 8 | 8 | 7.8 | PASS |
+| F010 | Error state handling | 8 | 8 | 8 | 7 | 7.8 | PASS |
 
-### {HARNESS_DIR}/evaluation-round-1.md 생성
+### Create {HARNESS_DIR}/evaluation-round-1.md
 
 ```markdown
 # Evaluation Round 1
 
-## 메타 정보
-- 검증 도구: mcp-baepsae | 시뮬레이터: iPhone 16 Pro
-- 참조: harness-design-principles.md, common-mistakes.md
+## Meta Info
+- Verification tool: mcp-baepsae | Simulator: iPhone 16 Pro
+- References: harness-design-principles.md, common-mistakes.md
 
-## 결과 요약
-| ID | 가중평균 | 판정 | 비고 |
+## Result Summary
+| ID | Weighted avg | Verdict | Notes |
 |----|---------|------|------|
 | F001 | 8.5 | PASS | |
 | F002 | 8.8 | PASS | |
 | F003 | 8.0 | PASS | |
 | F004 | 8.5 | PASS | |
-| F005 | 6.9 | PARTIAL | 접근성 label 누락, 시각적 구분 약함 |
+| F005 | 6.9 | PARTIAL | accessibility label missing, visual distinction weak |
 | F006 | 7.9 | PASS | |
-| F007 | 3.7 | FAIL | 핵심 로직 TODO |
+| F007 | 3.7 | FAIL | core logic TODO |
 | F008 | 8.2 | PASS | |
 | F009 | 7.8 | PASS | |
 | F010 | 7.8 | PASS | |
 
-## F007 수정 지침
-SettingsSearchView.swift:28 -- session.respond(to:) 구현.
-references/foundation-models.md "Generating Text" + "Availability Check" 참조.
+## F007 Fix Instructions
+SettingsSearchView.swift:28 -- implement session.respond(to:).
+Refer to references/foundation-models.md "Generating Text" + "Availability Check".
 
-## 종합: 8 PASS + 1 PARTIAL + 1 FAIL = 80% -> PASS
+## Overall: 8 PASS + 1 PARTIAL + 1 FAIL = 80% -> PASS
 ```
 
-### 종합 결과
+### Overall Result
 
-| 구분 | 수량 | 기능 ID |
+| Category | Count | Feature IDs |
 |------|------|---------|
-| PASS | 8개 | F001, F002, F003, F004, F006, F008, F009, F010 |
-| PARTIAL | 1개 | F005 |
-| FAIL | 1개 | F007 |
+| PASS | 8 | F001, F002, F003, F004, F006, F008, F009, F010 |
+| PARTIAL | 1 | F005 |
+| FAIL | 1 | F007 |
 
-**통과율**: 80% (임계값 충족) -- **판정: PASS**
+**Pass rate**: 80% (threshold met) -- **Verdict: PASS**
 
 ---
 
-## 완료 보고
+## Completion Report
 
 ```
-apple-craft harness 완료
+apple-craft harness complete
 
-기능 수: 10개
-라운드: 1/3 (첫 라운드에서 통과)
-PASS: 8개, PARTIAL: 1개, FAIL: 1개
-변경 파일: 8개 (SettingsView, ProfileSection, NotificationSection, ThemeSection,
+Feature count: 10
+Rounds: 1/3 (passed on the first round)
+PASS: 8, PARTIAL: 1, FAIL: 1
+Changed files: 8 (SettingsView, ProfileSection, NotificationSection, ThemeSection,
   AccessibilityModifiers, SettingsSearchView, HapticManager, ErrorStateView)
-커밋 수: 10개
-참조 문서: liquid-glass-swiftui.md, foundation-models.md,
+Commit count: 10
+Reference docs: liquid-glass-swiftui.md, foundation-models.md,
   harness-design-principles.md, common-mistakes.md
-검증 도구: mcp-baepsae (런타임), axe-simulator (접근성)
+Verification tools: mcp-baepsae (runtime), axe-simulator (accessibility)
 
-Git 히스토리:
-  feat(F001): SettingsView 기본 구조
+Git history:
+  feat(F001): SettingsView base structure
   feat(F002): glassEffect + GlassEffectContainer
-  feat(F003): 프로필 섹션 -- Glass 버튼 + 편집 시트
-  feat(F004): 알림 설정 -- Toggle 컨트롤
-  feat(F005): 테마 선택 -- Glass 카드 + morphing
-  feat(F006): VoiceOver 접근성 전체 적용
-  feat(F007): FoundationModels 검색 -- UI + ViewModel 스텁
+  feat(F003): profile section -- Glass button + edit sheet
+  feat(F004): notification settings -- Toggle controls
+  feat(F005): theme selection -- Glass card + morphing
+  feat(F006): VoiceOver accessibility applied throughout
+  feat(F007): FoundationModels search -- UI + ViewModel stub
   feat(F008): haptic feedback
-  feat(F009): 다크모드 전환 애니메이션
-  feat(F010): 에러 상태 처리
+  feat(F009): dark mode transition animation
+  feat(F010): error-state handling
 ```
 
 ---
 
-## 핵심 포인트
+## Key Points
 
-### 1. Planner가 질문으로 맥락 수집 -- 이후 자율 진행의 기반
+### 1. The Planner gathers context via questions -- the foundation for subsequent autonomous progress
 
-4개의 AskUserQuestion으로 대상 사용자, 아키텍처, 차별화 요구, 테스트 환경을 수집.
-이 정보가 {HARNESS_DIR}/harness-spec.md "사용자 맥락" 섹션에 기록되어 Phase 1.5 -> 3 전체 과정의
-의사결정 기반이 됩니다. 사용자는 Phase 1 확인 후 완료까지 개입 불필요.
+4 AskUserQuestions gather the target user, architecture, differentiating requirements, and test environment.
+This information is recorded in the "User Context" section of {HARNESS_DIR}/harness-spec.md and becomes
+the decision-making basis across the entire Phase 1.5 -> 3 process. The user needs no intervention from
+Phase 1 confirmation through completion.
 
-### 2. Evaluator가 검증 기준을 사전 리뷰 (Phase 1.5)
+### 2. The Evaluator pre-reviews the verification criteria (Phase 1.5)
 
-VERIFICATION_REVIEW 모드에서 Planner의 verification_steps를 보강.
-F003의 "편집 -> 저장 -> 반영", F006의 "analyze_ui 접근성 트리", F007의
-"FoundationModels 가용성 체크 코드 확인"이 추가됨. Builder 코드 작성 전에
-검증 기준이 확립되어 평가의 공정성과 깊이가 보장됩니다.
+In VERIFICATION_REVIEW mode it reinforces the Planner's verification_steps.
+F003's "edit -> save -> reflect", F006's "analyze_ui accessibility tree", and F007's
+"FoundationModels availability-check code verification" were added. Before the Builder writes code,
+the verification criteria are established, ensuring the fairness and depth of evaluation.
 
-### 3. 10개 기능으로 야심찬 범위 (기본 5 + 차별화 3 + 품질 2)
+### 3. Ambitious scope with 10 features (5 core + 3 differentiating + 2 quality)
 
-기존 5개에 차별화 3개(접근성, AI 검색, haptic) + 품질 2개(다크모드, 에러)를 추가.
-사용자 맥락에서 추출한 요구가 F006, F007로 구체화. under-scope 방지가
-Planner의 핵심 가치.
+Added 3 differentiating (accessibility, AI search, haptic) + 2 quality (dark mode, error) to the original 5.
+Requirements extracted from user context were concretized as F006, F007. Preventing under-scope is
+the Planner's core value.
 
-### 4. baepsae로 실제 인터랙션 테스트 -- TODO를 런타임에서 탐지
+### 4. Real interaction testing with baepsae -- detecting TODOs at runtime
 
-mcp-baepsae로 시뮬레이터에서 앱을 조작. F007에 "알림 끄기" 입력 후 결과 미표시를
-런타임에서 탐지. 정적 분석만으로는 "빌드 성공"으로 PASS했을 F007이 인터랙션
-테스트 덕분에 FAIL로 정확 판정. Generator-Evaluator 분리 + 런타임 검증의 핵심 가치.
+Operate the app on the simulator with mcp-baepsae. After entering "turn off notifications" in F007, the missing result
+was detected at runtime. F007, which static analysis alone would have PASSed as "build success", was
+accurately judged FAIL thanks to interaction testing. The core value of Generator-Evaluator separation + runtime verification.
 
-### 5. 4축 다차원 평가 -- "빌드 성공"이 아닌 "얼마나 잘 만들었나"
+### 5. 4-axis multi-dimensional evaluation -- not "build success" but "how well it was made"
 
-기능 완성도, 코드 품질, UI 품질, 인터랙션 4축 평가. F005는 기능 완성도 7점이지만
-UI 품질 6점(접근성 label 누락)으로 PARTIAL. harness-design-principles.md의
-Design Quality/Originality/Craft/Functionality를 적용한 결과. "빌드 성공"만으로는
-잡을 수 없는 품질 문제를 구조적으로 탐지.
+Evaluation across 4 axes: functional completeness, code quality, UI quality, interaction. F005 scored 7 in functional completeness but
+6 in UI quality (missing accessibility label), resulting in PARTIAL. The result of applying
+harness-design-principles.md's Design Quality/Originality/Craft/Functionality. It structurally detects quality issues
+that "build success" alone cannot catch.
 
-### 6. {HARNESS_DIR}/evaluation-round-1.md로 구체적 수정 지침
+### 6. Concrete fix instructions via {HARNESS_DIR}/evaluation-round-1.md
 
-단순 점수가 아닌 파일명, 라인 번호, 참조 문서까지 명시하는 수정 지침 제공.
-Builder가 다음 라운드에서 추가 조사 없이 바로 수정 착수 가능. Anthropic 사례의
-"Evaluator 발견은 추가 조사 없이 조치 가능할 만큼 구체적" 원칙을 구현.
+Provides fix instructions that specify not just a score but file name, line number, and reference docs.
+The Builder can immediately begin fixes in the next round without additional investigation. It implements the
+"Evaluator findings are concrete enough to act on without additional investigation" principle from the Anthropic case.

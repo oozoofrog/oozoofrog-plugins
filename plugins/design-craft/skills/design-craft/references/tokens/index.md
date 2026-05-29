@@ -1,6 +1,6 @@
-# 토큰 검색 인덱스
+# Token Search Index
 
-알파벳/가나다 순 토큰명 인덱스. 각 토큰의 정의는 unified-tokens.md를 참조한다.
+Alphabetically ordered token-name index. For each token's definition, see unified-tokens.md.
 
 ## A
 
@@ -180,11 +180,11 @@
 
 - whitespace-ratio -- Layout & Spacing -- Ive, Brockmann, Rand
 
-## 출처별 토큰 수
+## Token count by source
 
-| 출처 | 토큰 수 | 주요 카테고리 |
+| Source | Token count | Main categories |
 |------|--------|-------------|
-| Jony Ive | 28 | 전 카테고리 |
+| Jony Ive | 28 | All categories |
 | Alan Dye | 14 | Layout, Typography, Color, Motion |
 | Dieter Rams | 15 | Layout, Color, Shape, Motion |
 | Don Norman | 12 | Layout, Typography, Motion |

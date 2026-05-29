@@ -1,14 +1,14 @@
-# Markdown 출력 템플릿
+# Markdown Output Template
 
-yoda의 마크다운 출력 형식을 정의하는 템플릿. Review 모드와 Share 모드(md 포맷) 두 가지 출력 구조를 포함한다.
+Template defining yoda's markdown output format. Includes two output structures: Review mode and Share mode (md format).
 
 ---
 
-## Review 모드 출력 템플릿
+## Review Mode Output Template
 
-3계층 점진적 공개(Progressive Disclosure) 구조. 독자의 시간 예산에 따라 Layer 1만 읽거나, Layer 3까지 깊이 읽을 수 있다.
+3-layer Progressive Disclosure structure. Depending on the reader's time budget, they can read only Layer 1 or read deeply down to Layer 3.
 
-### 전체 구조
+### Overall Structure
 
 ````markdown
 # 코드 리뷰: `{대상 타입/파일명}`
@@ -118,11 +118,11 @@ flowchart LR
 
 ---
 
-## Share 모드 (md 포맷) 출력 템플릿
+## Share Mode (md format) Output Template
 
-교육/공유 목적의 마크다운 문서.
+Markdown document for educational/sharing purposes.
 
-### 전체 구조
+### Overall Structure
 
 ````markdown
 # {주제 제목}

@@ -1,40 +1,40 @@
-# PPTX 출력 템플릿
+# PPTX Output Template
 
-yoda share 모드의 `--format pptx` 출력을 위한 PowerPoint 구조 템플릿. `pptx` 스킬이 설치되어 있으면 위임하고, 없으면 Marp 슬라이드 + 별도 발표자 노트 마크다운으로 fallback한다.
-
----
-
-## 구조
-
-slides 포맷의 15장 구조를 동일하게 적용하되, 각 슬라이드에 **발표자 노트**를 추가한다.
-
-### Mayer 양식 원칙 (Modality Principle)
-
-| 슬라이드 본문 (시각) | 발표자 노트 (청각) |
-|---------------------|-------------------|
-| 키워드, 다이어그램, 코드 | 상세 설명, 전환 멘트, 보충 설명 |
-| 텍스트 최소화 (3줄 이하) | 구두 전달 내용 전체 |
-| 청중이 **보는** 것 | 발표자가 **말하는** 것 |
-
-### 슬라이드별 발표자 노트 가이드
-
-| # | 슬라이드 | 본문 | 발표자 노트 |
-|---|---------|------|------------|
-| 1 | Hook | 도발적 질문 한 줄 | 인사말, 배경, "발표 끝에 답할 수 있을 겁니다" |
-| 2 | Context #1 | 상황 불릿 3개 | 상세 배경, "비슷한 경험 있으실 텐데요" |
-| 3 | Context #2 | 문제 코드 3-5줄 | 코드 맥락, "잘 동작하는 것처럼 보이죠?" |
-| 4-6 | Mental Model | 개념 + 다이어그램 | 일상 비유, 개념 연결, 통합 설명 |
-| 7-8 | Before | 문제 코드 + 문제점 | ⚠️ 의미 설명, 프로덕션 영향 |
-| 9 | Why | 원칙명 + 영향 수치 | Why를 구어체로, "아하" 유도 |
-| 10 | After | 수정 코드 + ✅ | Before 대비 변경 포인트, 트레이드오프 |
-| 11 | Aha Insight | 통찰 한 문장 | 부연, 개인/팀 경험 연결 |
-| 12-13 | Generalization | 적용 범위 + 원칙 | 구체 사례, CTA 전환 멘트 |
-| 14 | CTA | 액션 아이템 3개 | 실행 방법, Hook 질문 답변 |
-| 15 | Resources | 참고 링크 + 질문 | 마무리, 추천 자료 강조 |
+PowerPoint structure template for the `--format pptx` output of yoda share mode. Delegate to the `pptx` skill if installed; otherwise fall back to Marp slides + a separate presenter-notes markdown.
 
 ---
 
-## 저장 경로
+## Structure
+
+Apply the same 15-slide structure as the slides format, but add **presenter notes** to each slide.
+
+### Mayer's Principle (Modality Principle)
+
+| Slide body (visual) | Presenter notes (auditory) |
+|---------------------|----------------------------|
+| Keywords, diagrams, code | Detailed explanation, transition lines, supplementary notes |
+| Minimal text (3 lines or fewer) | Full spoken content |
+| What the audience **sees** | What the presenter **says** |
+
+### Per-slide presenter note guide
+
+| # | Slide | Body | Presenter notes |
+|---|-------|------|-----------------|
+| 1 | Hook | One provocative question | Greeting, background, "발표 끝에 답할 수 있을 겁니다" |
+| 2 | Context #1 | 3 situation bullets | Detailed background, "비슷한 경험 있으실 텐데요" |
+| 3 | Context #2 | 3-5 lines of problem code | Code context, "잘 동작하는 것처럼 보이죠?" |
+| 4-6 | Mental Model | Concept + diagram | Everyday analogy, concept linkage, integrated explanation |
+| 7-8 | Before | Problem code + issues | ⚠️ meaning, production impact |
+| 9 | Why | Principle name + impact figures | State the Why colloquially, induce the "아하" moment |
+| 10 | After | Fixed code + ✅ | Change points vs Before, trade-offs |
+| 11 | Aha Insight | One insight sentence | Elaboration, link to personal/team experience |
+| 12-13 | Generalization | Scope of application + principle | Concrete cases, CTA transition line |
+| 14 | CTA | 3 action items | How to execute, answer to the Hook question |
+| 15 | Resources | Reference links + questions | Wrap-up, emphasize recommended materials |
+
+---
+
+## Save path
 
 ```
 docs/yoda/YYYY-MM-DD-{slug}.pptx

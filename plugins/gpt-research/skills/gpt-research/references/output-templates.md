@@ -1,8 +1,8 @@
-# GPT-PRO Research Prompt 출력 템플릿
+# GPT-PRO Research Prompt Output Templates
 
-## 공통 헤더
+## Common Header
 
-모든 모드에서 프롬프트는 다음 헤더로 시작합니다:
+In every mode the prompt starts with this header:
 
 ```
 # GPT-PRO Research Request
@@ -14,9 +14,9 @@
 
 ---
 
-## Role 섹션 — 모드별 템플릿
+## Role Section — Per-mode Templates
 
-### module 모드
+### module mode
 
 ```
 ## Role
@@ -25,7 +25,7 @@
 요청된 리서치 질문에 답해주세요.
 ```
 
-### arch 모드
+### arch mode
 
 ```
 ## Role
@@ -34,7 +34,7 @@
 프로젝트의 아키텍처를 분석하고 요청된 리서치 질문에 답해주세요.
 ```
 
-### issue 모드
+### issue mode
 
 ```
 ## Role
@@ -43,7 +43,7 @@
 문제의 근본 원인을 파악하고 해결 방안을 제시해주세요.
 ```
 
-### custom 모드
+### custom mode
 
 ```
 ## Role
@@ -52,9 +52,9 @@
 
 ---
 
-## Context 섹션 포맷
+## Context Section Format
 
-각 파일은 파일 경로 헤더와 코드 블록으로 구성합니다:
+Each file consists of a file-path header plus a code block:
 
 ```
 ## Context
@@ -86,7 +86,7 @@
 \```
 ```
 
-**arch 모드의 Context에는 추가 하위 섹션:**
+**arch mode adds these Context subsections:**
 
 ```
 ### 디렉토리 구조
@@ -108,7 +108,7 @@
 {Makefile, Tuist 등의 내용}
 ```
 
-**issue 모드의 Context에는 추가 하위 섹션:**
+**issue mode adds these Context subsections:**
 
 ```
 ### 에러 정보
@@ -129,7 +129,7 @@
 
 ---
 
-## Research Request 섹션
+## Research Request Section
 
 ```
 ## Research Request
@@ -141,9 +141,9 @@
 - {특별히 주의할 점}
 ```
 
-사용자가 명시적 질문을 제공하지 않은 경우, 모드별 기본 질문을 사용합니다:
+When the user provides no explicit question, use the per-mode default question:
 
-| 모드 | 기본 리서치 질문 |
+| Mode | Default research question |
 |------|-----------------|
 | module | "이 모듈의 설계를 분석하고 개선점을 제안해주세요. 특히 책임 분리, 의존성 관리, 테스트 용이성 측면에서 검토해주세요." |
 | arch | "이 프로젝트의 아키텍처를 분석하고 강점과 개선 기회를 식별해주세요. 확장성, 유지보수성, 관심사 분리 측면에서 평가해주세요." |
@@ -152,13 +152,13 @@
 
 ---
 
-## Expected Output 섹션
+## Expected Output Section
 
-GPT-PRO의 응답은 Claude Code에 붙여넣어 바로 활용할 수 있도록 **공통 응답 envelope** + **모드별 본문**으로 구성합니다.
+GPT-PRO's response is structured as a **common response envelope** + **per-mode body** so it can be pasted straight into Claude Code for immediate use.
 
-### 공통 응답 envelope
+### Common response envelope
 
-모든 모드에서 GPT-PRO에게 다음 응답 구조를 요청합니다:
+In every mode, ask GPT-PRO for the following response structure:
 
 ```
 ## Expected Output
@@ -208,9 +208,9 @@ GPT-PRO의 응답은 Claude Code에 붙여넣어 바로 활용할 수 있도록 
 ---
 ```
 
-### 필드 규칙
+### Field rules
 
-| 필드 | 필수 | 설명 |
+| Field | Required | Description |
 |------|------|------|
 | Summary | O | 3줄 이내 핵심 요약 |
 | Findings | O | 모드별 분석 본문 (아래 참조) |
@@ -218,19 +218,19 @@ GPT-PRO의 응답은 Claude Code에 붙여넣어 바로 활용할 수 있도록 
 | Action Items | O | 최소 1개. 우선순위 P0~P2로 분류 |
 | References | △ | 외부 참고 자료가 있을 때만 |
 
-### 우선순위 정의
+### Priority definitions
 
-| 레벨 | 의미 | 예시 |
+| Level | Meaning | Examples |
 |------|------|------|
-| **P0-Critical** | 즉시 수정 필요 (크래시, 보안, 데이터 손실) | 메모리 릭, SQL 인젝션, 무한 루프 |
-| **P1-Important** | 가까운 시일 내 수정 권장 (품질, 성능, 유지보수성) | 중복 코드, 느린 쿼리, 잘못된 추상화 |
-| **P2-Suggestion** | 개선하면 좋은 사항 (스타일, 가독성, 미래 대비) | 네이밍, 문서화, 테스트 추가 |
+| **P0-Critical** | Fix immediately (crash, security, data loss) | 메모리 릭, SQL 인젝션, 무한 루프 |
+| **P1-Important** | Recommend fixing soon (quality, performance, maintainability) | 중복 코드, 느린 쿼리, 잘못된 추상화 |
+| **P2-Suggestion** | Nice to improve (style, readability, future-proofing) | 네이밍, 문서화, 테스트 추가 |
 
 ---
 
-### 모드별 Findings 본문 템플릿
+### Per-mode Findings body templates
 
-#### module 모드
+#### module mode
 
 ```
 ## Findings
@@ -259,7 +259,7 @@ GPT-PRO의 응답은 Claude Code에 붙여넣어 바로 활용할 수 있도록 
 - {잠재적 문제나 기술 부채. 없으면 "특이사항 없음"}
 ```
 
-#### arch 모드
+#### arch mode
 
 ```
 ## Findings
@@ -295,7 +295,7 @@ UI → ViewModel → Repository → Network
 {향후 성장에 대한 준비 상태. 병목 지점이 있다면 명시}
 ```
 
-#### issue 모드
+#### issue mode
 
 ```
 ## Findings
@@ -319,7 +319,7 @@ UI → ViewModel → Repository → Network
 - {추가할 테스트 케이스 설명}
 ```
 
-#### custom 모드
+#### custom mode
 
 ```
 ## Findings
@@ -329,11 +329,11 @@ UI → ViewModel → Repository → Network
 
 ---
 
-## 청킹 시 헤더 템플릿
+## Chunking Header Templates
 
-컨텍스트가 200K 문자를 초과하여 여러 프롬프트로 분할할 때:
+When the context exceeds 200K characters and is split across multiple prompts:
 
-### 첫 번째 청크
+### First chunk
 
 ```
 # GPT-PRO Research Request (Part 1/{총 파트 수})
@@ -350,7 +350,7 @@ UI → ViewModel → Repository → Network
 > ▶ 다음 파트를 붙여넣어 주세요.
 ```
 
-### 중간 청크
+### Middle chunk
 
 ```
 # GPT-PRO Research Request (Part {N}/{총 파트 수})
@@ -363,7 +363,7 @@ UI → ViewModel → Repository → Network
 > ▶ 다음 파트를 붙여넣어 주세요.
 ```
 
-### 마지막 청크
+### Last chunk
 
 ```
 # GPT-PRO Research Request (Part {N}/{총 파트 수} — Final)

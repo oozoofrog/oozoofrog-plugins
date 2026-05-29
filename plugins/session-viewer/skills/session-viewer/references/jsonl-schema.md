@@ -1,10 +1,10 @@
 # Claude Code Session JSONL Schema
 
-이 문서는 Claude Code가 `~/.claude/projects/<encoded-cwd>/<session-uuid>.jsonl`에 기록하는 JSONL 라인의 종류와 필드를 정리한다. 스킬의 파서(`src/src/main.rs`의 `extract_user_text`, `load_messages`)가 이 스키마를 따른다.
+This document catalogs the types and fields of the JSONL lines that Claude Code writes to `~/.claude/projects/<encoded-cwd>/<session-uuid>.jsonl`. The skill's parser (`extract_user_text`, `load_messages` in `src/src/main.rs`) follows this schema.
 
-## 디렉토리 인코딩
+## Directory Encoding
 
-세션 디렉토리 이름은 cwd를 다음 규칙으로 인코딩한 것이다:
+The session directory name is the cwd encoded with the following rule:
 
 ```
 replace each '/' or '.' with '-'
@@ -16,17 +16,17 @@ replace each '/' or '.' with '-'
 | `/Volumes/eyedisk/develop/kakao-talk` | `-Volumes-eyedisk-develop-kakao-talk` |
 | `/Users/foo/site.io/.claude/x` | `-Users-foo-site-io--claude-x` |
 
-`-Users-foo` 처럼 leading dash로 시작하는 것은 cwd의 leading `/` 때문이다. `--claude` 같은 double dash는 `/.claude` (slash + dot)이 모두 dash로 치환되며 발생.
+The leading dash, as in `-Users-foo`, comes from the leading `/` of the cwd. A double dash like `--claude` occurs when `/.claude` (slash + dot) is both replaced with dashes.
 
-이 인코딩은 lossy다 — `kakao-talk`과 `kakao.talk`은 같은 인코딩이 된다. 일반적인 cwd에서는 충돌 가능성이 낮다.
+This encoding is lossy — `kakao-talk` and `kakao.talk` encode to the same value. For typical cwds the collision probability is low.
 
-## 라인 타입
+## Line Types
 
-각 라인은 단일 JSON 오브젝트. 빈 줄 또는 파싱 실패 라인은 skip.
+Each line is a single JSON object. Empty lines or lines that fail to parse are skipped.
 
 ### 1. `permission-mode`
 
-세션 시작 또는 모드 전환 시.
+At session start or on mode switch.
 
 ```json
 {
@@ -36,17 +36,17 @@ replace each '/' or '.' with '-'
 }
 ```
 
-| 필드 | 타입 | 설명 |
+| field | type | description |
 |---|---|---|
-| `type` | `"permission-mode"` | 고정 |
-| `permissionMode` | string | `"auto"`, `"acceptEdits"`, `"plan"`, `"default"`, `"bypassPermissions"`, `"dontAsk"` 중 하나 |
-| `sessionId` | uuid | 현재 세션 ID |
+| `type` | `"permission-mode"` | fixed |
+| `permissionMode` | string | one of `"auto"`, `"acceptEdits"`, `"plan"`, `"default"`, `"bypassPermissions"`, `"dontAsk"` |
+| `sessionId` | uuid | current session ID |
 
 ### 2. `user`
 
-사용자 메시지. `message.content`는 두 형태가 가능하다.
+User message. `message.content` can take two forms.
 
-#### 2a. content가 string
+#### 2a. content as string
 
 ```json
 {
@@ -58,7 +58,7 @@ replace each '/' or '.' with '-'
 }
 ```
 
-#### 2b. content가 block 배열
+#### 2b. content as block array
 
 ```json
 {
@@ -73,16 +73,16 @@ replace each '/' or '.' with '-'
 }
 ```
 
-블록 타입별 처리:
+Handling by block type:
 
-- `type: "text"` — `text` 필드 사용
-- `type: "tool_result"` — `tool_use_id`로 매칭, `content`는 string 또는 `[{type:"text", text:"..."}]` 배열
+- `type: "text"` — use the `text` field
+- `type: "tool_result"` — matched by `tool_use_id`; `content` is a string or a `[{type:"text", text:"..."}]` array
 
-특수 케이스: 사용자 텍스트가 `<system-reminder>`, `<command-message>`, `<command-name>`, `<command-args>`, `<local-command-stdout>`로 시작하면 노이즈로 분류하여 첫 user prompt 추출 시 제외 (스킬에서는 detail view에서도 제외).
+Special case: if the user text starts with `<system-reminder>`, `<command-message>`, `<command-name>`, `<command-args>`, or `<local-command-stdout>`, it is classified as noise and excluded when extracting the first user prompt (the skill also excludes it from the detail view).
 
 ### 3. `assistant`
 
-어시스턴트 응답. `message.content`는 항상 block 배열.
+Assistant response. `message.content` is always a block array.
 
 ```json
 {
@@ -103,15 +103,15 @@ replace each '/' or '.' with '-'
 }
 ```
 
-블록 타입:
+Block types:
 
-- `type: "text"` — 일반 응답 텍스트
-- `type: "tool_use"` — 도구 호출. `name`, `id`, `input` 사용. `input`은 임의 JSON 오브젝트
-- `type: "thinking"` — extended thinking. `thinking` 필드의 string 사용
+- `type: "text"` — normal response text
+- `type: "tool_use"` — tool call. Use `name`, `id`, `input`. `input` is an arbitrary JSON object
+- `type: "thinking"` — extended thinking. Use the string in the `thinking` field
 
-### 4. Hook 이벤트 (`attachment` 필드)
+### 4. Hook Events (`attachment` field)
 
-`type` 필드가 없거나 다른 값이고 `attachment` 객체를 가진 라인은 hook 이벤트로 처리.
+A line with no `type` field, or a different value, that has an `attachment` object is treated as a hook event.
 
 ```json
 {
@@ -128,47 +128,47 @@ replace each '/' or '.' with '-'
 }
 ```
 
-| 필드 | 의미 |
+| field | meaning |
 |---|---|
-| `attachment.hookName` | 예: `"SessionStart:startup"`, `"UserPromptSubmit"`, `"PreToolUse"` |
-| `attachment.hookEvent` | hook event 종류 (`SessionStart`, `UserPromptSubmit`, `PreToolUse`, `PostToolUse`, `Stop`, `SubagentStop`) |
-| `attachment.stdout` | hook 스크립트의 stdout — 종종 JSON으로 추가 컨텍스트 주입 |
+| `attachment.hookName` | e.g. `"SessionStart:startup"`, `"UserPromptSubmit"`, `"PreToolUse"` |
+| `attachment.hookEvent` | hook event type (`SessionStart`, `UserPromptSubmit`, `PreToolUse`, `PostToolUse`, `Stop`, `SubagentStop`) |
+| `attachment.stdout` | stdout of the hook script — often JSON to inject additional context |
 
-### 5. 기타 라인
+### 5. Other Lines
 
-위 4가지로 매칭되지 않는 라인은 현재 스킬에서 silent하게 skip된다. 향후 확장 가능한 라인 종류:
+Lines that match none of the four above are currently silently skipped by the skill. Line types that may be supported in the future:
 
-- 압축(`compact`) 이벤트
-- `summary` 라인
-- 진단(`telemetry`) 라인
+- compaction (`compact`) events
+- `summary` lines
+- diagnostic (`telemetry`) lines
 
-## 첫 user prompt 추출 알고리즘
+## First User Prompt Extraction Algorithm
 
-세션 목록 표시용 미리보기를 위해 다음 절차로 추출:
+For the preview shown in the session list, extraction proceeds as follows:
 
-1. 파일을 한 줄씩 스캔
-2. `type == "user"`이고 content에서 텍스트를 추출 (block 배열이면 모든 `text` 블록 합침)
-3. 추출 텍스트를 trim 후, `is_system_noise`로 필터 (system-reminder 등)
-4. 첫 번째로 통과한 텍스트를 200자로 truncate하여 사용
+1. Scan the file line by line
+2. For `type == "user"`, extract the text from content (if a block array, concatenate all `text` blocks)
+3. Trim the extracted text, then filter with `is_system_noise` (system-reminder, etc.)
+4. Truncate the first text that passes to 200 characters and use it
 
-빈 결과인 경우 `(no user message)`로 표시.
+If the result is empty, display `(no user message)`.
 
-## 메시지 카운트
+## Message Count
 
-`msg_count`는 파일 안의 valid JSON 라인 개수 (빈 줄/파싱 실패 제외). user/assistant/hook/permission-mode 모두 합친 raw event count다 — 사용자가 주고받은 turn 수와는 다르다.
+`msg_count` is the number of valid JSON lines in the file (excluding empty/parse-failed lines). It is a raw event count combining user/assistant/hook/permission-mode — different from the number of turns the user exchanged.
 
-정확한 turn 수가 필요하면 `type == "user" && content가 시스템 노이즈가 아님` 으로 다시 카운트해야 한다.
+If you need the exact turn count, re-count with `type == "user" && content is not system noise`.
 
-## 시간 정렬
+## Time Ordering
 
-세션 목록은 파일의 mtime (last modified) 내림차순 정렬. JSONL 안의 timestamp가 아닌 파일 시스템 mtime 사용 — 단순하고 빠르며, 마지막 활동 시점을 잘 반영한다.
+The session list is sorted in descending order by the file's mtime (last modified). It uses the file system mtime rather than a timestamp inside the JSONL — simple, fast, and a good reflection of the last activity time.
 
-## 변경 이력
+## Change History
 
-스키마는 Claude Code 버전에 따라 진화한다. 다음 사항은 현재 관찰된 형태이며 향후 변경 가능:
+The schema evolves across Claude Code versions. The following are the currently observed shapes and may change in the future:
 
-- `parentUuid`, `isSidechain` 필드는 모든 라인에 있을 수 있음 (sidechain agent 추적용)
-- `sessionId`는 `permission-mode` 라인 외에는 보통 생략됨 (파일명이 곧 sessionId)
-- 새로운 block type (예: `image`, `document`)이 추가될 수 있음
+- The `parentUuid` and `isSidechain` fields may appear on every line (for sidechain agent tracking)
+- `sessionId` is usually omitted outside of `permission-mode` lines (the filename is the sessionId)
+- New block types (e.g. `image`, `document`) may be added
 
-스킬 파서는 알 수 없는 type을 silent skip하므로 forward-compatible.
+The skill parser silently skips unknown types, so it is forward-compatible.

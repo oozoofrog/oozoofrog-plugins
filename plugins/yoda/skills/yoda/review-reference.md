@@ -1,322 +1,322 @@
 # Review Mode Reference
 
-yoda review 모드의 전체 실행 파이프라인 및 출력 구조 레퍼런스.
+Reference for the full execution pipeline and output structure of yoda review mode.
 
 ---
 
-## 진입점
+## Entry Point
 
 ```
-/yoda review <파일|디렉토리>
+/yoda review <file|directory>
 ```
 
-- 대상은 단일 소스 파일 또는 디렉토리 경로.
-- 디렉토리인 경우 하위 소스 파일을 재귀 탐색하여 전체 리뷰.
-- 출력은 **항상 마크다운** 형식.
+- The target is a single source file or a directory path.
+- For a directory, recursively traverse the source files within it for a full review.
+- Output is **always in markdown** format.
 
 ---
 
-## 내부 분석 파이프라인 (6단계)
+## Internal Analysis Pipeline (6 Phases)
 
-### Phase 1: 컨텍스트 수집
+### Phase 1: Context Gathering
 
-리뷰의 정확도는 컨텍스트의 깊이에 비례한다. 코드만 읽는 것이 아니라 **변경의 맥락**까지 수집한다.
+Review accuracy is proportional to the depth of context. Do not just read the code — gather the **context of the change** as well.
 
-| 단계 | 행동 | 도구 | 목적 |
-|------|------|------|------|
-| 1 | 대상 코드 전체 읽기 | `Read` | 코드의 전체 구조와 흐름 파악 |
-| 2 | 최근 변경 맥락 확인 | `git log --oneline -10 -- <대상>` | 최근 10개 커밋에서 변경 패턴, 빈도, 저자 파악 |
-| 3 | 각 줄의 저자/시점 확인 | `git blame <대상>` | 코드 영역별 책임자와 작성 시점 파악. 최근 대량 변경 영역 식별 |
-| 4 | 테스트 파일 탐색 | `Grep` (테스트 파일 패턴) | 대상 타입에 대한 테스트 존재 여부 및 커버리지 범위 확인 |
-| 5 | 의존성 탐색 | `Grep` (타입명으로 다른 파일 검색) | 이 타입을 참조하는 파일 목록. 변경 시 영향 범위 추정 |
-| 6 | 저자 의도 추론 | 커밋 메시지, PR 설명 분석 | 코드가 "왜" 이렇게 작성되었는지 의도 파악. 의도와 구현 간 괴리 탐지 |
+| Step | Action | Tool | Purpose |
+|------|--------|------|---------|
+| 1 | Read the entire target code | `Read` | Grasp the overall structure and flow of the code |
+| 2 | Check recent change context | `git log --oneline -10 -- <target>` | Identify change patterns, frequency, and authors from the last 10 commits |
+| 3 | Check author/timestamp per line | `git blame <target>` | Identify the owner and authoring time per code region. Detect recently bulk-changed regions |
+| 4 | Search for test files | `Grep` (test file pattern) | Verify whether tests exist for the target type and their coverage scope |
+| 5 | Explore dependencies | `Grep` (search other files by type name) | List files referencing this type. Estimate the blast radius of a change |
+| 6 | Infer author intent | Analyze commit messages, PR descriptions | Understand "why" the code was written this way. Detect the gap between intent and implementation |
 
-#### 컨텍스트 수집 규칙
+#### Context Gathering Rules
 
-- Phase 1은 **묵시적으로 실행**한다. 사용자에게 "컨텍스트를 수집하겠습니다"라고 알리지 않는다.
-- 모든 단계를 완료한 후에만 Phase 2로 진행한다.
-- git 이력이 없는 새 파일이면 2, 3, 6단계를 건너뛴다.
-- 테스트 파일이 없으면 Phase 2 테스트 렌즈에서 "테스트 부재"로 기록한다.
-
----
-
-### Phase 2: 다관점 분석
-
-5개 렌즈로 코드를 독립적으로 분석한다. 각 렌즈는 **내부 분석용**이며 최종 출력에 렌즈 이름을 직접 노출하지 않는다. 발견 사항은 심각도 기준으로 재정렬되어 출력된다.
-
-| 렌즈 | 분석 내용 | 구체적 체크 항목 |
-|------|----------|----------------|
-| **구조** | 책임 분리, 의존성 방향, 모듈 경계 | SRP 위반, 순환 의존, God Object, 얇은 래퍼, Feature Envy, 잘못된 캡슐화 |
-| **명료성** | 네이밍, 추상화 수준, 가독성 | 불명확한 이름, 과도한 축약, 잘못된 추상화 수준, 매직 넘버, 불필요한 주석 |
-| **안전성** | 동시성, 메모리, 에러 처리, 타입 안전성 | data race, 메모리 릭, 미처리 에러, 타입 안전성 위반 |
-| **성능** | 불필요한 비용, 비효율 패턴 | N+1 문제, 불필요한 할당, 메인 스레드 블로킹, 과도한 재렌더링 |
-| **테스트** | 검증 가능성, 테스트 설계 품질 | 테스트 부재, 모킹 과다, 구현 결합 테스트, 경계 조건 누락, 비결정적 테스트 |
-
-#### 분석 규칙
-
-- 각 렌즈는 **독립적으로** 실행한다. 렌즈 간 발견 사항이 겹치면 더 심각한 쪽에 귀속한다.
-- 발견 사항이 없는 렌즈는 출력에서 생략한다.
-- 렌즈당 최대 3개 발견 사항. 전체 발견 사항은 7개 이하로 유지한다(청킹 원칙).
-- 5개 렌즈 분석이 끝난 후 교차 검증: 렌즈 간 충돌하는 판단이 있으면 우선순위 렌즈(안전성 > 구조 > 성능 > 명료성 > 테스트)의 판단을 따른다.
+- Run Phase 1 **implicitly**. Do not tell the user "I will gather context."
+- Proceed to Phase 2 only after completing all steps.
+- For a new file with no git history, skip steps 2, 3, and 6.
+- If there is no test file, record it as "test absent" in the Phase 2 test lens.
 
 ---
 
-### Phase 3: 발견 사항 구조화
+### Phase 2: Multi-Perspective Analysis
 
-각 발견 사항을 **Before/After/Why 트리플**로 구조화한다. (상세 규칙은 `learning-science.md` 참조)
+Analyze the code independently through 5 lenses. Each lens is **for internal analysis** and the lens name is not exposed directly in the final output. Findings are reordered by severity for output.
 
-#### Why 블록 통합 구조
+| Lens | Analysis Content | Concrete Check Items |
+|------|------------------|----------------------|
+| **Structure** | Separation of responsibilities, dependency direction, module boundaries | SRP violation, circular dependency, God Object, thin wrapper, Feature Envy, broken encapsulation |
+| **Clarity** | Naming, abstraction level, readability | Unclear names, excessive abbreviation, wrong abstraction level, magic numbers, unnecessary comments |
+| **Safety** | Concurrency, memory, error handling, type safety | data race, memory leak, unhandled errors, type-safety violations |
+| **Performance** | Unnecessary cost, inefficient patterns | N+1 problem, unnecessary allocation, main-thread blocking, excessive re-rendering |
+| **Test** | Verifiability, test design quality | Test absent, over-mocking, implementation-coupled tests, missing boundary conditions, non-deterministic tests |
 
-Why 블록의 모든 요소와 순서를 아래에 정의한다. **필수/선택 구분**을 지키되, 전체가 **한 화면 분량**을 넘지 않도록 한다. 분량이 넘을 경우 선택적 요소를 생략한다.
+#### Analysis Rules
 
-| 순서 | 요소 | 필수 | 내용 |
-|------|------|------|------|
-| 1 | **호기심 트리거** | 필수 | 정보 격차 질문으로 시작 — Why 블록 첫 문장 |
-| 2 | **원칙 연결** | 필수 | 위반된 설계 원칙/패턴 명명 (예: "SRP 위반") |
-| 3 | **근거 출처 + 근거 신뢰도** | 🔴🟡 필수 | 구체적 테스트/계약/타입 증거 + `높음`/`중간`/`낮음` |
-| 4 | **실제 영향** | 필수 | 프로덕션에서 어떤 결과를 초래하는지 |
-| 5 | **정상화 문구** | 🔴 필수 | "이 패턴은 숙련된 개발자도 자주 빠지는 함정입니다" |
-| 6 | **예방 방향** | 🔴🟡 필수 | 인지 오류 유형에 따른 개입 전략 (Why 마지막 소제목) |
-
-> **분량 원칙**: 호기심 트리거(1문장) + 원칙·근거·영향(각 1-2문장) + 예방 방향(1-2문장) = 총 6-10문장 이내. 이것이 Before/After와 함께 스크롤 없이 보여야 한다.
-
-#### Before/After 코드 규칙
-
-- Before: 실제 코드를 그대로 인용. 문제 지점에 `// ⚠️` 마커.
-- After: 수정 코드 + 핵심 변경에 `// ✅` 인라인 주석.
-- 변경과 무관한 코드는 `// ... (변경 없음)`으로 생략.
-- Before/After/Why가 **스크롤 없이 함께** 보이도록 한 화면 분량 유지.
-
-#### Reveal Gate (공개 순서 제어)
-
-독자가 Why/After를 즉시 소비하지 않고 **먼저 생각하도록** 공개 순서를 제어한다.
-
-Review 모드는 `--audience` 파라미터가 없으므로 항상 **mid 수준의 소프트 reveal gate**를 적용한다. audience별 차등 reveal은 share 모드에서만 적용된다 (`share-reference.md` 참조).
-
-##### 소프트 Reveal Gate (Review 모드)
-
-마크다운 텍스트 출력이므로 물리적 접기가 불가하다. 대신 구조적 순서로 유도한다:
-
-1. **Before 블록** — 문제 코드를 `// ⚠️` 마커와 함께 제시
-2. **Why 블록** — 호기심 트리거 질문으로 시작하여 독자가 잠시 멈추고 생각하도록 유도한 뒤, 답으로 자연스럽게 전개
-3. **After 블록** — 수정 코드 제시
+- Run each lens **independently**. When findings overlap across lenses, attribute them to the more severe one.
+- Omit lenses with no findings from the output.
+- **Collect all findings without omission during analysis — do not cap the analysis itself.** Apply caps only at the output-selection stage: when presenting, select the top findings (up to 3 per lens, and 7 or fewer total) following the chunking principle, while still preserving the full finding set internally.
+- After analyzing all 5 lenses, cross-validate: when judgments conflict across lenses, follow the priority lens (Safety > Structure > Performance > Clarity > Test).
 
 ---
 
-### Phase 4: 심각도 분류
+### Phase 3: Structuring Findings
 
-모든 발견 사항에 심각도 라벨을 부착한다.
+Structure each finding as a **Before/After/Why triple**. (See `learning-science.md` for detailed rules.)
 
-| 라벨 | 의미 | 기준 | 필수 여부 |
-|------|------|------|----------|
-| 🔴 Must Fix | 반드시 수정 | 크래시, 데이터 손실, 보안 취약점, 심각한 성능 저하 | 해당 시 |
-| 🟡 Should Improve | 개선 권장 | 유지보수성 저하, 잠재적 버그, 설계 원칙 위반 | 해당 시 |
-| 🔵 Nit | 사소한 개선 | 네이밍, 포매팅, 컨벤션 불일치 | 해당 시 |
-| 🟢 Praise | 칭찬 | 잘 작성된 코드, 모범 사례 적용 | **반드시 1개 이상** |
-| 💡 Insight | 통찰 | 학습 포인트, 대안 접근법, 팀 차원 논의 제안 | **전체 리뷰에서 1개** |
+#### Why Block Integrated Structure
 
-#### 분류 규칙
+All elements and their order in the Why block are defined below. Respect the **required/optional distinction**, but keep the whole block within **one screen**. When it exceeds that, omit optional elements.
 
-- 정렬 순서: 🔴 → 🟡 → 🔵 (심각한 것부터).
-- 🟢 Praise는 반드시 1개 이상 포함한다. 코드에서 잘된 부분을 찾아 구체적으로 칭찬한다.
-- 💡 Insight는 전체 리뷰에서 **정확히 1개**. 이 코드를 넘어 팀/프로젝트 수준에서 논의할 가치가 있는 통찰.
-- 출력 상단에 심각도별 카운트를 표시한다: `🔴 2 | 🟡 3 | 🔵 1 | 🟢 2 | 💡 1`
-- 라벨 없는 발견 사항을 출력하지 않는다.
+| Order | Element | Required | Content |
+|-------|---------|----------|---------|
+| 1 | **Curiosity Trigger** | Required | Open with an information-gap question — the first sentence of the Why block |
+| 2 | **Principle Link** | Required | Name the violated design principle/pattern (e.g., "SRP violation") |
+| 3 | **Evidence Source + Evidence Confidence** | 🔴🟡 Required | Concrete test/contract/type evidence + `높음`/`중간`/`낮음` |
+| 4 | **Actual Impact** | Required | What outcome it causes in production |
+| 5 | **Normalization Phrase** | 🔴 Required | "이 패턴은 숙련된 개발자도 자주 빠지는 함정입니다" |
+| 6 | **Prevention Direction** | 🔴🟡 Required | Intervention strategy by cognitive-error type (last subheading of Why) |
 
-#### 인지 오류 유형 분류 (Cognitive Error Classification) — 필수 출력 계약
+> **Length Principle**: Curiosity trigger (1 sentence) + principle/evidence/impact (1-2 sentences each) + prevention direction (1-2 sentences) = within 6-10 sentences total. This must be visible together with Before/After without scrolling.
 
-🔴/🟡 발견 사항에 개발자가 **왜 이 실수를 했는지** 인지심리학적 분류와 맞춤 개입 전략을 필수로 부착한다 (Huang & Madeira 2024 HECR).
+#### Before/After Code Rules
 
-##### 필수 메타데이터
+- Before: Quote the actual code verbatim. Mark the problem spot with `// ⚠️`.
+- After: Fixed code + `// ✅` inline comments on key changes.
+- Omit code unrelated to the change with `// ... (변경 없음)`.
+- Keep within one screen so Before/After/Why are **visible together without scrolling**.
 
-각 🔴/🟡 발견에 아래 3가지를 반드시 포함한다:
+#### Reveal Gate (Disclosure Order Control)
 
-| 필드 | 설명 | 필수 |
-|------|------|------|
-| **오류 유형 라벨** | `[Slip]`, `[Rule]`, `[Knowledge]`, `[Lapse]` 중 하나 | 필수 |
-| **분류 신뢰도** | `높음`/`중간`/`낮음` — 낮음이면 차순위 후보도 병기 | 필수 |
-| **개입 전략** | 오류 유형에 맞는 구체적 예방/학습 방향 | 필수 |
+Control the disclosure order so the reader **thinks first** rather than immediately consuming the Why/After.
 
-##### 오류 유형별 개입 전략 매핑
+Review mode has no `--audience` parameter, so it always applies a **mid-level soft reveal gate**. Per-audience differential reveal applies only in share mode (see `share-reference.md`).
 
-| 유형 | 의미 | 개입 전략 | Why 블록 반영 |
-|------|------|----------|-------------|
-| `[Slip]` | 올바른 지식, 실행 실수 (타이포, off-by-one) | 린팅 규칙/체크리스트/자동 포매터 제안 | "이 실수를 자동으로 잡을 수 있는 도구: ..." |
-| `[Rule]` | 익숙한 패턴의 잘못된 적용 (API 계약 오해) | 전제 조건 설명 + 반례 제시 | "이 패턴이 여기서 맞지 않는 이유: ..." |
-| `[Knowledge]` | 해당 개념 미경험 (race condition 등) | 개념 설명 + worked example 제공 | "이 개념의 핵심: ..." + 학습 자료 안내 |
-| `[Lapse]` | 알지만 잊어버림 (에러 처리 누락 등) | 자동화/리마인더/팀 체크리스트 제안 | "이 패턴을 자동화하는 방법: ..." |
+##### Soft Reveal Gate (Review Mode)
 
-##### 분류 규칙
+Since the output is markdown text, physical collapsing is impossible. Instead, guide via structural ordering:
 
-- **분류 신뢰도가 낮을 때**: 차순위 후보를 병기한다 — `[Rule/Knowledge]`
-- **동일 프로젝트 내 올바른 사용례가 존재하면**: `[Lapse]`를 우선 고려한다 (이미 알고 있을 가능성)
-- **개입 전략은 Why 블록 마지막**에 "예방 방향" 소제목으로 배치한다
-- 개입이 단순 지적("고치세요")이 아닌 **메커니즘 + 예방법**을 포함해야 한다
+1. **Before block** — Present the problematic code with a `// ⚠️` marker
+2. **Why block** — Open with a curiosity-trigger question to prompt the reader to pause and think, then unfold naturally into the answer
+3. **After block** — Present the fixed code
 
-##### 통합 제목 형식
+---
 
-인지 오류 라벨과 grounding 상태 표기가 모두 제목에 들어간다. 정규화된 형식:
+### Phase 4: Severity Classification
+
+Attach a severity label to every finding.
+
+| Label | Meaning | Criteria | Requirement |
+|-------|---------|----------|-------------|
+| 🔴 Must Fix | Must be fixed | Crash, data loss, security vulnerability, severe performance degradation | When applicable |
+| 🟡 Should Improve | Improvement recommended | Reduced maintainability, potential bug, design-principle violation | When applicable |
+| 🔵 Nit | Minor improvement | Naming, formatting, convention inconsistency | When applicable |
+| 🟢 Praise | Praise | Well-written code, applied best practices | **At least 1 required** |
+| 💡 Insight | Insight | Learning point, alternative approach, team-level discussion proposal | **1 per whole review** |
+
+#### Classification Rules
+
+- Sort order: 🔴 → 🟡 → 🔵 (most severe first).
+- Include at least 1 🟢 Praise. Find a well-done part of the code and praise it concretely.
+- Include **exactly 1** 💡 Insight per whole review. An insight worth discussing at the team/project level beyond this code.
+- Show the per-severity counts at the top of the output: `🔴 2 | 🟡 3 | 🔵 1 | 🟢 2 | 💡 1`
+- Do not output findings without a label.
+
+#### Cognitive Error Classification — Required Output Contract
+
+For 🔴/🟡 findings, mandatorily attach a cognitive-psychology classification of **why the developer made this mistake** plus a tailored intervention strategy (Huang & Madeira 2024 HECR).
+
+##### Required Metadata
+
+Include all 3 of the following in each 🔴/🟡 finding:
+
+| Field | Description | Required |
+|-------|-------------|----------|
+| **Error type label** | One of `[Slip]`, `[Rule]`, `[Knowledge]`, `[Lapse]` | Required |
+| **Classification confidence** | `높음`/`중간`/`낮음` — if low, also note the runner-up candidate | Required |
+| **Intervention strategy** | Concrete prevention/learning direction matching the error type | Required |
+
+##### Intervention Strategy Mapping by Error Type
+
+| Type | Meaning | Intervention Strategy | Reflected in Why Block |
+|------|---------|----------------------|------------------------|
+| `[Slip]` | Correct knowledge, execution mistake (typo, off-by-one) | Suggest linting rule/checklist/auto-formatter | "이 실수를 자동으로 잡을 수 있는 도구: ..." |
+| `[Rule]` | Wrong application of a familiar pattern (API-contract misunderstanding) | Explain preconditions + present a counterexample | "이 패턴이 여기서 맞지 않는 이유: ..." |
+| `[Knowledge]` | Inexperience with the concept (race condition, etc.) | Explain the concept + provide a worked example | "이 개념의 핵심: ..." + point to learning materials |
+| `[Lapse]` | Knew but forgot (missing error handling, etc.) | Suggest automation/reminder/team checklist | "이 패턴을 자동화하는 방법: ..." |
+
+##### Classification Rules
+
+- **When classification confidence is low**: note the runner-up candidate alongside — `[Rule/Knowledge]`
+- **When a correct usage example exists within the same project**: prefer `[Lapse]` (likely already known)
+- **Place the intervention strategy at the end of the Why block** under a "Prevention Direction" subheading
+- The intervention must include a **mechanism + prevention method**, not a mere callout ("just fix it")
+
+##### Integrated Title Format
+
+Both the cognitive-error label and the grounding-state marker go in the title. Normalized format:
 
 ```
 {심각도} {오류유형}: {발견 제목} {grounding 표기}
 ```
 
-| grounding 상태 | 통합 제목 예시 |
-|---------------|-------------|
+| Grounding State | Integrated Title Example |
+|-----------------|--------------------------|
 | grounded | `🔴 Must Fix [Knowledge]: 비격리 상태에서의 data race` |
 | partially_grounded | `🟡 Should Improve [Rule]: 캐시 무효화 누락 (추가 검증 권장)` |
 | needs_verification | `🟡 Should Improve [Lapse]: 에러 핸들링 누락 (확인 필요)` |
 
-#### 사양 근거 (Specification Grounding) — 필수 출력 계약
+#### Specification Grounding — Required Output Contract
 
-모든 🔴/🟡 발견 사항에 **grounding 메타데이터**를 필수로 부착한다.
+Mandatorily attach **grounding metadata** to every 🔴/🟡 finding.
 
-##### Grounding 상태 분류
+##### Grounding State Classification
 
-| 상태 | 조건 | 출력 표기 |
-|------|------|----------|
-| **grounded** | 테스트, 프로토콜, 타입 시스템 등 1차 증거가 1개 이상 존재 | 표기 없음 (기본값) |
-| **partially_grounded** | 주석, 문서, 에러 메시지 등 2차 증거만 존재 | 발견 제목 뒤에 `(추가 검증 권장)` |
-| **needs_verification** | 코드 패턴/휴리스틱 기반 추론이며 직접 증거 없음 | 발견 제목 뒤에 `(확인 필요)` |
+| State | Condition | Output Marker |
+|-------|-----------|---------------|
+| **grounded** | At least 1 piece of primary evidence exists (test, protocol, type system, etc.) | No marker (default) |
+| **partially_grounded** | Only secondary evidence exists (comment, doc, error message, etc.) | `(추가 검증 권장)` after the finding title |
+| **needs_verification** | Inference based on code patterns/heuristics with no direct evidence | `(확인 필요)` after the finding title |
 
-##### 필수 필드
+##### Required Fields
 
-각 🔴/🟡 발견의 Why 블록에 아래 정보를 포함한다:
+Include the following in the Why block of each 🔴/🟡 finding:
 
-1. **근거 출처** — 위반하는 구체적 테스트/계약/타입 제약을 명시
-   - 좋은 예: "`UserRepository` 프로토콜의 async 계약을 위반 (L42)"
-   - 나쁜 예: "thread-safe하지 않습니다"
-2. **근거 신뢰도** — 근거의 확실성 수준을 `높음`/`중간`/`낮음`으로 명시 (인지 오류의 "분류 신뢰도"와 별개 필드)
-3. **증거 누락 시 테스트 제안** — grounded가 아닌 경우, 이 문제를 검증할 수 있는 테스트를 제안
+1. **Evidence source** — State the concrete test/contract/type constraint being violated
+   - Good example: "`UserRepository` 프로토콜의 async 계약을 위반 (L42)"
+   - Bad example: "thread-safe하지 않습니다"
+2. **Evidence confidence** — State the certainty level of the evidence as `높음`/`중간`/`낮음` (a separate field from the cognitive error's "classification confidence")
+3. **Test suggestion when evidence is missing** — When not grounded, suggest a test that could verify this issue
 
-##### 표현 제약 규칙
+##### Expression Constraint Rules
 
-grounding 상태에 따라 **사용 가능한 표현 수준이 달라진다**:
+The **permissible level of expression varies** by grounding state:
 
-| 상태 | 허용 표현 | 금지 표현 |
-|------|----------|----------|
-| **grounded** | "위반", "오류", "버그" 등 단정형 | — |
+| State | Allowed Expressions | Forbidden Expressions |
+|-------|---------------------|------------------------|
+| **grounded** | Assertive forms such as "위반", "오류", "버그" | — |
 | **partially_grounded** | "가능성이 높음", "~로 이어질 수 있음" | "위반", "반드시", "확실히" |
-| **needs_verification** | "확인 필요", "추가 테스트 필요", "~일 가능성" | 모든 단정형 표현 |
+| **needs_verification** | "확인 필요", "추가 테스트 필요", "~일 가능성" | All assertive forms |
 
-> **원칙**: 증거의 강도가 표현의 확신도를 결정한다. 증거 없이 단정하지 않는다.
+> **Principle**: The strength of the evidence determines the confidence of the expression. Do not assert without evidence.
 
-#### 성장 마인드셋 프레이밍
+#### Growth Mindset Framing
 
-- 🔴 발견에 정상화 문구를 포함한다: "이 패턴은 숙련된 개발자도 자주 빠지는 함정입니다"
-- 결함 언어 대신 성장 언어를 사용한다
-
----
-
-### Phase 5: 멘탈 모델 시각화
-
-**조건부 실행**: 아키텍처 변경이 필요한 🔴 또는 🟡 발견 사항이 있을 때만.
-
-#### 트리거 조건 (하나 이상 충족)
-
-- 의존성 방향 변경이 필요한 경우
-- 새 타입 도입을 제안하는 경우
-- 모듈 경계 변경을 제안하는 경우
-
-#### 시각화 규칙
-
-- **Mermaid 다이어그램 1개**만 생성한다. 여러 개 생성하지 않는다.
-- 유형 선택 기준:
-
-| 상황 | 다이어그램 유형 |
-|------|---------------|
-| 타입 간 의존성 변경 | `flowchart` (LR 또는 TD) |
-| 상태 전이 변경 | `stateDiagram-v2` |
-| 호출 흐름 변경 | `sequenceDiagram` |
-
-- Before(현재) → After(제안) 구조를 하나의 다이어그램에 표현하거나, 필요 시 Before/After 두 다이어그램으로 분리.
-- 다이어그램 노드는 5-8개 이내로 유지한다.
-- 트리거 조건에 해당하지 않으면 Phase 5를 **건너뛴다**. "시각화할 내용이 없습니다" 등의 안내도 하지 않는다.
+- Include a normalization phrase in 🔴 findings: "이 패턴은 숙련된 개발자도 자주 빠지는 함정입니다"
+- Use growth language instead of deficit language
 
 ---
 
-### Phase 6: 메타인지 프롬프트
+### Phase 5: Mental Model Visualization
 
-yoda 리뷰의 메타인지 프롬프트는 **두 가지 범위**로 나뉜다. 이 둘은 별개이며 보완적이다.
+**Conditional execution**: Only when there is a 🔴 or 🟡 finding that requires an architecture change.
 
-#### 6a. Per-review 질문 (Layer 3에 배치)
+#### Trigger Conditions (meet one or more)
 
-리뷰 전체를 관통하는 **2개 질문**을 Layer 3 끝에 배치한다.
+- A change in dependency direction is needed
+- A new type is being proposed
+- A change in module boundaries is being proposed
 
-| 질문 | 방향 | 설계 원칙 |
-|------|------|----------|
-| **질문 1** | 확장성/변경 대응 | "이 코드에 X 요구사항이 추가되면 어디를 수정해야 할까요?" — 리뷰에서 발견한 구체적 변경 시나리오에서 도출 |
-| **질문 2** | 전이/적용 | "이 리뷰에서 발견한 패턴이 프로젝트의 다른 어디에도 존재할까요?" — 개별 발견을 팀/프로젝트 수준 개선으로 확장 |
+#### Visualization Rules
 
-#### 6b. Per-finding 프롬프트 (Layer 2 각 발견 내부, 선택적)
+- Generate **only 1 Mermaid diagram**. Do not generate several.
+- Type selection criteria:
 
-`learning-science.md`의 메타인지 비계(계획-모니터링-평가) 중 **모니터링/평가** 프롬프트를 개별 발견 사항 안에 선택적으로 배치할 수 있다. 단, review 모드에서는 audience=mid 고정이므로 모두 선택적이다.
+| Situation | Diagram Type |
+|-----------|--------------|
+| Dependency change between types | `flowchart` (LR or TD) |
+| State transition change | `stateDiagram-v2` |
+| Call-flow change | `sequenceDiagram` |
 
-- **모니터링**: Why 블록 끝에 "이 설명이 예상과 일치하나요?" (선택적)
-- **평가**: After 블록 뒤에 "이 수정이 작동하지 않는 경우는?" (선택적)
-
-> Per-finding 프롬프트는 Why 블록 분량 원칙(6-10문장)을 초과하지 않는 범위에서만 사용한다. 발견 사항이 5개 이상이면 생략하여 인지 부하를 통제한다.
-
-#### 공통 규칙
-
-- 질문은 반드시 **리뷰 대상 코드의 구체적 맥락**에서 도출한다. 일반적/추상적 질문 금지.
-- 정보 격차 이론을 적용: 독자가 "알고 있는 것"을 언급한 뒤 "아직 모르는 것"으로 유도.
-- 답을 직접 제공하지 않는다. 사고를 유도할 뿐이다.
+- Express the Before(current) → After(proposed) structure in a single diagram, or split into two Before/After diagrams if needed.
+- Keep diagram nodes within 5-8.
+- If the trigger conditions do not apply, **skip** Phase 5. Do not even add a note like "Nothing to visualize."
 
 ---
 
-## 출력: 3계층 점진적 공개
+### Phase 6: Metacognitive Prompts
 
-리뷰 출력은 독자의 시간 예산에 따라 **3개 계층**으로 구성한다. 각 계층은 독립적으로 가치를 제공하며, 더 깊이 읽을수록 학습 효과가 증가한다.
+yoda review's metacognitive prompts split into **two scopes**. These two are separate and complementary.
 
----
+#### 6a. Per-review Questions (placed in Layer 3)
 
-### Layer 1: 핵심 요약 (30초)
+Place **2 questions** that run through the whole review at the end of Layer 3.
 
-독자가 30초 안에 리뷰 결과를 파악할 수 있어야 한다.
+| Question | Direction | Design Principle |
+|----------|-----------|------------------|
+| **Question 1** | Extensibility/handling change | "이 코드에 X 요구사항이 추가되면 어디를 수정해야 할까요?" — derived from a concrete change scenario found in the review |
+| **Question 2** | Transfer/application | "이 리뷰에서 발견한 패턴이 프로젝트의 다른 어디에도 존재할까요?" — extend an individual finding into a team/project-level improvement |
 
-#### 구성
+#### 6b. Per-finding Prompts (inside each Layer 2 finding, optional)
 
-1. **한 줄 요약** — 이 코드의 핵심 상태를 한 문장으로.
-2. **심각도 카운트** — `🔴 2 | 🟡 3 | 🔵 1 | 🟢 2 | 💡 1`
-3. **발견 사항 테이블** — 각 발견의 라벨 + 한 줄 설명.
+Among the metacognitive scaffolds (plan-monitor-evaluate) in `learning-science.md`, the **monitoring/evaluation** prompts may be optionally placed inside individual findings. However, since review mode is fixed to audience=mid, all are optional.
 
----
+- **Monitoring**: At the end of the Why block, "이 설명이 예상과 일치하나요?" (optional)
+- **Evaluation**: After the After block, "이 수정이 작동하지 않는 경우는?" (optional)
 
-### Layer 2: 상세 분석 (5-10분)
+> Use per-finding prompts only within the range that does not exceed the Why block length principle (6-10 sentences). If there are 5 or more findings, omit them to control cognitive load.
 
-#### 🔴 Must Fix, 🟡 Should Improve 발견 사항
+#### Common Rules
 
-- 각각 **완전한 Before/After/Why 트리플**로 상세 분석.
-- Phase 3의 Why 블록 통합 구조(6요소)와 Reveal Gate를 그대로 적용.
-- Phase 4의 통합 제목 형식(`{심각도} {오류유형}: {제목} {grounding 표기}`)으로 각 발견을 표제한다.
-
-#### 🔵 Nit 발견 사항
-
-- 개별 트리플 대신 **간결 테이블**로 모아서 표시.
-- Before/After를 인라인 코드로 병렬 배치.
+- Questions must be derived from the **concrete context of the reviewed code**. No generic/abstract questions.
+- Apply information-gap theory: mention what the reader "already knows," then guide toward what they "don't yet know."
+- Do not provide the answer directly. Only prompt thinking.
 
 ---
 
-### Layer 3: 깊은 통찰 (+5분)
+## Output: 3-Layer Progressive Disclosure
 
-리뷰를 넘어 학습과 팀 개선으로 확장한다.
+Structure the review output into **3 layers** based on the reader's time budget. Each layer provides value independently, and the deeper one reads, the greater the learning effect.
 
-#### 구성 요소
+---
 
-1. **🟢 Praise** — 코드에서 잘된 부분을 구체적으로 칭찬.
-   - Before/After 없이 해당 코드 인용 + 왜 좋은지 설명.
-   - 독자가 이 패턴을 의식적으로 반복할 수 있도록 원칙을 명명한다.
+### Layer 1: Core Summary (30s)
 
-2. **💡 Insight** — 전체 리뷰에서 1개. 이 코드를 넘어선 팀 수준의 통찰.
-   - 발견 패턴을 일반화하여 팀 차원 개선 제안.
-   - 구체적 실행 방안 포함.
+The reader must be able to grasp the review result within 30 seconds.
 
-3. **멘탈 모델 시각화** — Phase 5에서 생성한 Mermaid 다이어그램 (해당 시에만).
+#### Composition
 
-4. **메타인지 프롬프트** — Phase 6a의 per-review 2개 질문. (per-finding 프롬프트는 Layer 2 각 발견 내부에 선택적 배치)
+1. **One-line summary** — The core state of this code in one sentence.
+2. **Severity counts** — `🔴 2 | 🟡 3 | 🔵 1 | 🟢 2 | 💡 1`
+3. **Findings table** — Each finding's label + one-line description.
 
-5. **공유 안내** — 이 리뷰를 팀과 공유하고 싶다면:
+---
+
+### Layer 2: Detailed Analysis (5-10 min)
+
+#### 🔴 Must Fix, 🟡 Should Improve Findings
+
+- Detailed analysis as a **complete Before/After/Why triple** for each.
+- Apply the Phase 3 Why block integrated structure (6 elements) and Reveal Gate as-is.
+- Title each finding with the Phase 4 integrated title format (`{심각도} {오류유형}: {제목} {grounding 표기}`).
+
+#### 🔵 Nit Findings
+
+- Collect into a **concise table** instead of individual triples.
+- Place Before/After side by side as inline code.
+
+---
+
+### Layer 3: Deep Insight (+5 min)
+
+Extend beyond the review into learning and team improvement.
+
+#### Components
+
+1. **🟢 Praise** — Praise a well-done part of the code concretely.
+   - Quote the relevant code + explain why it is good, without Before/After.
+   - Name the principle so the reader can consciously repeat this pattern.
+
+2. **💡 Insight** — 1 per whole review. A team-level insight that goes beyond this code.
+   - Generalize the found pattern into a team-level improvement proposal.
+   - Include a concrete action plan.
+
+3. **Mental Model Visualization** — The Mermaid diagram generated in Phase 5 (only when applicable).
+
+4. **Metacognitive Prompts** — The 2 per-review questions from Phase 6a. (Per-finding prompts are optionally placed inside each Layer 2 finding.)
+
+5. **Share Guidance** — If you want to share this review with the team:
 
 ```
 > 이 리뷰를 팀과 공유하려면: `/yoda share --from-review`
@@ -324,7 +324,7 @@ yoda 리뷰의 메타인지 프롬프트는 **두 가지 범위**로 나뉜다. 
 
 ---
 
-## 출력 구조 요약
+## Output Structure Summary
 
 ```
 ┌─────────────────────────────────────┐

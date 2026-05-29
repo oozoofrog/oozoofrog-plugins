@@ -1,28 +1,28 @@
-# Apple 플랫폼 디자인 가이드라인 요약
+# Apple Platform Design Guidelines Summary
 
-ios-designer 에이전트의 기본 참조 문서.
+Default reference document for the ios-designer agent.
 
-## 공식 출처
+## Official Sources
 
 - [Human Interface Guidelines](https://developer.apple.com/design/human-interface-guidelines/)
 - [SF Symbols](https://developer.apple.com/sf-symbols/)
 - [SF Pro Typography](https://developer.apple.com/fonts/)
 
-## 핵심 정량 기준
+## Core Quantitative Criteria
 
-### 레이아웃
+### Layout
 
-| 항목 | 값 | 출처 |
+| Item | Value | Source |
 |------|-----|------|
-| 최소 터치 타겟 | 44×44pt | HIG > Accessibility |
-| 기본 margin | 16pt (compact), 20pt (regular) | HIG > Layout |
-| 간격 그리드 | 8pt 기반 | HIG > Layout |
-| Safe Area (상단) | 59pt (Dynamic Island), 47pt (노치) | iOS Safe Area Guide |
-| Safe Area (하단) | 34pt (홈 인디케이터) | iOS Safe Area Guide |
+| Minimum touch target | 44×44pt | HIG > Accessibility |
+| Default margin | 16pt (compact), 20pt (regular) | HIG > Layout |
+| Spacing grid | 8pt based | HIG > Layout |
+| Safe Area (top) | 59pt (Dynamic Island), 47pt (notch) | iOS Safe Area Guide |
+| Safe Area (bottom) | 34pt (home indicator) | iOS Safe Area Guide |
 
-### 타이포그래피 (SF Pro)
+### Typography (SF Pro)
 
-| 스타일 | 크기 | 행간 | 자간 |
+| Style | Size | Line height | Tracking |
 |--------|------|------|------|
 | Large Title | 34pt | 41pt | 0.37 |
 | Title 1 | 28pt | 34pt | 0.36 |
@@ -36,49 +36,49 @@ ios-designer 에이전트의 기본 참조 문서.
 | Caption 1 | 12pt | 16pt | 0 |
 | Caption 2 | 11pt | 13pt | 0.07 |
 
-### 색상
+### Color
 
-| 항목 | Light | Dark |
+| Item | Light | Dark |
 |------|-------|------|
-| 시스템 배경 | #FFFFFF | #000000 |
-| 2차 배경 | #F2F2F7 | #1C1C1E |
-| 3차 배경 | #FFFFFF | #2C2C2E |
-| 라벨 (1차) | #000000 | #FFFFFF |
-| 라벨 (2차) | rgba(60,60,67,0.6) | rgba(235,235,245,0.6) |
-| 시스템 블루 | #007AFF | #0A84FF |
-| 구분선 | rgba(60,60,67,0.29) | rgba(84,84,88,0.6) |
+| System background | #FFFFFF | #000000 |
+| Secondary background | #F2F2F7 | #1C1C1E |
+| Tertiary background | #FFFFFF | #2C2C2E |
+| Label (primary) | #000000 | #FFFFFF |
+| Label (secondary) | rgba(60,60,67,0.6) | rgba(235,235,245,0.6) |
+| System blue | #007AFF | #0A84FF |
+| Separator | rgba(60,60,67,0.29) | rgba(84,84,88,0.6) |
 
 ### Corner Radius
 
-| 컴포넌트 | 값 | 비고 |
+| Component | Value | Note |
 |----------|-----|------|
-| 소형 버튼 | 8pt | |
-| 텍스트 필드 | 10pt | |
-| 카드/시트 | 12pt | |
-| 앱 아이콘 (홈) | continuous 곡선, ~23.4% | 슈퍼엘립스 |
-| 모달 시트 | 12pt (상단) | |
+| Small button | 8pt | |
+| Text field | 10pt | |
+| Card/sheet | 12pt | |
+| App icon (home) | continuous curve, ~23.4% | superellipse |
+| Modal sheet | 12pt (top) | |
 
 ### Liquid Glass (iOS 26+)
 
-| 항목 | 값 | 비고 |
+| Item | Value | Note |
 |------|-----|------|
-| 배경 블러 반경 | ~20pt | 시스템 material |
-| 투명도 (glass) | 0.7-0.85 | 배경에 따라 가변 |
-| 그림자 | 없음 (블러로 대체) | elevation → translucency |
-| 경계선 | 1px, rgba(255,255,255,0.2) | 글래스 엣지 |
+| Background blur radius | ~20pt | system material |
+| Opacity (glass) | 0.7-0.85 | varies by background |
+| Shadow | none (replaced by blur) | elevation → translucency |
+| Border | 1px, rgba(255,255,255,0.2) | glass edge |
 
-## SwiftUI 매핑 힌트
+## SwiftUI Mapping Hints
 
 ```swift
-// 간격
-.padding() // 16pt 기본
+// Spacing
+.padding() // 16pt default
 .padding(.horizontal, 20) // regular width
 
-// 타이포
+// Typography
 .font(.body) // 17pt SF Pro
 .font(.largeTitle) // 34pt SF Pro
 
-// 색상
+// Color
 Color(.systemBackground)
 Color(.secondarySystemBackground)
 

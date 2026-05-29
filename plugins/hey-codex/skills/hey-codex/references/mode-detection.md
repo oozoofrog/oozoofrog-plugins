@@ -1,60 +1,60 @@
-# 모드 판별 규칙
+# Mode Detection Rules
 
-## 판별 우선순위
+## Priority
 
-write > suggest > review > read (기본값)
+write > suggest > review > read (default)
 
-프롬프트에서 아래 키워드를 순서대로 매칭합니다. 먼저 매칭되는 모드가 선택됩니다.
+Match the keywords below against the prompt in order. The first matching mode wins.
 
-## write 키워드 (파일 변경 의도)
+## write keywords (intent to change files)
 
-| 한국어 | 영어 |
-|--------|------|
+| Korean | English |
+|--------|---------|
 | 작성, 생성, 만들어 | create, write |
 | 수정, 변경, 바꿔 | modify, change, update |
 | 리팩토링해, 리팩터링해 | refactor |
 | 삭제, 제거 | delete, remove |
 | 추가, 구현, 고쳐 | add, implement, fix |
 
-**핵심 판별 기준:** 동사가 파일 수정 행위를 직접 지시하는지 여부.
-- "리팩토링해줘" → write (직접 행위 지시)
-- "리팩토링 방법 알려줘" → suggest (방법 질문)
+**Core criterion:** whether the verb directly commands a file-modifying action.
+- "리팩토링해줘" → write (direct action command)
+- "리팩토링 방법 알려줘" → suggest (question about method)
 
-## suggest 키워드 (제안/조언 요청)
+## suggest keywords (request for proposal/advice)
 
-| 한국어 | 영어 |
-|--------|------|
+| Korean | English |
+|--------|---------|
 | 제안, 개선점, 추천, 대안 | suggest, recommend, alternative |
 | 방법, 어떻게, 알려줘 | how to, approach, advice |
 
-## review 키워드 (코드 리뷰 전용 — `codex review` 사용)
+## review keywords (code review only — uses `codex review`)
 
-| 한국어 | 영어 |
-|--------|------|
+| Korean | English |
+|--------|---------|
 | 리뷰, 코드 리뷰, 코드리뷰 | review, code review |
 
-**review vs read 구분:** "리뷰"가 명시적으로 코드 리뷰를 지칭하면 review 모드, 그 외는 read.
+**review vs read:** if "리뷰" explicitly refers to a code review, use review mode; otherwise read.
 
-## read 키워드 (기본값)
+## read keywords (default)
 
-write/suggest/review 어디에도 매칭되지 않으면 read 모드입니다.
+If nothing matches write/suggest/review, the mode is read.
 
-참고 키워드 (확인용):
+Reference keywords (for confirmation):
 
-| 한국어 | 영어 |
-|--------|------|
+| Korean | English |
+|--------|---------|
 | 분석, 설명 | analyze, explain |
 | 검색, 찾아, 보여줘, 확인 | search, find, show, check |
 
-## 모호한 경우 예시
+## Ambiguous case examples
 
-| 프롬프트 | 모드 | 이유 |
-|----------|------|------|
-| "이 코드 리뷰해줘" | review | 코드 리뷰 → `codex review` |
-| "버그 찾아줘" | read | 찾아 = 읽기 |
+| Prompt | Mode | Reason |
+|--------|------|--------|
+| "이 코드 리뷰해줘" | review | code review → `codex review` |
+| "버그 찾아줘" | read | 찾아 = read |
 | "리팩토링 방법 알려줘" | suggest | 방법 + 알려줘 |
 | "개선점 추천해줘" | suggest | 추천 |
-| "리팩토링해줘" | write | 직접 행위 지시 |
+| "리팩토링해줘" | write | direct action command |
 | "테스트 작성해줘" | write | 작성 |
 | "이 함수 고쳐줘" | write | 고쳐 |
 | "이 코드 어떻게 개선할 수 있을까?" | suggest | 어떻게 |

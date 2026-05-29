@@ -1,8 +1,8 @@
-# 릴리스 스크립트 생성 가이드
+# Release Script Generation Guide
 
-`scripts/release.sh`를 처음 만들 때 참조하는 상세 가이드입니다.
+Detailed guide to reference when first creating `scripts/release.sh`.
 
-## 스크립트 구조
+## Script Structure
 
 ```bash
 #!/usr/bin/env bash
@@ -28,17 +28,17 @@ SKIP_BREW=0
 NEW_VERSION=""
 ```
 
-## 각 단계 상세
+## Step Details
 
-### 1. 인자 파싱
+### 1. Argument Parsing
 
-지원해야 할 옵션:
-- `--dry-run`: 모든 단계를 출력만 하고 실행하지 않음
-- `--skip-brew`: Homebrew Cask 업데이트 건너뛰기
-- `-h, --help`: 사용법 출력
-- 위치 인자: 버전 번호 (없으면 자동 증가)
+Options to support:
+- `--dry-run`: print every step without executing
+- `--skip-brew`: skip the Homebrew Cask update
+- `-h, --help`: print usage
+- Positional argument: version number (auto-increment when omitted)
 
-### 2. 사전 검증 (Step 0)
+### 2. Pre-flight Checks (Step 0)
 
 ```bash
 command -v gh >/dev/null 2>&1 || err "gh CLI 필요"
@@ -53,7 +53,7 @@ DIRTY=$(git status --porcelain | grep -v '^\?\?' || true)
 git tag -l "${RELEASE_TAG}" | grep -q "${RELEASE_TAG}" && err "태그 존재"
 ```
 
-### 3. 버전 범프 (Step 1)
+### 3. Version Bump (Step 1)
 
 ```bash
 CURRENT_VERSION=$(grep 'MARKETING_VERSION' "$PBXPROJ" | head -1 | sed 's/.*= *//;s/ *;.*//')
@@ -72,11 +72,11 @@ sed -i '' "s/MARKETING_VERSION = ${CURRENT_VERSION}/MARKETING_VERSION = ${NEW_VE
 sed -i '' "s/CURRENT_PROJECT_VERSION = ${CURRENT_BUILD}/CURRENT_PROJECT_VERSION = ${NEW_BUILD}/g" "$PBXPROJ"
 ```
 
-주의: `sed -i` 는 Linux와 macOS에서 동작이 다릅니다.
+Note: `sed -i` behaves differently on Linux and macOS.
 - macOS: `sed -i '' 's/...'`
 - Linux: `sed -i 's/...'`
 
-### 4. Release 빌드 (Step 2)
+### 4. Release Build (Step 2)
 
 ```bash
 DERIVED_DATA="${REPO_ROOT}/.build/xcode"
@@ -90,9 +90,9 @@ xcodebuild \
   clean build 2>&1 | tail -5
 ```
 
-`-derivedDataPath`를 별도로 지정하는 이유: Xcode의 기본 DerivedData와 섞이지 않게 하고, 빌드 결과물 경로를 예측 가능하게 만듭니다.
+Why specify a separate `-derivedDataPath`: to keep it from mixing with Xcode's default DerivedData and to make the build output path predictable.
 
-### 5. DMG 생성 (Step 3)
+### 5. DMG Creation (Step 3)
 
 ```bash
 # 스테이징
@@ -118,15 +118,15 @@ hdiutil convert "${TEMP_DMG}" -format UDZO -imagekey zlib-level=9 -o "${DMG_PATH
 DMG_SHA256=$(shasum -a 256 "${DMG_PATH}" | awk '{print $1}')
 ```
 
-DMG 포맷:
-- `UDRW`: read-write (Finder 설정용 임시)
-- `UDZO`: zlib 압축 read-only (배포용 최종)
+DMG formats:
+- `UDRW`: read-write (temporary, for Finder setup)
+- `UDZO`: zlib-compressed read-only (final, for distribution)
 
-### 6. 로컬 설치 (Step 4)
+### 6. Local Install (Step 4)
 
-기존 앱 종료 → ~/Applications에 복사 → 재실행. 상세 코드는 SKILL.md 참조.
+Quit the existing app → copy to ~/Applications → relaunch. See SKILL.md for the detailed code.
 
-### 7. Git 작업 (Step 5)
+### 7. Git Operations (Step 5)
 
 ```bash
 git add "${PBXPROJ}"
@@ -178,7 +178,7 @@ git pull --rebase origin main 2>/dev/null || true
 git push origin main
 ```
 
-## 유틸리티 함수 패턴
+## Utility Function Pattern
 
 ```bash
 step() { echo ""; echo "==> $1"; }
@@ -194,18 +194,18 @@ run() {
 }
 ```
 
-## 스크립트 기능 체크리스트
+## Script Feature Checklist
 
-- [ ] `--dry-run` 플래그
-- [ ] `--skip-brew` 플래그
-- [ ] `--help` 사용법
-- [ ] 사전 검증 (도구, 깨끗한 상태, 태그 중복)
-- [ ] 버전 자동 증가 또는 명시적 지정
+- [ ] `--dry-run` flag
+- [ ] `--skip-brew` flag
+- [ ] `--help` usage
+- [ ] Pre-flight checks (tools, clean state, tag duplication)
+- [ ] Version auto-increment or explicit specification
 - [ ] clean build
-- [ ] DMG 생성 (Finder 레이아웃 포함)
-- [ ] 로컬 설치 (앱 종료 → 복사 → 재실행)
+- [ ] DMG creation (including Finder layout)
+- [ ] Local install (quit app → copy → relaunch)
 - [ ] Git commit + tag + push
-- [ ] GitHub Release + DMG 첨부
-- [ ] Homebrew Cask 업데이트 (pull --rebase 포함)
-- [ ] 한국어 (또는 사용자 언어) 메시지
-- [ ] HOMEBREW_TAP_PATH 환경변수 지원
+- [ ] GitHub Release + DMG attachment
+- [ ] Homebrew Cask update (including pull --rebase)
+- [ ] Korean (or user-language) messages
+- [ ] HOMEBREW_TAP_PATH environment variable support

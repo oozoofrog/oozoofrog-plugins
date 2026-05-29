@@ -1,10 +1,10 @@
-# Wiki 출력 템플릿
+# Wiki Output Template
 
-yoda share 모드의 `--format wiki` 출력을 위한 구조 템플릿. Confluence MCP 서버가 연결되어 있으면 직접 게시하고, 없으면 마크다운으로 생성한다.
+Structure template for the `--format wiki` output of yoda share mode. If a Confluence MCP server is connected, publish directly; otherwise generate as markdown.
 
 ---
 
-## 콘텐츠 구조 (내러티브 4막 구조)
+## Content Structure (4-act narrative structure)
 
 ```
 ┌─────────────────────────────────────────┐
@@ -22,18 +22,18 @@ yoda share 모드의 `--format wiki` 출력을 위한 구조 템플릿. Confluen
 └─────────────────────────────────────────┘
 ```
 
-### 4막 상세
+### 4-act detail
 
-| 막 | 목적 | 학습과학 원칙 |
+| Act | Purpose | Learning-science principle |
 |----|------|-------------|
-| 발단 | 공감대 형성, 흥미 유발 | 스토리텔링 (Zak 옥시토신/내러티브) |
-| 전개 | 분석적 사고 모델링 | 인지적 도제 (Collins et al.) |
-| 절정 | 학습 핵심 전달 | Before/After/Why 트리플 + 인접 원칙 |
-| 결말 | 실천 유도, 팀 토론 | 사회적 구성주의 (Vygotsky) |
+| 발단 | Build rapport, spark interest | Storytelling (Zak oxytocin/narrative) |
+| 전개 | Model analytical thinking | Cognitive apprenticeship (Collins et al.) |
+| 절정 | Deliver the learning core | Before/After/Why triple + adjacent principles |
+| 결말 | Drive practice, team discussion | Social constructivism (Vygotsky) |
 
-### 토론 질문 (사회적 구성주의)
+### Discussion questions (social constructivism)
 
-팀원의 댓글/피드백을 유도하는 3가지 질문:
+Three questions to elicit comments/feedback from teammates:
 
 1. **정교화 질문** — "이 패턴을 우리 프로젝트의 {구체적 모듈}에 적용한다면?"
 2. **대안 질문** — "이 문제에 대해 다른 접근법을 경험해보신 분이 있다면 공유해주세요."
@@ -41,7 +41,7 @@ yoda share 모드의 `--format wiki` 출력을 위한 구조 템플릿. Confluen
 
 ---
 
-## 저장 경로
+## Storage path
 
 ```
 docs/yoda/YYYY-MM-DD-{slug}-wiki.md

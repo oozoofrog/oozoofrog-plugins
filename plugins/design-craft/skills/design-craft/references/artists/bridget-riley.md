@@ -1,101 +1,101 @@
-# Bridget Riley -- 시각 언어 디자인 토큰
+# Bridget Riley -- Visual Language Design Tokens
 
-## 프로필
-- **활동 기간**: 1960-현재 (핵심 활동기: 1961-현재)
-- **운동/유파**: Op Art (광학 예술, Optical Art)
-- **핵심 공헌**: 기하학적 패턴의 체계적 반복과 변주로 시각적 운동감(optical movement)을 생성. 줄무늬의 간격·너비·색상을 정밀하게 조절하여 망막 수준의 지각 교란을 유도. 정적 이미지에서 동적 경험을 만드는 체계를 확립.
+## Profile
+- **Active period**: 1960-present (core period: 1961-present)
+- **Movement/school**: Op Art (Optical Art)
+- **Core contribution**: Generates optical movement through systematic repetition and variation of geometric patterns. Precisely modulates the spacing, width, and color of stripes to induce retinal-level perceptual disturbance. Established a system that creates dynamic experience from static images.
 
-## 시각 언어 원칙
+## Visual Language Principles
 
-1. **지각적 불안정(Perceptual Instability)**: 규칙적 패턴에 미세한 변이를 도입하여 눈이 안정점을 찾지 못하게 한다. 정적 이미지가 떨리고 움직이는 듯한 환각을 유발한다. UI에서 미세한 애니메이션, 호버 효과, 시각적 피드백의 근거이다.
-2. **체계적 변주(Systematic Variation)**: 패턴의 한 변수(너비, 간격, 각도, 색상)만 점진적으로 변경한다. 나머지는 고정. 한 번에 하나의 변수만 조절하는 실험적 엄밀함이 시각적 효과를 극대화한다.
-3. **반복의 에너지(Energy of Repetition)**: 동일 요소의 반복 자체가 에너지와 운동감을 생성한다. 반복 횟수가 임계점(약 7-10회)을 넘으면 패턴이 진동하기 시작한다.
-4. **흑백의 극대화(Maximized Black-White)**: 초기 작품에서 흑백만으로 최대 시각적 효과를 달성. 색상 없이도 "움직임"을 만들 수 있다. 대비(contrast)가 모든 시각적 에너지의 원천이다.
-5. **색상의 상호작용(Color Interaction)**: 1967년 이후 색상 작품에서 인접 색의 동시대비(simultaneous contrast)를 활용. 같은 색이 주변 색에 따라 다르게 보인다. Josef Albers의 이론을 운동 패턴에 적용.
-6. **곡선의 물결(Undulating Curve)**: 직선 줄무늬를 곡선으로 변형하여 파동 효과를 만든다. 곡률의 변화가 운동의 속도와 방향을 결정한다.
-7. **관람자 참여(Viewer Participation)**: 작품의 "움직임"은 캔버스에 있는 것이 아니라 관람자의 망막과 뇌에서 발생한다. UI에서 사용자의 지각이 인터페이스의 일부라는 원칙이다.
+1. **Perceptual Instability**: Introduces subtle variation into regular patterns so the eye cannot find a stable point. A static image triggers the illusion of shimmering and moving. In UI, this is the basis for subtle animation, hover effects, and visual feedback.
+2. **Systematic Variation**: Changes only one variable of the pattern (width, spacing, angle, color) progressively. The rest stay fixed. The experimental rigor of adjusting only one variable at a time maximizes the visual effect.
+3. **Energy of Repetition**: Repetition of identical elements itself generates energy and movement. Once the repetition count crosses a threshold (about 7-10 times), the pattern begins to vibrate.
+4. **Maximized Black-White**: Early works achieved maximum visual effect with black and white alone. "Movement" can be created without color. Contrast is the source of all visual energy.
+5. **Color Interaction**: Color works after 1967 exploit simultaneous contrast between adjacent colors. The same color appears different depending on its surroundings. Applies Josef Albers's theory to kinetic patterns.
+6. **Undulating Curve**: Transforms straight stripes into curves to create a wave effect. Changes in curvature determine the speed and direction of movement.
+7. **Viewer Participation**: The "movement" of the work is not on the canvas but occurs in the viewer's retina and brain. In UI, this is the principle that the user's perception is part of the interface.
 
-## 정량적 디자인 토큰
+## Quantitative Design Tokens
 
-### 색상 체계
-| 토큰명 | 값/범위 | 출처 | 신뢰도 | UI 적용 |
+### Color System
+| Token | Value/Range | Source | Confidence | UI Application |
 |--------|---------|------|--------|---------|
-| riley-black | #0A0A0A ~ #1A1A1A | Movement in Squares (1961) 실측 | B | 패턴의 전경, 텍스트, 강한 대비 요소 |
-| riley-white | #F5F5F5 ~ #FFFFFF | 전 흑백 작품 배경 | B | 패턴의 배경, 여백, 고대비 기반 |
-| riley-blue-cerulean | #0077B6 ~ #0096C7 | Late Morning (1967-68) 측색 | C | 차가운 액센트, 정보성 요소 |
-| riley-green-viridian | #1B8A5A ~ #2ECC71 | Nataraja (1993) 측색 | C | 보조 액센트, 성공, 자연 연관 |
-| riley-red-warm | #D72638 ~ #E63946 | Late Morning (1967-68) | C | 경고, 강조, 따뜻한 포인트 |
-| riley-orange-stripe | #E76F51 ~ #F4845F | Colour stripe 연작 | C | 보조 CTA, 활성 인디케이터 |
-| riley-pink-magenta | #D63384 ~ #E91E8C | Hesitate (1964) 이후 색상 전환기 | D | 하이라이트, 프리미엄 요소 |
-| riley-gray-mid | #808080 | 흑백 중간 회색 기준 | B | 중간 톤, 비활성, 보조 요소 |
+| riley-black | #0A0A0A ~ #1A1A1A | Movement in Squares (1961) measured | B | Pattern foreground, text, strong-contrast elements |
+| riley-white | #F5F5F5 ~ #FFFFFF | Background of all black-white works | B | Pattern background, whitespace, high-contrast base |
+| riley-blue-cerulean | #0077B6 ~ #0096C7 | Late Morning (1967-68) colorimetry | C | Cool accent, informational elements |
+| riley-green-viridian | #1B8A5A ~ #2ECC71 | Nataraja (1993) colorimetry | C | Secondary accent, success, nature association |
+| riley-red-warm | #D72638 ~ #E63946 | Late Morning (1967-68) | C | Warning, emphasis, warm point |
+| riley-orange-stripe | #E76F51 ~ #F4845F | Colour stripe series | C | Secondary CTA, active indicator |
+| riley-pink-magenta | #D63384 ~ #E91E8C | Color transition period after Hesitate (1964) | D | Highlight, premium element |
+| riley-gray-mid | #808080 | Black-white mid-gray reference | B | Mid tone, inactive, secondary element |
 
-### 구성 & 레이아웃
-| 토큰명 | 값/범위 | 출처 | 신뢰도 | UI 적용 |
+### Composition & Layout
+| Token | Value/Range | Source | Confidence | UI Application |
 |--------|---------|------|--------|---------|
-| stripe-width | 2-20px (뷰포트 대비 0.5-3%) | Movement in Squares (1961) 실측 | B | 줄무늬 패턴 기본 너비 |
-| stripe-gap | stripe-width의 0.5-2배 | 전 작품 간격 실측 | B | 줄무늬 간 간격 비율 |
-| stripe-count | 15-60개 per 축 | 전 작품 줄무늬 수 통계 | B | 반복 요소 수, 리스트 아이템 수 |
-| wave-amplitude | 줄무늬 너비의 2-8배 | Current (1964) 실측 | C | 곡선 패턴의 진폭 |
-| wave-period | 캔버스 너비의 20-50% | Current (1964) 실측 | C | 곡선 패턴의 주기 |
-| pattern-orientation | 수직, 수평, 대각(45°) | 전 작품 방향 통계 | B | 패턴 방향, 스크롤 방향과의 관계 |
+| stripe-width | 2-20px (0.5-3% of viewport) | Movement in Squares (1961) measured | B | Base width of stripe pattern |
+| stripe-gap | 0.5-2x of stripe-width | Spacing measured across all works | B | Gap ratio between stripes |
+| stripe-count | 15-60 per axis | Stripe-count statistics across all works | B | Count of repeated elements, list item count |
+| wave-amplitude | 2-8x of stripe width | Current (1964) measured | C | Amplitude of curved pattern |
+| wave-period | 20-50% of canvas width | Current (1964) measured | C | Period of curved pattern |
+| pattern-orientation | vertical, horizontal, diagonal (45°) | Orientation statistics across all works | B | Pattern direction, relation to scroll direction |
 
-### 비율 & 균형
-| 토큰명 | 값/범위 | 출처 | 신뢰도 | UI 적용 |
+### Ratio & Balance
+| Token | Value/Range | Source | Confidence | UI Application |
 |--------|---------|------|--------|---------|
-| black-white-ratio | 1:1 (초기 흑백), 가변 (후기) | 전 흑백 작품 면적비 | B | 전경:배경 비율의 기본값 |
-| width-variation-range | 기본 너비의 50-200% | Movement in Squares 측정 | B | 줄무늬 너비의 변화 범위 |
-| compression-ratio | 압축 지점에서 기본의 30-50% | Movement in Squares 좁은 구간 | B | 패턴 압축 시 최소 비율 |
-| expansion-ratio | 확장 지점에서 기본의 150-200% | Movement in Squares 넓은 구간 | B | 패턴 확장 시 최대 비율 |
-| color-stripe-count | 3-5가지 색상 교대 | Late Morning 등 색상 작품 | C | 컬러 시퀀스의 색상 수 |
+| black-white-ratio | 1:1 (early black-white), variable (later) | Area ratio of all black-white works | B | Default foreground:background ratio |
+| width-variation-range | 50-200% of base width | Movement in Squares measured | B | Variation range of stripe width |
+| compression-ratio | 30-50% of base at compression point | Movement in Squares narrow region | B | Minimum ratio at pattern compression |
+| expansion-ratio | 150-200% of base at expansion point | Movement in Squares wide region | B | Maximum ratio at pattern expansion |
+| color-stripe-count | 3-5 alternating colors | Late Morning and other color works | C | Number of colors in a color sequence |
 
-### 공간 & 여백
-| 토큰명 | 값/범위 | 출처 | 신뢰도 | UI 적용 |
+### Space & Whitespace
+| Token | Value/Range | Source | Confidence | UI Application |
 |--------|---------|------|--------|---------|
-| edge-to-edge | 패턴이 캔버스 가장자리까지 도달 (마진 0) | 전 작품 (패턴이 잘리지 않음) | B | 패턴이 뷰포트를 완전히 채움, full-bleed |
-| no-focal-rest | 시선이 쉴 수 있는 빈 공간 없음 | 전 작품 (전면 패턴) | B | 로딩/트랜지션에서 전면 패턴 적용 시 참고 |
-| pattern-boundary | 패턴 외부에는 완전한 여백 | 전시 설치 (패턴 작품 + 흰 벽) | C | 패턴 영역과 비패턴 영역의 명확한 구분 |
-| breathing-contrast | 패턴 영역 옆 최소 50% 여백 | 전시 공간 분석 | C | 패턴 UI 요소 주변에 충분한 빈 공간 확보 |
+| edge-to-edge | Pattern reaches the canvas edge (margin 0) | All works (pattern not cropped) | B | Pattern fully fills the viewport, full-bleed |
+| no-focal-rest | No empty space where the gaze can rest | All works (full-field pattern) | B | Reference when applying full-field pattern in loading/transition |
+| pattern-boundary | Complete whitespace outside the pattern | Exhibition install (pattern work + white wall) | C | Clear separation of pattern and non-pattern regions |
+| breathing-contrast | At least 50% whitespace beside the pattern region | Exhibition space analysis | C | Ensure sufficient empty space around pattern UI elements |
 
-### 시각적 리듬 & 반복
-| 토큰명 | 값/범위 | 출처 | 신뢰도 | UI 적용 |
+### Visual Rhythm & Repetition
+| Token | Value/Range | Source | Confidence | UI Application |
 |--------|---------|------|--------|---------|
-| repetition-threshold | 7-10회 반복 시 진동 시작 | 시지각 연구 기반 패턴 관찰 | C | 반복 요소의 최소 수 (진동 효과 의도 시) |
-| modulation-rate | 너비 변화 = 이웃 대비 5-15% | Movement in Squares 인접 줄무늬 비교 | B | 점진적 변화의 단위 — 급격한 변화 금지 |
-| phase-shift | 인접 열/행에서 패턴 50% 위상 차이 | Fall (1963) 실측 | C | 체커보드 패턴, 오프셋 그리드의 위상 |
-| color-sequence | 3-5색 규칙적 교대, 가끔 순서 교란 | Late Morning 색상 순서 분석 | C | 색상 시퀀스의 규칙성과 예외 |
-| moire-generation | 2개 이상 패턴 겹침 → 무아레 발생 | Blaze (1964) 동심원 겹침 | C | 의도적 패턴 오버랩으로 시각적 깊이 생성 |
-| speed-illusion | 좁은 간격 = 빠름, 넓은 간격 = 느림 | 전 작품 간격-속도 관계 | B | 로딩 바, 프로그레스의 속도감 조절 |
+| repetition-threshold | Vibration begins at 7-10 repetitions | Pattern observation based on visual-perception research | C | Minimum count of repeated elements (when vibration effect intended) |
+| modulation-rate | Width change = 5-15% relative to neighbor | Movement in Squares adjacent-stripe comparison | B | Unit of progressive change — no abrupt change |
+| phase-shift | 50% phase difference of pattern in adjacent column/row | Fall (1963) measured | C | Phase of checkerboard pattern, offset grid |
+| color-sequence | 3-5 colors regularly alternating, occasionally disrupted | Late Morning color-order analysis | C | Regularity and exceptions of a color sequence |
+| moire-generation | 2+ overlapping patterns → moiré occurs | Blaze (1964) concentric-circle overlap | C | Intentional pattern overlap to create visual depth |
+| speed-illusion | Narrow spacing = fast, wide spacing = slow | Spacing-speed relation across all works | B | Speed feel control for loading bars, progress |
 
-## 대표작 분석
+## Key Work Analysis
 
 ### 1. Movement in Squares (1961)
-- **캔버스**: 123 x 123cm (정사각형)
-- **소장**: Arts Council Collection, London
-- **구성**: 흑백 수직 줄무늬가 좌우에서 균일한 너비로 시작하여 중앙으로 갈수록 점진적으로 좁아진다. 중앙 압축 지점에서 줄무늬 너비가 가장 좁음(약 2mm). 다시 반대편으로 갈수록 넓어짐. 약 50-60개 줄무늬.
-- **압축 비율**: 가장자리 줄무늬 너비 약 15mm, 중앙 약 2mm. 비율 약 7.5:1.
-- **시각적 효과**: 중앙이 뒤로 빠져들어가는 듯한 깊이감. 평면에서 3D 공간감이 생김. 줄무늬가 "접히는" 느낌.
-- **UI 변환**: CSS `perspective` + `repeating-linear-gradient`로 줄무늬 너비를 점진적으로 변화. 로딩 화면, 트랜지션 효과, 스크롤 시 줄무늬 압축/확장으로 속도감 표현.
+- **Canvas**: 123 x 123cm (square)
+- **Collection**: Arts Council Collection, London
+- **Composition**: Black-white vertical stripes start at uniform width on the left and right and progressively narrow toward the center. Stripe width is narrowest at the central compression point (about 2mm). They widen again toward the opposite side. About 50-60 stripes.
+- **Compression ratio**: Edge stripe width about 15mm, center about 2mm. Ratio about 7.5:1.
+- **Visual effect**: A sense of depth as if the center recedes backward. A 3D sense of space arises on a flat plane. The stripes feel like they are "folding."
+- **UI conversion**: Progressively vary stripe width with CSS `perspective` + `repeating-linear-gradient`. Loading screens, transition effects, and stripe compression/expansion on scroll to express speed.
 
 ### 2. Current (1964)
-- **캔버스**: 148 x 149cm
-- **소장**: Museum of Modern Art, New York
-- **구성**: 흑백 곡선 줄무늬가 수직 방향으로 물결치며 흐른다. 곡률이 좌우로 변화하며 파동 패턴을 형성. 약 40개의 곡선. 파동의 주기가 캔버스 높이의 약 30%.
-- **운동 효과**: 강렬한 좌우 흔들림 착시. 캔버스 표면이 액체처럼 흐르는 듯한 느낌. 곡률이 큰 지점에서 움직임이 가장 강하다.
-- **수학적 분석**: 곡선은 사인파(sine wave)에 가까움. 진폭 약 10-15mm, 주기 약 40-50mm. 인접 곡선이 동일 위상으로 흘러 파면(wavefront)을 형성.
-- **UI 변환**: 물결치는 로딩 애니메이션, 스크롤 패럴랙스의 곡선 변형, 오디오 비주얼라이저 파형. `SVG path`의 사인파 변형 + CSS animation.
+- **Canvas**: 148 x 149cm
+- **Collection**: Museum of Modern Art, New York
+- **Composition**: Black-white curved stripes undulate and flow vertically. Curvature changes left and right, forming a wave pattern. About 40 curves. The wave period is about 30% of the canvas height.
+- **Movement effect**: Intense left-right swaying illusion. The canvas surface feels like flowing liquid. Movement is strongest at points of high curvature.
+- **Mathematical analysis**: The curves approximate a sine wave. Amplitude about 10-15mm, period about 40-50mm. Adjacent curves flow in the same phase, forming a wavefront.
+- **UI conversion**: Undulating loading animation, curved variation of scroll parallax, audio-visualizer waveform. `SVG path` sine-wave deformation + CSS animation.
 
 ### 3. Late Morning (1967-68)
-- **캔버스**: 226 x 231cm (거의 정사각형)
-- **소장**: Tate, London
-- **구성**: Riley의 첫 색상 작품 중 하나. 수직 줄무늬에 빨강, 파랑, 녹색, 회색, 흰색이 특정 순서로 교대. 줄무늬 너비는 거의 균일하나 색상 순서에 가끔 "이탈"이 있어 시각적 떨림 유발.
-- **색상 상호작용**: 빨강 줄무늬 옆의 회색이 녹색 기를 띄어 보임(동시대비). 파랑 옆의 흰색이 약간 노랑 기를 띔. 줄무늬 자체의 색이 아닌 "인지된 색"이 작품을 지배.
-- **UI 변환**: 색상 스트라이프 패턴의 네비게이션 바, 카테고리 인디케이터, 멀티 스텝 프로그레스. 동시대비 효과를 이용한 색상 구별 강화.
+- **Canvas**: 226 x 231cm (nearly square)
+- **Collection**: Tate, London
+- **Composition**: One of Riley's first color works. Vertical stripes alternate red, blue, green, gray, and white in a specific order. Stripe width is nearly uniform, but the color order occasionally "deviates," inducing visual shimmer.
+- **Color interaction**: Gray beside a red stripe appears to take on a green tint (simultaneous contrast). White beside blue takes on a slight yellow tint. The "perceived color" rather than the stripe's own color dominates the work.
+- **UI conversion**: Color-stripe pattern navigation bars, category indicators, multi-step progress. Reinforce color distinction using the simultaneous-contrast effect.
 
-## UI 적용 매핑
+## UI Application Mapping
 
-### 변환 규칙
+### Conversion Rules
 
-1. **로딩/트랜지션 패턴**: 줄무늬의 반복과 변주로 로딩 상태를 표현한다.
+1. **Loading/transition pattern**: Express loading state through repetition and variation of stripes.
    ```css
    .riley-loading {
      background: repeating-linear-gradient(
@@ -110,7 +110,7 @@
    }
    ```
 
-2. **프로그레스 바 속도감**: 줄무늬 간격을 변화시켜 진행 속도의 느낌을 조절한다. 좁은 간격 = 빠른 느낌, 넓은 간격 = 느린 느낌.
+2. **Progress bar speed feel**: Vary stripe spacing to adjust the perceived progress speed. Narrow spacing = fast feel, wide spacing = slow feel.
    ```css
    .riley-progress {
      background: repeating-linear-gradient(
@@ -122,7 +122,7 @@
    }
    ```
 
-3. **색상 스트라이프 네비게이션**: 카테고리별 색상을 수직 스트라이프로 표현한다.
+3. **Color stripe navigation**: Express per-category colors as vertical stripes.
    ```css
    .riley-nav {
      background: linear-gradient(
@@ -137,25 +137,25 @@
    }
    ```
 
-4. **패턴 압축/확장**: 스크롤 위치에 따라 줄무늬 너비를 동적으로 변경하여 깊이감과 속도감을 부여한다. `clamp(2px, 1vw, 20px)` 등 유동 단위 활용.
+4. **Pattern compression/expansion**: Dynamically change stripe width by scroll position to give a sense of depth and speed. Use fluid units such as `clamp(2px, 1vw, 20px)`.
 
-5. **동시대비 활용**: 회색 요소 옆에 원하는 색의 보색을 배치하여 회색이 해당 색 기를 띠게 만든다. 실제 색상 수를 줄이면서 인지되는 색상 수를 늘리는 전략.
+5. **Simultaneous contrast use**: Place the complement of the desired color beside a gray element so the gray takes on that color's tint. A strategy to reduce the actual color count while increasing the perceived color count.
 
-6. **전면 패턴과 여백의 분리**: 패턴은 지정된 영역을 100% 채우고, 그 밖은 완전한 여백으로 남긴다. 중간 상태(반쯤 채운 패턴)를 피한다.
+6. **Separation of full-field pattern and whitespace**: The pattern fills its designated region 100%, and everything outside remains complete whitespace. Avoid intermediate states (half-filled patterns).
 
-### 적합한 UI 유형
-- **로딩/스켈레톤**: 줄무늬 애니메이션으로 진행 상태 표현
-- **프로그레스 바**: 방향성 있는 줄무늬 패턴, 속도감 조절
-- **배경 패턴**: 히어로 영역, 섹션 분리기, 장식적 스트라이프
-- **데이터 시각화**: 히트맵, 바코드 차트, 스트라이프 차트
-- **트랜지션 효과**: 화면 전환 시 줄무늬 와이프(wipe) 효과
-- **스포츠/피트니스 앱**: 에너지, 운동감, 역동성이 필요한 인터페이스
+### Suitable UI Types
+- **Loading/skeleton**: Express progress state with stripe animation
+- **Progress bar**: Directional stripe patterns, speed-feel control
+- **Background pattern**: Hero areas, section dividers, decorative stripes
+- **Data visualization**: Heatmaps, barcode charts, stripe charts
+- **Transition effects**: Stripe wipe effects during screen transitions
+- **Sports/fitness apps**: Interfaces needing energy, movement, and dynamism
 
-### 주의사항
-- **접근성 최우선**: 옵아트 패턴은 광과민성 간질(photosensitive epilepsy)을 유발할 수 있다. `prefers-reduced-motion` 미디어 쿼리로 반드시 패턴 애니메이션을 비활성화한다. WCAG 2.1 규정 2.3.1(Three Flashes) 준수 필수.
-- **대면적 패턴 자제**: 화면의 50% 이상을 고대비 반복 패턴으로 채우면 시각적 불편을 유발한다. 패턴은 장식 요소(프로그레스 바, 배경 스트라이프)에 한정한다.
-- **줄무늬 최소 너비**: 2px 미만의 줄무늬는 해상도에 따라 깨지거나 무아레가 의도치 않게 발생한다. 최소 2px(1x 해상도 기준)을 유지한다.
-- **색상 과잉 금지**: 색상 스트라이프는 최대 5색으로 제한한다. 그 이상은 카테고리 구분이 아닌 시각적 혼란이 된다.
-- **정적 대면적 사용 금지**: Riley의 패턴은 "운동감"이 핵심이다. 정적 배경으로 대면적 패턴을 깔면 눈의 피로만 유발한다. 패턴은 작은 면적 또는 애니메이션과 함께 사용한다.
-- **콘텐츠 위 패턴 금지**: 텍스트나 중요 콘텐츠 뒤에 고대비 패턴을 배치하면 가독성이 파괴된다. 패턴은 콘텐츠와 분리된 장식 영역에만 사용한다.
-- **주기 일관성**: 한 화면에 서로 다른 주기의 줄무늬 패턴을 혼재하면 의도치 않은 무아레가 발생한다. 패턴 주기를 통일하거나 충분히 다르게(2배 이상 차이) 설정한다.
+### Cautions
+- **Accessibility first**: Op Art patterns can trigger photosensitive epilepsy. Always disable pattern animation with the `prefers-reduced-motion` media query. Compliance with WCAG 2.1 rule 2.3.1 (Three Flashes) is mandatory.
+- **Avoid large-area patterns**: Filling 50% or more of the screen with high-contrast repeating patterns causes visual discomfort. Limit patterns to decorative elements (progress bars, background stripes).
+- **Minimum stripe width**: Stripes under 2px break up or generate unintended moiré depending on resolution. Maintain a minimum of 2px (at 1x resolution).
+- **No color excess**: Limit color stripes to a maximum of 5 colors. More becomes visual confusion rather than category distinction.
+- **No static large-area use**: Riley's patterns are about "movement" at their core. Laying a large-area pattern as a static background only causes eye fatigue. Use patterns in small areas or together with animation.
+- **No pattern over content**: Placing a high-contrast pattern behind text or important content destroys legibility. Use patterns only in decorative regions separated from content.
+- **Period consistency**: Mixing stripe patterns of different periods on one screen produces unintended moiré. Unify the pattern period or make them sufficiently different (2x or more difference).

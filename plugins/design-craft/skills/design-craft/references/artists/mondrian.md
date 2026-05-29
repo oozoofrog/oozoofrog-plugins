@@ -1,154 +1,154 @@
-# Piet Mondrian -- 시각 언어 디자인 토큰
+# Piet Mondrian -- Visual Language Design Tokens
 
-## 프로필
-- **활동 기간**: 1892-1944 (활발한 창작기: 1911-1944)
-- **운동/유파**: De Stijl (신조형주의, Neoplasticism)
-- **핵심 공헌**: 회화를 수직선·수평선·3원색·무채색으로 환원하여 보편적 조화의 시각 문법을 확립. 건축·디자인·타이포그래피에 직접 영향을 준 최초의 순수 추상 체계.
+## Profile
+- **Active period**: 1892-1944 (peak creative period: 1911-1944)
+- **Movement/school**: De Stijl (Neoplasticism)
+- **Core contribution**: Reduced painting to vertical lines, horizontal lines, three primary colors, and achromatic tones, establishing a visual grammar of universal harmony. The first pure abstract system to directly influence architecture, design, and typography.
 
-## 시각 언어 원칙
+## Visual Language Principles
 
-1. **직교 질서(Orthogonal Order)**: 모든 구조를 수직과 수평으로만 구성한다. 대각선과 곡선을 배제하여 최대 명료성을 달성한다. UI에서 CSS Grid와 Flexbox의 철학적 원형이다.
-2. **비대칭 균형(Asymmetric Equilibrium)**: 좌우대칭이 아닌 면적·색상·위치의 상호 보상으로 균형을 잡는다. 큰 흰 면과 작은 빨간 면이 동등한 시각적 무게를 가진다. 색상의 시각적 무게는 면적에 반비례한다.
-3. **원색 순수성(Primary Purity)**: 빨강·파랑·노랑 + 흑·백·회만 사용한다. 혼합색은 순수성을 훼손한다. UI 디자인 시스템의 시맨틱 컬러 팔레트 원칙과 일치한다.
-4. **면의 독립(Plane Independence)**: 각 색면은 독립적 단위이며, 선(그리드 라인)이 면을 구획한다. UI 컴포넌트의 독립성과 그리드 시스템의 관계를 예시한다.
-5. **동적 정지(Dynamic Repose)**: 정적 구성이지만 비대칭으로 인해 시선이 순환한다. 사용자의 시선 흐름을 의도적으로 유도하는 레이아웃 원칙이다.
-6. **환원적 순수(Reductive Purity)**: 자연의 복잡한 형태를 수직-수평 관계로 환원한다. 몬드리안은 "자연은 곡선이지만 예술은 직선이어야 한다"고 주장했다. UI에서 장식을 제거하고 구조만 남기는 원칙이다.
-7. **보편적 조화(Universal Harmony)**: 개인 취향이 아닌 보편적 비례 관계를 추구한다. De Stijl 선언문(1918)은 "개별성을 넘어선 보편성"을 목표로 삼았다. 디자인 시스템의 일관성 원칙과 직접 대응한다.
+1. **Orthogonal Order**: Compose every structure using only verticals and horizontals. Exclude diagonals and curves to achieve maximum clarity. The philosophical archetype of CSS Grid and Flexbox in UI.
+2. **Asymmetric Equilibrium**: Balance is struck not by left-right symmetry but by mutual compensation of area, color, and position. A large white plane and a small red plane carry equal visual weight. A color's visual weight is inversely proportional to its area.
+3. **Primary Purity**: Use only red, blue, yellow + black, white, gray. Mixed colors compromise purity. Consistent with the semantic color palette principle of UI design systems.
+4. **Plane Independence**: Each color plane is an independent unit, and lines (grid lines) partition the planes. Illustrates the relationship between the independence of UI components and the grid system.
+5. **Dynamic Repose**: Though the composition is static, asymmetry causes the gaze to circulate. A layout principle that intentionally guides the user's eye flow.
+6. **Reductive Purity**: Reduce nature's complex forms to vertical-horizontal relationships. Mondrian asserted that "nature is curved, but art must be straight". The principle of removing ornament and leaving only structure in UI.
+7. **Universal Harmony**: Pursue universal proportional relationships rather than personal taste. The De Stijl manifesto (1918) aimed at "universality beyond individuality". Directly corresponds to the consistency principle of design systems.
 
-## 정량적 디자인 토큰
+## Quantitative Design Tokens
 
-### 색상 체계
-| 토큰명 | 값/범위 | 출처 | 신뢰도 | UI 적용 |
+### Color System
+| Token | Value/Range | Source | Confidence | UI Application |
 |--------|---------|------|--------|---------|
-| mondrian-red | #CC2200 ~ #E63929 | Composition II (1930) 디지털 측색 | B | Primary action, CTA 버튼, 경고 강조 |
-| mondrian-blue | #1B3B8C ~ #2040A0 | Composition with Red, Blue, and Yellow (1930) | B | 정보성 요소, 링크, 선택 상태 |
-| mondrian-yellow | #F2D516 ~ #FFE135 | Composition with Large Red Plane (1921) | B | 하이라이트, 배지, 알림 포인트 |
-| mondrian-black | #0A0A0A ~ #1A1A1A | 전 작품 격자선 일관 | B | 그리드 라인, 테두리, 구분선 |
-| mondrian-white | #F5F5F0 ~ #FAFAF5 | 전 작품 배경면 (순백이 아닌 미색) | B | 배경, 카드 면, 여백 |
-| mondrian-gray | #B0B0AA ~ #C8C8C0 | 후기 작품 일부 회색면 | C | 비활성 상태, 보조 배경 |
-| mondrian-warm-white | #FAF0E6 ~ #FFF8DC | Composition A (1920) 배경면 | F | 난색 배경 변형, 따뜻한 분위기의 카드 |
-| color-usage-density | 전체 면적의 15-30%만 유채색 | 주요 10작품 면적 통계 | C | 유채색 사용 비율 상한선 지침 |
+| mondrian-red | #CC2200 ~ #E63929 | Composition II (1930) digital colorimetry | B | Primary action, CTA buttons, alert emphasis |
+| mondrian-blue | #1B3B8C ~ #2040A0 | Composition with Red, Blue, and Yellow (1930) | B | Informational elements, links, selected state |
+| mondrian-yellow | #F2D516 ~ #FFE135 | Composition with Large Red Plane (1921) | B | Highlights, badges, notification points |
+| mondrian-black | #0A0A0A ~ #1A1A1A | Consistent grid lines across all works | B | Grid lines, borders, dividers |
+| mondrian-white | #F5F5F0 ~ #FAFAF5 | Background planes across all works (off-white, not pure white) | B | Background, card planes, whitespace |
+| mondrian-gray | #B0B0AA ~ #C8C8C0 | Gray planes in some late works | C | Disabled state, secondary background |
+| mondrian-warm-white | #FAF0E6 ~ #FFF8DC | Composition A (1920) background plane | F | Warm background variant, warm-toned cards |
+| color-usage-density | only 15-30% of total area is chromatic | area statistics of 10 major works | C | Upper-limit guideline for chromatic color usage ratio |
 
-### 구성 & 레이아웃
-| 토큰명 | 값/범위 | 출처 | 신뢰도 | UI 적용 |
+### Composition & Layout
+| Token | Value/Range | Source | Confidence | UI Application |
 |--------|---------|------|--------|---------|
-| grid-line-weight | 3-8px (캔버스 대비 0.5-1.2%) | Composition 연작 실측 | B | 그리드 구분선, 보더 두께 |
-| grid-cell-min | 캔버스의 5-8% | Composition II (1930) | B | 최소 컴포넌트 크기 |
-| grid-cell-max | 캔버스의 40-55% | Composition with Large Red Plane (1921) | B | 히어로 영역, 메인 컨텐츠 비율 |
-| grid-columns | 2-5개 불균등 분할 | 전 작품 통계 | C | CSS Grid 비균등 컬럼 설정 |
-| grid-rows | 2-4개 불균등 분할 | 전 작품 통계 | C | CSS Grid 비균등 로우 설정 |
+| grid-line-weight | 3-8px (0.5-1.2% relative to canvas) | Composition series measurements | B | Grid dividers, border thickness |
+| grid-cell-min | 5-8% of canvas | Composition II (1930) | B | Minimum component size |
+| grid-cell-max | 40-55% of canvas | Composition with Large Red Plane (1921) | B | Hero region, main content ratio |
+| grid-columns | 2-5 unequal divisions | statistics across all works | C | CSS Grid non-uniform column setup |
+| grid-rows | 2-4 unequal divisions | statistics across all works | C | CSS Grid non-uniform row setup |
 
-### 비율 & 균형
-| 토큰명 | 값/범위 | 출처 | 신뢰도 | UI 적용 |
+### Proportion & Balance
+| Token | Value/Range | Source | Confidence | UI Application |
 |--------|---------|------|--------|---------|
-| dominant-plane-ratio | 전체의 35-55% | Composition 연작 면적 분석 | B | 주요 컨텐츠 영역 비율 |
-| accent-plane-ratio | 전체의 3-12% | 색면 면적 측정 | B | CTA/강조 요소 크기 비율 |
-| color-to-white-ratio | 색면 15-35% : 백면 65-85% | 8개 주요 작품 통계 | B | 색상 사용 밀도, 화이트스페이스 비율 |
-| asymmetry-offset | 중심에서 10-25% 편향 | 구성 중심 분석 | C | 비대칭 레이아웃의 오프셋 값 |
+| dominant-plane-ratio | 35-55% of total | Composition series area analysis | B | Main content region ratio |
+| accent-plane-ratio | 3-12% of total | color plane area measurement | B | CTA/emphasis element size ratio |
+| color-to-white-ratio | color planes 15-35% : white planes 65-85% | statistics of 8 major works | B | Color usage density, whitespace ratio |
+| asymmetry-offset | 10-25% bias from center | composition center analysis | C | Offset value for asymmetric layouts |
 
-### 공간 & 여백
-| 토큰명 | 값/범위 | 출처 | 신뢰도 | UI 적용 |
+### Space & Whitespace
+| Token | Value/Range | Source | Confidence | UI Application |
 |--------|---------|------|--------|---------|
-| white-plane-dominance | 전체의 50-70% | 전 작품 백면 비율 | B | 여백 중심 레이아웃의 공백 비율 |
-| edge-margin | 캔버스 가장자리에서 첫 선까지 0-3% | 실측 | B | 컨테이너 바깥 여백 (극소 또는 0) |
-| inter-cell-gap | 선 두께와 동일 (3-8px) | 격자 구조 분석 | B | 그리드 갭, 컴포넌트 간 간격 |
-| canvas-to-frame | 선이 캔버스 가장자리까지 연장 | 전 작품 (선이 잘리지 않음) | B | 그리드 라인이 뷰포트 끝까지 도달, overflow 허용 |
-| negative-space-cluster | 2-3개 백면이 인접하여 큰 여백 형성 | Composition 연작 | C | 여백 영역을 의도적으로 군집화하여 시각적 휴식 공간 확보 |
+| white-plane-dominance | 50-70% of total | white plane ratio across all works | B | Blank ratio for whitespace-centered layouts |
+| edge-margin | 0-3% from canvas edge to first line | measurement | B | Container outer margin (minimal or 0) |
+| inter-cell-gap | equal to line thickness (3-8px) | grid structure analysis | B | Grid gap, spacing between components |
+| canvas-to-frame | lines extend to the canvas edge | all works (lines are not clipped) | B | Grid lines reach the viewport edges, overflow allowed |
+| negative-space-cluster | 2-3 white planes adjoin to form a large whitespace | Composition series | C | Intentionally cluster whitespace regions to secure visual rest space |
 
-### 시각적 리듬 & 반복
-| 토큰명 | 값/범위 | 출처 | 신뢰도 | UI 적용 |
+### Visual Rhythm & Repetition
+| Token | Value/Range | Source | Confidence | UI Application |
 |--------|---------|------|--------|---------|
-| rhythm-regularity | 비정규(aperiodic) 리듬 | 전 작품 간격 분석 | C | 그리드 트랙 크기를 불균등하게 설정 |
-| boogie-pulse-size | 8-12px 정사각형 반복 단위 | Broadway Boogie Woogie (1942) 실측 | B | 아이콘 크기, 마이크로 인터랙션 단위 |
-| boogie-color-alternation | 빨-노-파-회 4색 교대 패턴 | Broadway Boogie Woogie (1942) | B | 상태 표시 배지, 스텝 인디케이터 색상 순환 |
-| boogie-grid-density | 15-20개 선/축 | Broadway Boogie Woogie (1942) | B | 고밀도 대시보드 그리드 구성 |
-| line-continuity | 선이 캔버스 한쪽 끝에서 반대쪽까지 관통 | Composition 연작 | B | 그리드 라인이 뷰포트를 완전히 횡단, 부분 선 금지 |
-| intersection-emphasis | 선의 교차점에서 두께 변화 없음 (일정) | 전 작품 격자 교차점 | B | 그리드 교차점에 특별한 장식 없이 일정한 두께 유지 |
+| rhythm-regularity | aperiodic rhythm | spacing analysis across all works | C | Set grid track sizes unevenly |
+| boogie-pulse-size | 8-12px square repeating unit | Broadway Boogie Woogie (1942) measurement | B | Icon size, micro-interaction unit |
+| boogie-color-alternation | red-yellow-blue-gray 4-color alternating pattern | Broadway Boogie Woogie (1942) | B | Color cycling for status badges, step indicators |
+| boogie-grid-density | 15-20 lines/axis | Broadway Boogie Woogie (1942) | B | High-density dashboard grid composition |
+| line-continuity | lines run from one canvas edge straight through to the opposite edge | Composition series | B | Grid lines traverse the viewport completely, partial lines forbidden |
+| intersection-emphasis | no thickness change at line intersections (constant) | grid intersections across all works | B | Keep constant thickness at grid intersections with no special ornament |
 
-## 대표작 분석
+## Key Work Analysis
 
 ### 1. Composition with Red, Blue, and Yellow (1930)
-- **캔버스**: 약 46 x 46cm 정사각형
-- **소장**: Kunsthaus Zurich
-- **구성**: 수직선 2개, 수평선 2개로 9개 영역 생성. 우상단에 대형 빨간 면(전체의 ~40%), 좌하단에 소형 파란 면(~5%), 우하단에 소형 노란 면(~3%)
-- **비율 분석**: 수직선 위치 = 좌측에서 25%, 75% / 수평선 위치 = 상단에서 30%, 80%
-- **색면 대비**: 빨강 면적이 파랑의 8배, 노랑의 13배 → 면적 역비례로 시각적 무게 균형
-- **시각적 무게 공식**: 빨강(40% x 높은 채도) ≈ 파랑(5% x 중간 채도 + 후퇴색 보정) + 노랑(3% x 전진색 보정) + 백면의 가벼움
-- **UI 변환**: `grid-template-columns: 1fr 2fr; grid-template-rows: 1.4fr 2.5fr 1fr;` 불균등 그리드. 주요 컨텐츠를 우상단 40% 영역에, 보조 액션을 좌하단 소형 영역에 배치.
+- **Canvas**: roughly 46 x 46cm square
+- **Collection**: Kunsthaus Zurich
+- **Composition**: 2 vertical lines and 2 horizontal lines create 9 regions. Large red plane in the upper right (~40% of total), small blue plane in the lower left (~5%), small yellow plane in the lower right (~3%)
+- **Proportion analysis**: vertical line positions = 25%, 75% from the left / horizontal line positions = 30%, 80% from the top
+- **Color plane contrast**: red area is 8x the blue and 13x the yellow → visual weight balanced by inverse proportion of area
+- **Visual weight formula**: red(40% x high saturation) ≈ blue(5% x medium saturation + receding-color correction) + yellow(3% x advancing-color correction) + lightness of the white plane
+- **UI conversion**: `grid-template-columns: 1fr 2fr; grid-template-rows: 1.4fr 2.5fr 1fr;` unequal grid. Place main content in the upper-right 40% region and secondary actions in the small lower-left region.
 
 ### 2. Broadway Boogie Woogie (1942-43)
-- **캔버스**: 127 x 127cm 정사각형
-- **소장**: Museum of Modern Art, New York
-- **구성**: 검은 선 대신 색면 블록이 격자를 구성. 약 16개 수직선, 14개 수평선. 초기 작품의 검은 격자선이 색 블록의 연속으로 치환됨 — 선 자체가 리듬적 요소가 됨.
-- **리듬 패턴**: 노-빨-파-회 블록이 불규칙 간격으로 교대. 교차점에 확대된 색 블록 배치. 단위 블록 크기 약 8-12px(캔버스 대비). 재즈의 싱코페이션처럼 비정규 간격 반복.
-- **도시 그리드 매핑**: 맨해튼 거리 격자의 시각적 번역. 교차점 = 강조 노드. Avenue(수직)와 Street(수평)의 계층 차이가 선 두께와 블록 크기 차이로 반영됨.
-- **색상 분포**: 노랑 ~45%, 빨강 ~25%, 파랑 ~15%, 회색 ~15% (격자선 내 블록 기준)
-- **UI 변환**: 대시보드의 반복 타일 패턴, 네비게이션 바의 컬러 인디케이터, 데이터 시각화의 히트맵 구조. 특히 프로그레스 바, 스텝 인디케이터, 타임라인 시각화에 적합.
+- **Canvas**: 127 x 127cm square
+- **Collection**: Museum of Modern Art, New York
+- **Composition**: color-plane blocks form the grid instead of black lines. About 16 vertical lines, 14 horizontal lines. The black grid lines of early works are replaced by sequences of color blocks — the lines themselves become rhythmic elements.
+- **Rhythm pattern**: yellow-red-blue-gray blocks alternate at irregular intervals. Enlarged color blocks placed at intersections. Unit block size about 8-12px (relative to canvas). Aperiodic interval repetition like the syncopation of jazz.
+- **Urban grid mapping**: a visual translation of the Manhattan street grid. Intersections = emphasis nodes. The hierarchical difference between Avenue (vertical) and Street (horizontal) is reflected in differences of line thickness and block size.
+- **Color distribution**: yellow ~45%, red ~25%, blue ~15%, gray ~15% (based on blocks within the grid lines)
+- **UI conversion**: repeating tile patterns in dashboards, color indicators in navigation bars, heatmap structures in data visualization. Especially suited to progress bars, step indicators, and timeline visualizations.
 
 ### 3. Composition II in Red, Blue, and Yellow (1930)
-- **캔버스**: 약 51 x 51cm
-- **소장**: Kunsthaus Zurich
-- **구성**: 좌측 2/3를 차지하는 대형 빨간 면이 지배적. 우측에 좁은 흰·파랑·노랑 스트립이 수직으로 적층
-- **비율**: 주요 분할선 = 캔버스 폭의 66% 지점 (황금비 근사 아닌 2:1 비율). 수평 분할선 = 상단에서 약 75% 지점
-- **극단적 비대칭**: 빨간 면이 전체의 ~50%를 차지하며 나머지 5개 영역이 50%를 분점. 가장 극적인 면적 대비를 보여주는 작품
-- **UI 변환**: 사이드바(1/3) + 메인 컨텐츠(2/3) 레이아웃 패턴. 또는 모바일에서 상단 히어로(2/3) + 하단 액션바(1/3) 구성
+- **Canvas**: roughly 51 x 51cm
+- **Collection**: Kunsthaus Zurich
+- **Composition**: a large red plane occupying the left 2/3 dominates. Narrow white, blue, and yellow strips stacked vertically on the right
+- **Proportion**: main division line = at the 66% point of the canvas width (a 2:1 ratio, not a golden-ratio approximation). Horizontal division line = at about the 75% point from the top
+- **Extreme asymmetry**: the red plane occupies ~50% of the total while the remaining 5 regions share the other 50%. The work showing the most dramatic area contrast
+- **UI conversion**: sidebar (1/3) + main content (2/3) layout pattern. Or on mobile, top hero (2/3) + bottom action bar (1/3) composition
 
-## UI 적용 매핑
+## UI Application Mapping
 
-### 변환 규칙
+### Conversion Rules
 
-1. **그리드 시스템**: `display: grid`로 불균등 트랙 설정. `grid-template-columns`와 `grid-template-rows`에 fr 단위로 비대칭 비율 적용.
+1. **Grid system**: set unequal tracks with `display: grid`. Apply asymmetric ratios in fr units to `grid-template-columns` and `grid-template-rows`.
    ```css
    .mondrian-layout {
      display: grid;
      grid-template-columns: 1fr 2.5fr 0.8fr;
      grid-template-rows: 1fr 3fr 1.2fr;
      gap: 4px;
-     background: #1A1A1A; /* gap이 선 역할 */
+     background: #1A1A1A; /* gap acts as the lines */
    }
    .mondrian-layout > * {
-     background: #FAFAF5; /* 기본 백면 */
+     background: #FAFAF5; /* default white plane */
    }
    ```
 
-2. **색상 할당**: 시맨틱 컬러로 매핑한다.
-   - mondrian-red → destructive/primary-action (CTA 버튼, 중요 알림)
-   - mondrian-blue → informational/link (링크, 선택 상태, 네비게이션)
-   - mondrian-yellow → warning/highlight (배지, 알림 점, 새 항목 표시)
-   - 전체 면적의 15-25%만 유채색을 사용한다. 나머지는 백면과 흑선.
+2. **Color assignment**: map to semantic colors.
+   - mondrian-red → destructive/primary-action (CTA buttons, important alerts)
+   - mondrian-blue → informational/link (links, selected state, navigation)
+   - mondrian-yellow → warning/highlight (badges, notification dots, new-item markers)
+   - Use chromatic color in only 15-25% of the total area. The rest is white planes and black lines.
 
-3. **보더 체계**: 모든 구분선은 mondrian-black, 3-8px 실선. radius 없음(직각만 허용). `border: 4px solid #1A1A1A;`. CSS Grid의 `gap` + 부모 `background-color`로 선을 시뮬레이션할 수도 있다.
+3. **Border system**: all dividers are mondrian-black, 3-8px solid lines. No radius (only right angles allowed). `border: 4px solid #1A1A1A;`. Lines can also be simulated with CSS Grid `gap` + the parent `background-color`.
 
-4. **여백 전략**: 큰 흰 면은 "의도적 공백"으로 컨텐츠 없는 영역을 허용한다. 모든 영역을 채우려는 충동을 억제한다. 비어있는 그리드 셀은 레이아웃의 핵심 요소이다.
+4. **Whitespace strategy**: large white planes are "intentional blank space" that permit content-free regions. Suppress the urge to fill every region. Empty grid cells are a core element of the layout.
 
-5. **컴포넌트 독립**: 각 그리드 셀의 컴포넌트는 독립적으로 기능한다. 셀 간 의존성 최소화. 한 셀의 변경이 다른 셀에 영향을 주지 않는다.
+5. **Component independence**: the component in each grid cell functions independently. Minimize dependencies between cells. A change in one cell does not affect another.
 
-6. **타이포그래피**: 산세리프 서체만 사용한다. De Stijl 운동은 Futura, Gill Sans 등 기하학적 산세리프를 선호했다. 텍스트 정렬은 좌측 정렬 기본, 중앙 정렬은 허용하되 양쪽 정렬은 금지한다.
+6. **Typography**: use only sans-serif typefaces. The De Stijl movement preferred geometric sans-serifs such as Futura and Gill Sans. Text alignment is left-aligned by default; center alignment is allowed but justified alignment is forbidden.
 
-7. **색면 배치 전략**: 색면은 모서리나 가장자리에 위치시킨다. 캔버스 중앙에 고립된 색면은 몬드리안 작품에 거의 없다. UI에서 CTA를 화면 구석이나 가장자리에 배치하는 근거가 된다.
+7. **Color plane placement strategy**: place color planes at corners or edges. An isolated color plane in the center of the canvas almost never appears in Mondrian's work. This is the rationale for placing CTAs at the corners or edges of the screen in UI.
 
-### 적합한 UI 유형
-- **대시보드**: 불균등 그리드로 KPI 카드 배치, 큰 차트 + 작은 지표 조합
-- **포트폴리오/갤러리**: 비대칭 이미지 그리드, 메이슨리 레이아웃의 정돈된 변형
-- **랜딩 페이지**: 히어로 영역(큰 면) + 보조 정보(작은 면) 구성
-- **디자인 도구**: 캔버스 기반 인터페이스, 그리드 오버레이 시스템
-- **미니멀 브랜드 사이트**: 여백 중심, 강한 구조적 그리드
+### Suitable UI Types
+- **Dashboards**: place KPI cards in an unequal grid, combine large charts + small metrics
+- **Portfolio/gallery**: asymmetric image grid, an orderly variant of the masonry layout
+- **Landing pages**: hero region (large plane) + secondary info (small planes) composition
+- **Design tools**: canvas-based interfaces, grid overlay systems
+- **Minimal brand sites**: whitespace-centered, strong structural grid
 
-### 주의사항
-- **과도한 색면 사용 금지**: 색면이 전체의 35%를 초과하면 몬드리안 미학이 파괴된다. 백면 우세 원칙을 유지한다.
-- **둥근 모서리 금지**: `border-radius`는 De Stijl 원칙에 정면 위배된다. 이 스타일 적용 시 모든 모서리를 직각으로 유지한다.
-- **대각선·곡선 요소 배제**: 기울어진 텍스트, 원형 아바타, 파동형 구분선 등은 사용하지 않는다.
-- **균등 분할 회피**: `1fr 1fr 1fr` 같은 균등 그리드는 몬드리안적이지 않다. 반드시 불균등 비율을 사용한다.
-- **그림자 효과 자제**: 그림자(box-shadow)는 면의 평면성을 해친다. 깊이감은 색상 대비로만 표현한다.
-- **과밀 배치 경계**: Broadway Boogie Woogie 스타일을 제외하면, 셀 수를 9개 이하로 제한한다. 너무 많은 분할은 혼란을 유발한다.
-- **그라디언트 사용 금지**: 몬드리안의 색면은 평면적이고 균질하다. 색면 내부의 그라디언트, 텍스처, 패턴은 순수성을 해친다.
-- **아이콘/일러스트 최소화**: 구상적 이미지는 추상 구성의 순수성을 훼손한다. 아이콘을 사용해야 한다면 단순한 기하학적 형태로 제한한다.
+### Cautions
+- **No excessive color planes**: if color planes exceed 35% of the total, the Mondrian aesthetic is destroyed. Maintain the white-plane-dominant principle.
+- **No rounded corners**: `border-radius` directly violates De Stijl principles. When applying this style, keep all corners at right angles.
+- **Exclude diagonal/curved elements**: do not use slanted text, circular avatars, wavy dividers, etc.
+- **Avoid equal divisions**: an equal grid like `1fr 1fr 1fr` is not Mondrian-like. Always use unequal ratios.
+- **Restrain shadow effects**: shadows (box-shadow) harm the flatness of the planes. Express depth only through color contrast.
+- **Beware overcrowding**: except for the Broadway Boogie Woogie style, limit the cell count to 9 or fewer. Too many divisions cause confusion.
+- **No gradients**: Mondrian's color planes are flat and homogeneous. Gradients, textures, and patterns inside a color plane harm purity.
+- **Minimize icons/illustrations**: figurative imagery compromises the purity of abstract composition. If icons must be used, limit them to simple geometric forms.
 
-## De Stijl 수학적 원칙 참고
+## De Stijl Mathematical Principles Reference
 
-몬드리안과 De Stijl 그룹(Theo van Doesburg, Gerrit Rietveld)이 공유한 수학적 원칙:
+Mathematical principles shared by Mondrian and the De Stijl group (Theo van Doesburg, Gerrit Rietveld):
 
-- **동적 균형(Dynamic Equilibrium)**: 대칭은 정적이고 죽은 균형이다. 비대칭의 동적 균형만이 생명력을 가진다. Van Doesburg는 이를 "대위법적 구성(counterpoint composition)"이라 불렀다.
-- **직각의 보편성**: 직각은 자연에서 중력(수직)과 수평면의 관계에서 발생하는 가장 근본적인 구조적 관계이다.
-- **비율 관계**: 몬드리안은 황금비를 의도적으로 사용하지 않았다. 대신 직관적으로 결정된 비율이 작품마다 고유하다. 이는 디자인 시스템에서 "규칙 내의 자유"를 의미한다 — 그리드는 고정하되 분할 비율은 컨텐츠에 따라 유동적으로 결정한다.
-- **Rietveld Schroder House (1924)**: De Stijl 원칙의 건축적 구현. 내부 벽을 슬라이딩 패널로 재구성 가능하게 만듦 → 반응형 레이아웃의 물리적 선례.
+- **Dynamic Equilibrium**: symmetry is a static, dead balance. Only the dynamic balance of asymmetry holds vitality. Van Doesburg called this "counterpoint composition".
+- **Universality of the right angle**: the right angle is the most fundamental structural relationship, arising in nature from the relationship between gravity (vertical) and the horizontal plane.
+- **Proportional relationships**: Mondrian deliberately avoided using the golden ratio. Instead, intuitively determined ratios are unique to each work. In a design system this means "freedom within rules" — fix the grid but let the division ratios be determined fluidly according to content.
+- **Rietveld Schroder House (1924)**: an architectural realization of De Stijl principles. Interior walls were made reconfigurable with sliding panels → a physical precedent for responsive layouts.

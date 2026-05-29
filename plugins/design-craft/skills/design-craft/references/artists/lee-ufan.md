@@ -1,109 +1,109 @@
-# 이우환 (Lee Ufan) -- 시각 언어 디자인 토큰
+# 이우환 (Lee Ufan) -- Visual Language Design Tokens
 
-## 프로필
-- **활동 기간**: 1967-현재 (핵심 활동기: 1968-현재)
-- **운동/유파**: 모노하(Mono-ha, もの派), 한국 단색화와의 접점
-- **핵심 공헌**: "만남"의 미학으로 최소 행위와 최대 여백의 긴장을 확립. 점·선·바람으로부터(From Point, From Line, From Wind) 연작에서 반복과 소멸의 구조를 체계화. 동양의 '간(間)' 개념을 현대 미술의 공간론으로 승격시킴.
+## Profile
+- **Active period**: 1967-present (core period: 1968-present)
+- **Movement/school**: Mono-ha (もの派), with ties to Korean Dansaekhwa
+- **Core contribution**: Established the aesthetics of "encounter," holding minimal action and maximal void in tension. Systematized structures of repetition and disappearance in the From Point, From Line, From Wind series. Elevated the Eastern concept of 'ma (間)' into a theory of space for contemporary art.
 
-## 시각 언어 원칙
+## Visual Language Principles
 
-1. **여백의 능동성(Active Void)**: 빈 공간은 비어있는 것이 아니라 "울림"을 담는 장(場)이다. 캔버스의 70-90%가 여백이며, 그 여백이 작품의 본체이다. UI에서 whitespace는 장식이 아닌 기능적 호흡이다.
-2. **만남(Encounter, 出会い)**: 이질적 요소(붓 자국과 캔버스, 돌과 철판)가 만나는 접점에서 긴장이 발생한다. UI에서 컴포넌트 간 "관계"가 개별 요소보다 중요하다.
-3. **비완결성(Incompleteness)**: 완성을 향해 가지 않고 의도적으로 미완으로 남긴다. 화면 밖으로 이어지는 선, 잘린 형태가 상상력을 유발한다. UI에서 peek/preview 패턴의 미학적 근거이다.
-4. **반복과 소멸(Repetition & Fading)**: 점·선 연작에서 붓의 잉크가 점차 소진되며 자국이 희미해진다. 한 획의 시작과 끝이 밀도 차이를 가진다. UI에서 opacity 그라디언트, fade-out 패턴의 원형이다.
-5. **신체성(Bodily Gesture)**: 붓질은 신체의 호흡과 리듬을 그대로 담는다. 기계적 균일함을 거부한다. UI에서 ease-in-out 커브, 자연스러운 감속 애니메이션의 근거이다.
-6. **관계항(Relatum)**: 조각 연작 Relatum에서 돌(자연)과 철판(인공)이 나란히 놓인다. 둘 다 변형하지 않고 "있는 그대로" 만나게 한다. UI에서 콘텐츠와 컨테이너의 관계 — 과도한 스타일링 없이 본질을 드러내는 원칙이다.
-7. **간(間, Ma)**: 한국/일본 미학의 핵심 개념. 시간적 공간적 "사이"의 여운. 요소 간 거리가 관계의 성격을 결정한다. UI에서 spacing scale이 시각적 계층을 형성하는 원리이다.
+1. **Active Void**: Empty space is not emptiness but a field (場) that holds "resonance." 70-90% of the canvas is void, and that void is the substance of the work. In UI, whitespace is functional breathing, not decoration.
+2. **Encounter (出会い)**: Tension arises at the contact point where heterogeneous elements (brush mark and canvas, stone and steel plate) meet. In UI, the "relationship" between components matters more than the individual elements.
+3. **Incompleteness**: The work does not strive toward completion but is intentionally left unfinished. Lines extending beyond the canvas and cut-off forms provoke imagination. This is the aesthetic basis for peek/preview patterns in UI.
+4. **Repetition & Fading**: In the Point and Line series, the brush's ink gradually exhausts and the marks fade. The start and end of a stroke differ in density. This is the prototype for opacity gradients and fade-out patterns in UI.
+5. **Bodily Gesture**: The brushstroke carries the body's breath and rhythm directly. It rejects mechanical uniformity. This is the basis for ease-in-out curves and natural deceleration animations in UI.
+6. **Relatum**: In the Relatum sculpture series, stone (nature) and steel plate (artifice) are placed side by side. Neither is transformed; both meet "as they are." In UI, this is the relationship between content and container — revealing essence without excessive styling.
+7. **Ma (間)**: A core concept of Korean/Japanese aesthetics. The resonance of a temporal and spatial "in-between." The distance between elements determines the character of their relationship. In UI, this is the principle by which spacing scale forms visual hierarchy.
 
-## 정량적 디자인 토큰
+## Quantitative Design Tokens
 
-### 색상 체계
-| 토큰명 | 값/범위 | 출처 | 신뢰도 | UI 적용 |
+### Color System
+| Token | Value/Range | Source | Confidence | UI Application |
 |--------|---------|------|--------|---------|
-| lee-mineral-blue | #2C4A6E ~ #3B6B9C | From Point 연작 (1975-) 광물성 안료 측색 | B | 주요 액센트, 링크, 포커스 링 |
-| lee-burnt-orange | #B85C2A ~ #D4733A | From Line 연작 (1978-) 붓 자국 초반부 | C | CTA 버튼, 활성 상태, 경고 |
-| lee-ink-black | #1A1A1E ~ #2A2A30 | 점·선·바람으로부터 전 연작 | B | 텍스트, 아이콘, 주요 요소 |
-| lee-canvas-white | #F5F0E8 ~ #FAF5ED | 캔버스 자체 색상 (순백이 아닌 생지) | B | 배경, 여백, 카드 서피스 |
-| lee-fading-gray | #C0B8A8 ~ #D8D0C0 | 잉크 소진 구간 색조 | C | 비활성 상태, 힌트 텍스트, 플레이스홀더 |
-| lee-stone-gray | #7A7570 ~ #9A9590 | Relatum 연작 자연석 색상 | C | 보조 텍스트, 구분선, 보더 |
-| lee-iron-dark | #3A3530 ~ #4D4840 | Relatum 철판 표면 색상 | C | 다크모드 서피스, 헤더/푸터 |
-| opacity-fade-range | 100% → 5% (선형 감소) | From Point 점 밀도 실측 | B | 요소 opacity 감쇠 시퀀스 |
+| lee-mineral-blue | #2C4A6E ~ #3B6B9C | From Point series (1975-) mineral pigment colorimetry | B | Primary accent, links, focus ring |
+| lee-burnt-orange | #B85C2A ~ #D4733A | From Line series (1978-) early brush mark | C | CTA button, active state, warning |
+| lee-ink-black | #1A1A1E ~ #2A2A30 | All From Point/Line/Wind series | B | Text, icons, primary elements |
+| lee-canvas-white | #F5F0E8 ~ #FAF5ED | Canvas's own color (raw cloth, not pure white) | B | Background, void, card surface |
+| lee-fading-gray | #C0B8A8 ~ #D8D0C0 | Tone of the ink-exhaustion zone | C | Disabled state, hint text, placeholder |
+| lee-stone-gray | #7A7570 ~ #9A9590 | Natural stone color in the Relatum series | C | Secondary text, dividers, borders |
+| lee-iron-dark | #3A3530 ~ #4D4840 | Relatum steel-plate surface color | C | Dark-mode surface, header/footer |
+| opacity-fade-range | 100% → 5% (linear decrease) | From Point dot-density measurement | B | Element opacity decay sequence |
 
-### 구성 & 레이아웃
-| 토큰명 | 값/범위 | 출처 | 신뢰도 | UI 적용 |
+### Composition & Layout
+| Token | Value/Range | Source | Confidence | UI Application |
 |--------|---------|------|--------|---------|
-| mark-coverage | 캔버스의 10-30% | From Point/Line 전 연작 면적 통계 | B | 콘텐츠가 차지하는 최대 면적 비율 |
-| void-ratio | 캔버스의 70-90% | 전 작품 여백 분석 | B | 여백 최소 비율 — 화면의 70% 이상 여백 확보 |
-| mark-position | 중심에서 한쪽으로 편향 (좌/하 30-40% 지점) | From Point 구성 분석 | C | 주요 요소를 중앙이 아닌 1/3 지점에 배치 |
-| extension-beyond-frame | 선이 캔버스 밖으로 연장되는 듯한 구성 | From Line 연작 | B | 요소가 뷰포트 밖으로 이어지는 느낌, overflow: visible |
-| gesture-direction | 좌상→우하 또는 상→하 (중력 방향) | 붓질 방향 분석 | C | 시선 유도 방향, 콘텐츠 흐름 방향 |
+| mark-coverage | 10-30% of canvas | Area statistics across the From Point/Line series | B | Maximum area ratio occupied by content |
+| void-ratio | 70-90% of canvas | Void analysis across all works | B | Minimum void ratio — secure at least 70% of the screen as void |
+| mark-position | Biased to one side of center (30-40% point, left/bottom) | From Point composition analysis | C | Place primary elements at the 1/3 point rather than the center |
+| extension-beyond-frame | Composition where lines appear to extend off the canvas | From Line series | B | Sense of elements continuing beyond the viewport, overflow: visible |
+| gesture-direction | Top-left→bottom-right or top→bottom (gravity direction) | Brushstroke direction analysis | C | Gaze-guiding direction, content flow direction |
 
-### 비율 & 균형
-| 토큰명 | 값/범위 | 출처 | 신뢰도 | UI 적용 |
+### Proportion & Balance
+| Token | Value/Range | Source | Confidence | UI Application |
 |--------|---------|------|--------|---------|
-| mark-to-void | 1:3 ~ 1:9 | 주요 20작품 비율 통계 | B | 콘텐츠 대 여백 비율 가이드 |
-| point-interval | 점 간 거리 = 점 지름의 1.5-3배 | From Point No. 780127 (1978) 실측 | B | 반복 요소 간 간격 비율 |
-| point-size-decay | 첫 점 100% → 마지막 점 20-40% | From Point 연작 크기 변화 | B | 리스트/시퀀스 요소의 점진적 크기 감소 |
-| line-taper | 시작 너비의 100% → 끝 30-50% | From Line 연작 실측 | C | 프로그레스 바, 스크롤 인디케이터 테이퍼 |
-| asymmetric-weight | 무게중심이 캔버스 하단 1/3에 집중 | 전 작품 시각적 무게 분석 | C | 화면 하단에 주요 인터랙션 집중 (thumb zone) |
+| mark-to-void | 1:3 ~ 1:9 | Ratio statistics across 20 major works | B | Content-to-void ratio guide |
+| point-interval | Distance between dots = 1.5-3x the dot diameter | From Point No. 780127 (1978) measurement | B | Spacing ratio between repeating elements |
+| point-size-decay | First dot 100% → last dot 20-40% | From Point series size variation | B | Gradual size reduction of list/sequence elements |
+| line-taper | 100% of start width → 30-50% at end | From Line series measurement | C | Progress bar, scroll indicator taper |
+| asymmetric-weight | Center of gravity concentrated in the bottom 1/3 of the canvas | Visual-weight analysis across all works | C | Concentrate primary interactions at the bottom of the screen (thumb zone) |
 
-### 공간 & 여백
-| 토큰명 | 값/범위 | 출처 | 신뢰도 | UI 적용 |
+### Space & Void
+| Token | Value/Range | Source | Confidence | UI Application |
 |--------|---------|------|--------|---------|
-| ma-spacing-xs | 8px (base unit) | 점 간격 최소 단위 추정 | C | 최소 간격 단위 |
-| ma-spacing-sm | 16px (2x) | 반복 요소 내부 간격 | C | 인접 요소 간 간격 |
-| ma-spacing-md | 32px (4x) | 요소 그룹 간 간격 | C | 섹션 내부 간격 |
-| ma-spacing-lg | 64px (8x) | 연작 내 캔버스 간 관계적 거리 | C | 섹션 간 여백 |
-| ma-spacing-xl | 128px (16x) | 캔버스와 벽면의 호흡 거리 | C | 페이지 상하 마진, 대형 여백 |
-| void-as-content | 여백 자체가 "내용" — 채울 수 없는 공간 | 이우환 에세이 "만남을 찾아서" (1971) | B | 빈 상태(empty state)를 장식하지 않고 여백으로 남김 |
+| ma-spacing-xs | 8px (base unit) | Estimated minimum dot-spacing unit | C | Minimum spacing unit |
+| ma-spacing-sm | 16px (2x) | Internal spacing of repeating elements | C | Spacing between adjacent elements |
+| ma-spacing-md | 32px (4x) | Spacing between element groups | C | Internal section spacing |
+| ma-spacing-lg | 64px (8x) | Relational distance between canvases within a series | C | Spacing between sections |
+| ma-spacing-xl | 128px (16x) | Breathing distance between canvas and wall | C | Page top/bottom margins, large void |
+| void-as-content | The void itself is "content" — space that cannot be filled | Lee Ufan essay "만남을 찾아서" (In Search of Encounter) (1971) | B | Leave the empty state as void without decorating it |
 
-### 시각적 리듬 & 반복
-| 토큰명 | 값/범위 | 출처 | 신뢰도 | UI 적용 |
+### Visual Rhythm & Repetition
+| Token | Value/Range | Source | Confidence | UI Application |
 |--------|---------|------|--------|---------|
-| point-rhythm | 규칙적 시작 → 불규칙 소멸 | From Point 연작 패턴 분석 | B | 로딩 애니메이션: 규칙적 도트 → 페이드아웃 |
-| line-breath | 1획에 시작(굵음)→중간(일정)→끝(가늘어짐) | From Line 연작 붓질 분석 | B | 스와이프 제스처 피드백, 터치 궤적 |
-| density-gradient | 좌상 고밀도 → 우하 저밀도 (또는 역방향) | From Point No. 780127 실측 | B | 리스트 아이템의 점진적 간격 증가 |
-| repetition-count | 5-15회 반복 후 소멸 | From Point/Line 반복 횟수 통계 | C | 시퀀스/스텝 인디케이터 최대 단계 수 |
-| fade-out-curve | ease-out (급격 시작 → 부드러운 종료) | 잉크 소진 패턴 | C | 애니메이션 커브, transition-timing-function |
+| point-rhythm | Regular start → irregular disappearance | From Point series pattern analysis | B | Loading animation: regular dots → fade-out |
+| line-breath | One stroke: start (thick) → middle (steady) → end (thinning) | From Line series brushstroke analysis | B | Swipe gesture feedback, touch trajectory |
+| density-gradient | High density at top-left → low density at bottom-right (or reverse) | From Point No. 780127 measurement | B | Gradual spacing increase of list items |
+| repetition-count | Disappears after 5-15 repetitions | From Point/Line repetition-count statistics | C | Maximum number of steps in a sequence/step indicator |
+| fade-out-curve | ease-out (sharp start → smooth end) | Ink-exhaustion pattern | C | Animation curve, transition-timing-function |
 
-## 대표작 분석
+## Representative Work Analysis
 
 ### 1. From Point No. 780127 (1978)
-- **캔버스**: 182 x 227cm (가로형)
-- **소장**: 국립현대미술관, 과천
-- **구성**: 좌상단 모서리에서 시작하여 우하단으로 향하는 점의 격자 배열. 약 12x8 그리드. 좌상단 점은 진하고 크며(지름 약 4-5cm), 우하단으로 갈수록 옅고 작아진다(지름 약 1-2cm). 캔버스 우하단 1/3은 거의 빈 여백.
-- **밀도 분석**: 좌상단 점 opacity 100%, 우하단 점 opacity 15-20%. 중간 지점에서 약 50% opacity. 감쇠 곡선은 지수적(exponential decay).
-- **여백 비율**: 점이 차지하는 면적 약 15%, 여백 약 85%.
-- **UI 변환**: 데이터 시각화의 밀도맵, 무한 스크롤의 로딩 인디케이터(진한 점 → 흐린 점), 알림 뱃지의 시간 경과에 따른 페이드.
+- **Canvas**: 182 x 227cm (landscape)
+- **Collection**: 국립현대미술관, 과천 (National Museum of Modern and Contemporary Art, Gwacheon)
+- **Composition**: A grid array of dots starting at the top-left corner and heading toward the bottom-right. Roughly a 12x8 grid. The top-left dots are dark and large (diameter approx. 4-5cm) and grow fainter and smaller toward the bottom-right (diameter approx. 1-2cm). The bottom-right 1/3 of the canvas is almost entirely void.
+- **Density analysis**: Top-left dot opacity 100%, bottom-right dot opacity 15-20%. About 50% opacity at the midpoint. The decay curve is exponential.
+- **Void ratio**: Dots occupy about 15% of the area, void about 85%.
+- **UI translation**: Density maps for data visualization, loading indicators for infinite scroll (dark dot → faint dot), time-based fade of notification badges.
 
 ### 2. From Line No. 790143 (1979)
-- **캔버스**: 182 x 227cm
-- **소장**: 도쿄 국립근대미술관
-- **구성**: 캔버스 상단에서 하단으로 내려오는 수직 선 7-8개. 각 선은 상단에서 시작하여 하단으로 갈수록 잉크가 소진되어 흐려진다. 선 간격은 약 25-30cm로 비교적 균일.
-- **선의 특성**: 시작점 너비 약 3-4cm, 종료점 약 1cm. 잉크 농도 100% → 20%. 한 획에 붓을 들지 않고 그어 호흡의 리듬이 선의 굵기 변화로 기록됨.
-- **UI 변환**: 수직 구분선의 페이드 효과, 스크롤 인디케이터, 프로그레스 바의 잉크 소진 메타포. `border-image: linear-gradient(to bottom, #1A1A1E, transparent)`.
+- **Canvas**: 182 x 227cm
+- **Collection**: 도쿄 국립근대미술관 (The National Museum of Modern Art, Tokyo)
+- **Composition**: 7-8 vertical lines descending from the top to the bottom of the canvas. Each line begins at the top and fades toward the bottom as the ink exhausts. Line spacing is relatively uniform at about 25-30cm.
+- **Line characteristics**: Start-point width about 3-4cm, end-point about 1cm. Ink density 100% → 20%. Drawn in a single stroke without lifting the brush, so the rhythm of breath is recorded in the variation of line thickness.
+- **UI translation**: Fade effect for vertical dividers, scroll indicators, ink-exhaustion metaphor for progress bars. `border-image: linear-gradient(to bottom, #1A1A1E, transparent)`.
 
 ### 3. Relatum — Silence (2008)
-- **설치**: 철판(240 x 360cm) 위에 자연석 1개
-- **소장**: Lee Ufan Museum, 나오시마
-- **구성**: 거대한 수평 철판이 바닥에 놓이고, 한쪽 모서리 근처에 자연석 1개가 놓인다. 돌과 철판 사이 약 5cm 여백. 나머지 공간은 완전한 빈 철판면.
-- **비율**: 돌이 차지하는 면적 약 3-5%, 철판 면적의 95-97%가 빈 표면. 돌의 시각적 무게와 철판의 광활한 여백이 팽팽한 긴장.
-- **UI 변환**: 넓은 빈 화면에 단 하나의 CTA만 배치하는 극단적 미니멀 레이아웃. 랜딩 페이지에서 하나의 메시지, 하나의 버튼만 존재하는 구성.
+- **Installation**: A natural stone on a steel plate (240 x 360cm)
+- **Collection**: Lee Ufan Museum, 나오시마 (Naoshima)
+- **Composition**: A huge horizontal steel plate is laid on the floor, with one natural stone placed near one corner. About 5cm of void between the stone and the steel plate. The remaining space is a completely empty steel-plate surface.
+- **Proportion**: The stone occupies about 3-5% of the area; 95-97% of the steel plate is empty surface. The visual weight of the stone and the vast void of the steel plate hold a taut tension.
+- **UI translation**: An extreme minimal layout placing a single CTA on a wide empty screen. A landing-page composition with only one message and one button.
 
-## UI 적용 매핑
+## UI Application Mapping
 
-### 변환 규칙
+### Translation Rules
 
-1. **여백 우선 설계**: 콘텐츠를 배치하기 전에 여백을 먼저 설계한다. 화면의 70% 이상을 여백으로 확보한 뒤 나머지 30%에 콘텐츠를 배치한다.
+1. **Void-first design**: Design the void before placing content. Secure at least 70% of the screen as void, then place content in the remaining 30%.
    ```css
    .lee-ufan-layout {
      padding: 128px 64px;  /* xl, lg */
-     max-width: 40%;       /* 콘텐츠 영역 제한 */
-     margin: 0;            /* 중앙이 아닌 한쪽 편향 */
+     max-width: 40%;       /* limit content area */
+     margin: 0;            /* biased to one side, not centered */
    }
    ```
 
-2. **페이드 시퀀스**: 반복 요소에 점진적 opacity 감쇠를 적용한다.
+2. **Fade sequence**: Apply gradual opacity decay to repeating elements.
    ```css
    .fade-sequence > *:nth-child(1) { opacity: 1.0; }
    .fade-sequence > *:nth-child(2) { opacity: 0.8; }
@@ -112,25 +112,25 @@
    .fade-sequence > *:nth-child(5) { opacity: 0.2; }
    ```
 
-3. **간(間) 스페이싱**: spacing scale을 지수적으로 증가시켜 계층을 만든다. 8-16-32-64-128px. 인접 요소 간 간격보다 그룹 간 간격을 극적으로 크게 한다.
+3. **Ma (間) spacing**: Increase the spacing scale exponentially to create hierarchy. 8-16-32-64-128px. Make group-to-group spacing dramatically larger than spacing between adjacent elements.
 
-4. **비완결 패턴**: 요소가 뷰포트 밖으로 이어지는 듯한 구성을 허용한다. `overflow: visible`, 잘린 텍스트/이미지로 "계속됨"을 암시한다.
+4. **Incompleteness pattern**: Allow compositions where elements appear to continue beyond the viewport. Use `overflow: visible` and cut-off text/images to imply "continues."
 
-5. **빈 상태의 미학**: empty state에 일러스트나 CTA를 채우지 않는다. 여백 자체가 메시지이다. "아직 아무것도 없습니다"라는 텍스트 한 줄이면 충분하다.
+5. **Aesthetics of the empty state**: Do not fill the empty state with illustrations or a CTA. The void itself is the message. A single line of text such as "Nothing here yet" is enough.
 
-### 적합한 UI 유형
-- **미니멀 포트폴리오**: 극단적 여백, 작품 1개씩 대형 표시, 점진적 스크롤
-- **명상/마음챙김 앱**: 여백 중심, 호흡 리듬에 맞춘 페이드 애니메이션
-- **럭셔리 브랜드 사이트**: 제품 하나에 넓은 공간, 최소 텍스트, 절제된 인터랙션
-- **독서 앱**: 넓은 마진, 텍스트 밀도 최소화, 행간과 자간에 충분한 여유
-- **갤러리/전시 앱**: 작품과 작품 사이 충분한 간격, 캡션 최소화
-- **제로 스테이트 디자인**: 빈 화면을 장식 없이 의미 있는 여백으로 처리
+### Suitable UI Types
+- **Minimal portfolio**: Extreme void, one large work shown at a time, gradual scroll
+- **Meditation/mindfulness app**: Void-centric, fade animations timed to breathing rhythm
+- **Luxury brand site**: Wide space per product, minimal text, restrained interaction
+- **Reading app**: Wide margins, minimized text density, ample line and letter spacing
+- **Gallery/exhibition app**: Ample spacing between works, minimal captions
+- **Zero-state design**: Treat empty screens as meaningful void without decoration
 
-### 주의사항
-- **여백 채우기 충동 억제**: 빈 공간을 보면 무언가를 넣으려는 충동이 가장 큰 적이다. 여백은 의도적이며 구조적이다.
-- **균일한 반복 금지**: 점·선의 반복은 기계적 균일함이 아닌 점진적 변화를 동반한다. CSS `repeat()` 대신 `nth-child`로 개별 조정한다.
-- **중앙 정렬 과용 금지**: 이우환의 요소는 거의 항상 한쪽으로 편향된다. `margin: 0 auto`를 기본값으로 쓰지 않는다.
-- **과도한 색상 사용 금지**: 1-2가지 색상과 무채색만 사용한다. 다색 팔레트는 '만남'의 긴장을 해소시킨다.
-- **장식적 요소 배제**: 그림자, 그라디언트, 테두리 장식 등은 이우환 미학에 정면 위배된다. 요소의 존재 자체로 충분하다.
-- **빽빽한 정보 구조 부적합**: 대시보드, 데이터 테이블 등 고밀도 정보 UI에는 적합하지 않다. 정보 밀도가 높아지면 여백의 힘이 사라진다.
-- **작은 화면에서의 여백 비율 조정**: 모바일에서 70% 여백은 비현실적일 수 있다. 최소 50% 여백을 유지하되, 핵심 콘텐츠의 가독성을 우선한다.
+### Caveats
+- **Suppress the urge to fill the void**: The urge to put something in any empty space you see is the greatest enemy. The void is intentional and structural.
+- **No uniform repetition**: The repetition of dots/lines carries gradual change, not mechanical uniformity. Adjust individually with `nth-child` instead of CSS `repeat()`.
+- **No overuse of center alignment**: Lee Ufan's elements are almost always biased to one side. Do not use `margin: 0 auto` as a default.
+- **No excessive color use**: Use only 1-2 colors plus achromatic tones. A multicolor palette dissolves the tension of "encounter."
+- **Exclude decorative elements**: Shadows, gradients, border decorations, and the like directly violate Lee Ufan's aesthetics. The mere presence of an element is enough.
+- **Unsuitable for dense information structures**: Not suitable for high-density information UIs such as dashboards and data tables. As information density rises, the power of the void disappears.
+- **Adjust void ratio on small screens**: 70% void may be unrealistic on mobile. Maintain at least 50% void while prioritizing readability of the core content.

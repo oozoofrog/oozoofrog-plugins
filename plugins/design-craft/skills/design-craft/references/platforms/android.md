@@ -1,27 +1,27 @@
-# Android 플랫폼 디자인 가이드라인 요약
+# Android Platform Design Guidelines Summary
 
-android-designer 에이전트의 기본 참조 문서.
+Base reference document for the android-designer agent.
 
-## 공식 출처
+## Official Sources
 
 - [Material Design 3](https://m3.material.io/)
 - [Android Developers — Design](https://developer.android.com/design)
 
-## 핵심 정량 기준
+## Core Quantitative Standards
 
-### 레이아웃
+### Layout
 
-| 항목 | 값 | 출처 |
+| Item | Value | Source |
 |------|-----|------|
-| 최소 터치 타겟 | 48×48dp | M3 Accessibility |
-| 기본 margin (compact) | 16dp | M3 Layout |
-| 기본 margin (expanded) | 24dp | M3 Layout |
-| 간격 그리드 | 4dp 기반 | M3 Layout |
-| 기본 gutter | 8dp | M3 Layout |
+| Minimum touch target | 48×48dp | M3 Accessibility |
+| Default margin (compact) | 16dp | M3 Layout |
+| Default margin (expanded) | 24dp | M3 Layout |
+| Spacing grid | 4dp based | M3 Layout |
+| Default gutter | 8dp | M3 Layout |
 
-### 타이포그래피 (M3 Type Scale)
+### Typography (M3 Type Scale)
 
-| 스타일 | 크기 | 행간 | 자간 | Weight |
+| Style | Size | Line Height | Letter Spacing | Weight |
 |--------|------|------|------|--------|
 | Display Large | 57sp | 64sp | -0.25 | 400 |
 | Display Medium | 45sp | 52sp | 0 | 400 |
@@ -41,7 +41,7 @@ android-designer 에이전트의 기본 참조 문서.
 
 ### Shape (Corner Radius)
 
-| 크기 | 값 | 사용처 |
+| Size | Value | Usage |
 |------|-----|--------|
 | Extra Small | 4dp | Chip |
 | Small | 8dp | TextInput |
@@ -52,7 +52,7 @@ android-designer 에이전트의 기본 참조 문서.
 
 ### Elevation (Tonal + Shadow)
 
-| 레벨 | Shadow | Tonal Overlay |
+| Level | Shadow | Tonal Overlay |
 |------|--------|--------------|
 | Level 0 | 0dp | 0% |
 | Level 1 | 1dp | 5% |
@@ -63,7 +63,7 @@ android-designer 에이전트의 기본 참조 문서.
 
 ### Dynamic Color
 
-| 역할 | Light | Dark |
+| Role | Light | Dark |
 |------|-------|------|
 | Primary | tone(40) | tone(80) |
 | OnPrimary | tone(100) | tone(20) |
@@ -75,7 +75,7 @@ android-designer 에이전트의 기본 참조 문서.
 
 ### Motion
 
-| 유형 | Duration | Easing |
+| Type | Duration | Easing |
 |------|----------|--------|
 | Enter (fade in) | 200ms | EmphasizedDecelerate |
 | Exit (fade out) | 150ms | EmphasizedAccelerate |
@@ -83,19 +83,19 @@ android-designer 에이전트의 기본 참조 문서.
 | Collapse | 250ms | Emphasized |
 | Shared Axis | 300ms | Emphasized |
 
-## Compose 매핑 힌트
+## Compose Mapping Hints
 
 ```kotlin
-// 타이포
+// Typography
 MaterialTheme.typography.bodyLarge // 16sp
 
-// 색상
+// Color
 MaterialTheme.colorScheme.primary // Dynamic Color
 
 // Shape
 MaterialTheme.shapes.medium // 12dp corner
 
-// 간격
+// Spacing
 Modifier.padding(16.dp)
 
 // Elevation

@@ -1,32 +1,32 @@
-# Slides (Marp) 출력 템플릿
+# Slides (Marp) Output Template
 
-yoda share 모드의 `--format slides` 출력을 위한 Marp 프레젠테이션 구조 템플릿.
+Marp presentation structure template for the `--format slides` output of yoda share mode.
 
 ---
 
-## 15장 슬라이드 구조
+## 15-Slide Structure
 
-| # | 슬라이드 | 내용 | 인지적 도제 단계 |
+| # | Slide | Content | Cognitive Apprenticeship Stage |
 |---|---------|------|----------------|
-| 1 | Hook | 도발적 질문 — 발표 전체를 관통 | — |
-| 2-3 | Context | 배경 + 실제 코드 | 모델링 |
-| 4-6 | Mental Model | 개념 점진적 구축 (1슬라이드=1개념) | 코칭 |
-| 7-8 | Before | 문제 코드 + 문제 지점 하이라이트 | 비계 설정 |
-| 9 | Why | 핵심 이유 집약 | 비계 설정 |
-| 10 | After | 수정 코드 (핵심 변경만) | 비계 제거 |
-| 11 | Aha Insight | 핵심 깨달음 한 문장 | 비계 제거 |
-| 12-13 | Generalization | 패턴 일반화 + 원칙 정리 | 탐색 |
-| 14 | CTA | 액션 아이템 3개 + Hook 답변 | 탐색 |
-| 15 | Resources | 참고 자료 + 메타인지 질문 | 탐색 |
+| 1 | Hook | Provocative question — runs through the entire talk | — |
+| 2-3 | Context | Background + actual code | Modeling |
+| 4-6 | Mental Model | Build the concept gradually (1 slide = 1 concept) | Coaching |
+| 7-8 | Before | Problem code + highlight the problem spots | Scaffolding |
+| 9 | Why | Distill the core reason | Scaffolding |
+| 10 | After | Fixed code (core changes only) | Fading |
+| 11 | Aha Insight | The key realization in one sentence | Fading |
+| 12-13 | Generalization | Generalize the pattern + summarize the principle | Exploration |
+| 14 | CTA | 3 action items + answer to the Hook | Exploration |
+| 15 | Resources | References + metacognitive question | Exploration |
 
-## 슬라이드 작성 규칙
+## Slide Authoring Rules
 
-- 1 슬라이드 = 1 개념 (텍스트 밀도 최소화)
-- 코드 블록은 핵심 3-5줄만 발췌
-- 문제 지점에 `// ⚠️`, 개선 지점에 `// ✅`
-- Mermaid 다이어그램 노드는 5개 이내
+- 1 slide = 1 concept (minimize text density)
+- Excerpt only the core 3-5 lines of each code block
+- Mark problem spots with `// ⚠️`, improvement spots with `// ✅`
+- Keep Mermaid diagram nodes to 5 or fewer
 
-## 저장 및 변환
+## Save and Convert
 
 ```
 docs/yoda/YYYY-MM-DD-{slug}-slides.md

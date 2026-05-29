@@ -1,144 +1,144 @@
-# Kazimir Malevich -- 시각 언어 디자인 토큰
+# Kazimir Malevich -- Visual Language Design Tokens
 
-## 프로필
-- **활동 기간**: 1904-1935 (절대주의 핵심기: 1915-1927)
-- **운동/유파**: Suprematism (절대주의, Супрематизм)
-- **핵심 공헌**: 1915년 Black Square로 "순수 감정의 절대주의"를 선언. 기하학적 형태(사각형, 원, 십자)를 회화의 최소 단위로 환원. White on White(1918)로 형태마저 해소하는 극한의 추상에 도달. 미니멀 디자인의 철학적 원점.
+## Profile
+- **Active period**: 1904-1935 (core Suprematist phase: 1915-1927)
+- **Movement/school**: Suprematism (Супрематизм)
+- **Key contribution**: Declared "the Suprematism of pure feeling" with Black Square in 1915. Reduced geometric forms (square, circle, cross) to the minimal unit of painting. Reached the extreme of abstraction by dissolving even form with White on White (1918). The philosophical origin point of minimal design.
 
-## 시각 언어 원칙
+## Visual Language Principles
 
-1. **순수 형태(Pure Form)**: 자연의 재현을 완전히 거부하고 기하학적 형태만으로 구성한다. 사각형이 가장 근본적인 형태이다. UI에서 카드, 버튼, 입력 필드의 직사각형이 "원형적 형태"로 정당화된다.
-2. **비대상성(Non-Objectivity)**: 형태는 어떤 대상도 지시하지 않는다. 그 자체로 존재한다. UI 아이콘이 "사물의 축소판"이 아니라 "기능의 신호"여야 한다는 원칙이다.
-3. **동적 부유(Dynamic Floating)**: 형태가 중력에서 벗어나 캔버스 위를 떠다닌다. 고정된 그리드가 아닌 자유로운 배치. UI에서 FAB(Floating Action Button), 드래그 가능 요소, 자유 배치 레이아웃의 미학적 근거이다.
-4. **계층적 기하학(Hierarchical Geometry)**: 큰 형태가 작은 형태를 지배한다. 크기가 곧 시각적 계층이다. UI에서 시각적 계층 구조(visual hierarchy)의 원칙과 직접 대응한다.
-5. **절대적 단순(Absolute Simplicity)**: 더 이상 뺄 수 없을 때까지 환원한다. White on White는 이 원칙의 극한이다. UI에서 "필수 요소만 남긴다"는 미니멀리즘의 가장 급진적 선언이다.
-6. **색면의 자율성(Color-Plane Autonomy)**: 각 색면은 독립적 에너지를 가진다. 빨강은 전진하고, 파랑은 후퇴한다. UI에서 색상이 깊이감(z-index)을 결정하는 원칙이다.
-7. **무중력 구성(Zero-Gravity Composition)**: 위/아래 구분이 없다. 작품을 회전해도 유효하다. 반응형 디자인에서 가로/세로 전환 시 구성이 유지되어야 한다는 원칙이다.
+1. **Pure Form**: Completely rejects the representation of nature and composes solely with geometric forms. The square is the most fundamental form. In UI, the rectangle of cards, buttons, and input fields is justified as the "archetypal form."
+2. **Non-Objectivity**: Form points to no object. It exists in itself. This is the principle that a UI icon should be a "signal of function" rather than a "miniature of an object."
+3. **Dynamic Floating**: Forms escape gravity and float across the canvas. Free placement rather than a fixed grid. In UI, this is the aesthetic basis for the FAB (Floating Action Button), draggable elements, and free-placement layouts.
+4. **Hierarchical Geometry**: Large forms dominate small forms. Size is visual hierarchy. In UI, this corresponds directly to the principle of visual hierarchy.
+5. **Absolute Simplicity**: Reduce until nothing more can be subtracted. White on White is the extreme of this principle. In UI, it is the most radical declaration of minimalism: "leave only the essential elements."
+6. **Color-Plane Autonomy**: Each color plane carries independent energy. Red advances, blue recedes. In UI, this is the principle that color determines depth (z-index).
+7. **Zero-Gravity Composition**: There is no up/down distinction. The work holds even when rotated. In responsive design, this is the principle that the composition must be preserved when switching between landscape and portrait.
 
-## 정량적 디자인 토큰
+## Quantitative Design Tokens
 
-### 색상 체계
-| 토큰명 | 값/범위 | 출처 | 신뢰도 | UI 적용 |
+### Color System
+| Token | Value/Range | Source | Confidence | UI Application |
 |--------|---------|------|--------|---------|
-| malevich-black | #0A0A0A ~ #1C1C1C | Black Square (1915) 디지털 측색 (크랙 제외) | B | 최고 강조, 핵심 CTA, 텍스트 |
-| malevich-white | #F0EDE5 ~ #FAF7F0 | White on White (1918) 배경면 | B | 배경, 카드, 여백 (순백이 아닌 미색) |
-| malevich-white-warm | #F5F0E0 ~ #FFF8E8 | White on White (1918) 기울어진 사각형 면 | C | 서피스 레벨 구분, 카드 위 카드 |
-| malevich-red | #CC1A1A ~ #E62E2E | Red Square (1915) 실측 | B | 경고, 긴급, primary destructive |
-| malevich-yellow | #E8C800 ~ #FFD700 | Suprematist Composition (1916) 측색 | C | 주의, 하이라이트, 배지 |
-| malevich-blue | #1A3A8B ~ #2850A8 | Suprematist Painting (1916) 측색 | C | 정보, 링크, 선택 상태 |
-| malevich-green | #2A6B3A ~ #3D8B50 | Suprematist Composition (1916) | D | 성공, 완료, 긍정 피드백 |
-| suprematist-bg | #E8E0D0 ~ #F0E8D8 | 0.10 전시 배경 복원색 | C | 갤러리형 레이아웃 배경 |
+| malevich-black | #0A0A0A ~ #1C1C1C | Black Square (1915) digital colorimetry (cracks excluded) | B | Highest emphasis, key CTA, text |
+| malevich-white | #F0EDE5 ~ #FAF7F0 | White on White (1918) background plane | B | Background, cards, whitespace (off-white, not pure white) |
+| malevich-white-warm | #F5F0E0 ~ #FFF8E8 | White on White (1918) tilted square plane | C | Surface-level distinction, card on card |
+| malevich-red | #CC1A1A ~ #E62E2E | Red Square (1915) measured | B | Warning, urgent, primary destructive |
+| malevich-yellow | #E8C800 ~ #FFD700 | Suprematist Composition (1916) colorimetry | C | Caution, highlight, badge |
+| malevich-blue | #1A3A8B ~ #2850A8 | Suprematist Painting (1916) colorimetry | C | Info, link, selected state |
+| malevich-green | #2A6B3A ~ #3D8B50 | Suprematist Composition (1916) | D | Success, completion, positive feedback |
+| suprematist-bg | #E8E0D0 ~ #F0E8D8 | 0.10 exhibition background restored color | C | Gallery-style layout background |
 
-### 구성 & 레이아웃
-| 토큰명 | 값/범위 | 출처 | 신뢰도 | UI 적용 |
+### Composition & Layout
+| Token | Value/Range | Source | Confidence | UI Application |
 |--------|---------|------|--------|---------|
-| shape-count | 1-12개 기하 형태 per 구성 | Suprematist Composition 연작 통계 | B | 화면당 주요 UI 요소 최대 수 |
-| dominant-shape-size | 캔버스의 20-45% | Black Square, Red Square 실측 | B | 히어로 요소, 주요 카드 크기 |
-| satellite-shape-size | 캔버스의 2-8% | Suprematist Composition 부수 요소 | B | 보조 버튼, 아이콘, 배지 크기 |
-| rotation-angles | 0°, 15°, 30°, 45°, 60° | 전 작품 회전 각도 통계 | B | 요소 기울기 (주로 장식적 용도) |
-| overlap-frequency | 형태의 30-50%가 다른 형태와 중첩 | Suprematist Composition 연작 | C | z-index 레이어링, 카드 오버랩 |
-| center-offset | 주요 형태가 중심에서 10-30% 편향 | 전 작품 중심 분석 | C | 비대칭 레이아웃의 편향값 |
+| shape-count | 1-12 geometric forms per composition | Suprematist Composition series statistics | B | Max number of primary UI elements per screen |
+| dominant-shape-size | 20-45% of canvas | Black Square, Red Square measured | B | Hero element, primary card size |
+| satellite-shape-size | 2-8% of canvas | Suprematist Composition secondary elements | B | Secondary button, icon, badge size |
+| rotation-angles | 0°, 15°, 30°, 45°, 60° | Rotation-angle statistics across all works | B | Element tilt (mainly decorative use) |
+| overlap-frequency | 30-50% of forms overlap other forms | Suprematist Composition series | C | z-index layering, card overlap |
+| center-offset | Primary form deviates 10-30% from center | Center analysis across all works | C | Deviation value for asymmetric layouts |
 
-### 비율 & 균형
-| 토큰명 | 값/범위 | 출처 | 신뢰도 | UI 적용 |
+### Proportion & Balance
+| Token | Value/Range | Source | Confidence | UI Application |
 |--------|---------|------|--------|---------|
-| black-square-ratio | 정사각형 — 1:1 (실제 미세 비대칭: 1:1.02) | Black Square (1915) Tretyakov Gallery 실측 | B | 정사각형 컴포넌트의 기준 비율 |
-| rectangle-ratio | 장변:단변 = 1.5:1 ~ 3:1 | Suprematist 직사각형 통계 | C | 카드, 배너, 입력 필드 비율 |
-| cross-ratio | 가로:세로 = 1:1 (정십자), 팔의 길이:너비 = 4:1 ~ 6:1 | Suprematist Cross (1920) | C | 닫기 버튼, 추가 버튼 형태 비율 |
-| circle-to-square | 원의 지름 = 인접 사각형 변의 70-100% | Suprematist Composition 통계 | D | 원형 아바타와 사각형 카드의 크기 관계 |
-| size-hierarchy | 최대:최소 형태 = 5:1 ~ 15:1 | 다형태 구성 실측 | C | 시각적 계층 최소 배율 차이 |
+| black-square-ratio | Square — 1:1 (actual slight asymmetry: 1:1.02) | Black Square (1915) Tretyakov Gallery measured | B | Reference ratio for square components |
+| rectangle-ratio | long:short = 1.5:1 ~ 3:1 | Suprematist rectangle statistics | C | Card, banner, input field ratio |
+| cross-ratio | width:height = 1:1 (equal cross), arm length:width = 4:1 ~ 6:1 | Suprematist Cross (1920) | C | Close button, add button form ratio |
+| circle-to-square | Circle diameter = 70-100% of adjacent square's side | Suprematist Composition statistics | D | Size relation between circular avatar and square card |
+| size-hierarchy | largest:smallest form = 5:1 ~ 15:1 | Multi-form composition measured | C | Minimum scale-factor difference for visual hierarchy |
 
-### 공간 & 여백
-| 토큰명 | 값/범위 | 출처 | 신뢰도 | UI 적용 |
+### Space & Whitespace
+| Token | Value/Range | Source | Confidence | UI Application |
 |--------|---------|------|--------|---------|
-| white-ground-ratio | 캔버스의 50-80% | 전 작품 배경 비율 | B | 최소 여백 비율 |
-| shape-cluster-gap | 형태 간 0-5% (일부 중첩) | Suprematist Composition 간격 분석 | C | 관련 요소 간 간격 (작거나 중첩) |
-| shape-to-edge | 형태와 캔버스 가장자리 간 5-15% | 전 작품 가장자리 여백 | B | 화면 가장자리 safe area |
-| float-space | 형태 주위 최소 자유 공간 3-8% | 형태별 여백 실측 | C | 컴포넌트 주위 최소 여백 |
-| white-on-white-gap | 두 흰색 면 간 인지 가능 최소 차이 = L*: 3-5 | White on White (1918) 측색 | B | 동색 서피스 레벨 간 최소 명도 차이 |
+| white-ground-ratio | 50-80% of canvas | Background ratio across all works | B | Minimum whitespace ratio |
+| shape-cluster-gap | 0-5% between forms (some overlap) | Suprematist Composition spacing analysis | C | Gap between related elements (small or overlapping) |
+| shape-to-edge | 5-15% between form and canvas edge | Edge margin across all works | B | Screen edge safe area |
+| float-space | Minimum free space around a form 3-8% | Per-form margin measured | C | Minimum margin around a component |
+| white-on-white-gap | Minimum perceivable difference between two white planes = L*: 3-5 | White on White (1918) colorimetry | B | Minimum lightness difference between same-color surface levels |
 
-### 시각적 리듬 & 반복
-| 토큰명 | 값/범위 | 출처 | 신뢰도 | UI 적용 |
+### Visual Rhythm & Repetition
+| Token | Value/Range | Source | Confidence | UI Application |
 |--------|---------|------|--------|---------|
-| form-vocabulary | 사각형, 원, 십자, 삼각형 (4가지) | 전 작품 형태 인벤토리 | B | 기본 UI 도형: 카드, 아바타, 닫기, 방향 표시 |
-| scatter-pattern | 비정규 분포, 클러스터 + 고립 형태 혼재 | Suprematist Composition 분포 분석 | C | 벤토 그리드, 자유 배치 대시보드 |
-| diagonal-rhythm | 15-45° 대각선 축을 따른 형태 배열 | Suprematism (1915-16) 실측 | C | 대각선 시선 유도, 기울어진 카드 배열 |
-| scale-variation | 동일 화면에 3-5단계 크기 차이 공존 | 전 작품 | B | 시각적 계층을 위한 최소 크기 단계 수 |
-| achromatic-dominance | 작품의 60-80%가 무채색 (흑/백/회) | 전 작품 색상 통계 | B | 무채색 기반 + 유채색 포인트 전략 |
+| form-vocabulary | square, circle, cross, triangle (4 types) | Form inventory across all works | B | Basic UI shapes: card, avatar, close, direction indicator |
+| scatter-pattern | irregular distribution, cluster + isolated forms mixed | Suprematist Composition distribution analysis | C | Bento grid, free-placement dashboard |
+| diagonal-rhythm | forms arranged along a 15-45° diagonal axis | Suprematism (1915-16) measured | C | Diagonal gaze guidance, tilted card arrangement |
+| scale-variation | 3-5 levels of size difference coexisting on the same screen | All works | B | Minimum number of size steps for visual hierarchy |
+| achromatic-dominance | 60-80% of the work is achromatic (black/white/gray) | Color statistics across all works | B | Achromatic base + chromatic accent strategy |
 
-## 대표작 분석
+## Representative Work Analysis
 
 ### 1. Black Square (1915)
-- **캔버스**: 79.5 x 79.5cm (정사각형)
-- **소장**: Tretyakov Gallery, Moscow
-- **구성**: 흰 배경 위에 검은 정사각형 1개. 검은 면이 캔버스의 약 62-65%를 차지한다. 사각형은 완벽한 정사각형이 아니라 미세한 비대칭(각 변의 길이 1-2mm 차이)을 가진다. 가장자리에 흰 테두리 약 7-8cm.
-- **크랙(craquelure)**: 시간이 지나며 검은 면에 그물 모양 갈라짐이 생겨 밑층의 색상(녹색, 분홍)이 노출됨. 의도된 것은 아니지만 "시간의 질감"으로 재해석 가능.
-- **비율**: 검은 사각형 변 ≈ 캔버스 변의 79-80%. 흰 테두리 ≈ 캔버스 변의 10%.
-- **UI 변환**: 화면 중앙의 단일 대형 CTA. `width: 80%; aspect-ratio: 1; margin: 10% auto;`. 극단적 단순함 — 한 화면에 하나의 행동만 요구.
+- **Canvas**: 79.5 x 79.5cm (square)
+- **Collection**: Tretyakov Gallery, Moscow
+- **Composition**: One black square on a white background. The black plane occupies about 62-65% of the canvas. The square is not a perfect square but has slight asymmetry (1-2mm difference in each side's length). A white border of about 7-8cm at the edges.
+- **Cracks (craquelure)**: Over time, a net-like crazing formed in the black plane, exposing underlying colors (green, pink). Not intended, but reinterpretable as a "texture of time."
+- **Ratio**: black square side ≈ 79-80% of canvas side. white border ≈ 10% of canvas side.
+- **UI conversion**: A single large CTA at the center of the screen. `width: 80%; aspect-ratio: 1; margin: 10% auto;`. Extreme simplicity — demand only one action per screen.
 
 ### 2. White on White (1918)
-- **캔버스**: 79.4 x 79.4cm (정사각형)
-- **소장**: Museum of Modern Art, New York
-- **구성**: 미색 배경 위에 약간 다른 톤의 흰색 사각형이 약 15° 기울어져 배치됨. 두 흰색의 명도 차이는 L*: 약 3-5 수준. 기울어진 사각형은 캔버스 우상단으로 약간 편향.
-- **색상 차이**: 배경 = 따뜻한 흰색(#F0EDE5), 사각형 = 차가운 흰색(#FAF7F0). 색온도 차이로만 형태를 구분.
-- **극한의 환원**: 색채도, 대비도, 형태도 거의 제거. "그림의 제로 포인트"라고 말레비치 자신이 명명.
-- **UI 변환**: 서피스 레벨 시스템의 원형. 동색 카드 위의 카드를 미세한 명도/색온도 차이로 구분. `background: #FAF7F0` (카드) on `background: #F0EDE5` (배경). box-shadow 없이 색상 차이만으로 elevation 표현.
+- **Canvas**: 79.4 x 79.4cm (square)
+- **Collection**: Museum of Modern Art, New York
+- **Composition**: A white square in a slightly different tone, placed at about a 15° tilt on an off-white background. The lightness difference between the two whites is around L*: 3-5. The tilted square is slightly biased toward the upper right of the canvas.
+- **Color difference**: background = warm white (#F0EDE5), square = cool white (#FAF7F0). Form distinguished by color temperature difference alone.
+- **Extreme reduction**: chroma, contrast, and form almost all removed. Named by Malevich himself "the zero point of painting."
+- **UI conversion**: The archetype of a surface-level system. Distinguish a card on a same-color card by a slight lightness/color-temperature difference. `background: #FAF7F0` (card) on `background: #F0EDE5` (background). Express elevation by color difference alone, without box-shadow.
 
 ### 3. Suprematist Composition (1916)
-- **캔버스**: 88.5 x 71cm (세로형)
-- **소장**: 여러 버전 존재, 대표적으로 Stedelijk Museum
-- **구성**: 다양한 크기의 사각형, 직사각형, 사다리꼴이 15-45° 각도로 기울어져 캔버스 위에 분포. 대형 빨간 사각형이 중심에, 소형 검은/파란/노란 형태가 주위를 둘러쌈. 총 8-12개 형태.
-- **계층**: 가장 큰 형태(빨강) = 캔버스의 ~20%, 가장 작은 형태 = ~2%. 크기 비 약 10:1.
-- **중첩**: 3-4쌍의 형태가 서로 겹침. 겹치는 영역에서 앞뒤 관계(z-index)가 발생.
-- **UI 변환**: 벤토 그리드 대시보드, 드래그 앤 드롭 캔버스, 자유 배치 위젯 보드. 크기 계층으로 중요도를 표현하고, 회전으로 시각적 활력을 부여.
+- **Canvas**: 88.5 x 71cm (portrait)
+- **Collection**: Multiple versions exist; representatively the Stedelijk Museum
+- **Composition**: Squares, rectangles, and trapezoids of various sizes distributed across the canvas, tilted at 15-45° angles. A large red square at the center, surrounded by small black/blue/yellow forms. 8-12 forms total.
+- **Hierarchy**: largest form (red) = ~20% of canvas, smallest form = ~2%. Size ratio about 10:1.
+- **Overlap**: 3-4 pairs of forms overlap. Front-back relationships (z-index) arise in the overlapping regions.
+- **UI conversion**: Bento grid dashboard, drag-and-drop canvas, free-placement widget board. Express importance through size hierarchy, and add visual vitality through rotation.
 
-## UI 적용 매핑
+## UI Application Mapping
 
-### 변환 규칙
+### Conversion Rules
 
-1. **형태 어휘 제한**: UI 컴포넌트를 4가지 기본 형태로 제한한다.
-   - 사각형/직사각형 → 카드, 버튼, 입력 필드
-   - 원 → 아바타, 토글, FAB
-   - 십자 → 닫기, 추가, 확장
-   - 삼각형 → 방향 표시, 드롭다운 화살표
+1. **Limit form vocabulary**: Restrict UI components to 4 basic forms.
+   - square/rectangle → card, button, input field
+   - circle → avatar, toggle, FAB
+   - cross → close, add, expand
+   - triangle → direction indicator, dropdown arrow
 
-2. **흑백 우선 설계**: 무채색(흑/백/회)으로 먼저 설계한 뒤 유채색을 포인트로 추가한다. 전체 면적의 20% 이하만 유채색을 허용한다.
+2. **Black-and-white-first design**: Design first in achromatic colors (black/white/gray), then add chromatic colors as accents. Allow chromatic color in no more than 20% of total area.
    ```css
    :root {
      --surface: #F0EDE5;
      --on-surface: #1C1C1C;
-     --accent: #CC1A1A;  /* 20% 이하 */
+     --accent: #CC1A1A;  /* 20% or less */
    }
    ```
 
-3. **서피스 레벨(White on White)**: 그림자 없이 미세한 색상 차이로 깊이를 표현한다.
+3. **Surface levels (White on White)**: Express depth with slight color differences instead of shadows.
    ```css
-   --surface-0: #F0EDE5;  /* 배경 */
-   --surface-1: #F5F0E0;  /* 카드 */
-   --surface-2: #FAF7F0;  /* 올라온 요소 */
-   --surface-3: #FFFFFF;  /* 최상위 */
+   --surface-0: #F0EDE5;  /* background */
+   --surface-1: #F5F0E0;  /* card */
+   --surface-2: #FAF7F0;  /* raised element */
+   --surface-3: #FFFFFF;  /* topmost */
    ```
 
-4. **크기 계층**: 최소 5:1 비율로 주요 요소와 보조 요소의 크기 차이를 둔다. 중간 크기를 남발하지 않는다. 큰 것은 확실히 크게, 작은 것은 확실히 작게.
+4. **Size hierarchy**: Set a size difference of at least 5:1 between primary and secondary elements. Do not overuse medium sizes. Make large things clearly large, small things clearly small.
 
-5. **자유 배치**: 엄격한 그리드에 얽매이지 않는다. 요소가 "부유"하는 느낌을 허용한다. `position: absolute` 또는 CSS Grid의 `grid-column/row` 수동 배치를 활용한다.
+5. **Free placement**: Do not be bound by a strict grid. Allow elements to feel like they are "floating." Use `position: absolute` or manual placement with CSS Grid's `grid-column/row`.
 
-6. **회전 액센트**: 정적 구성에 15-45°의 기울어진 요소를 하나 배치하여 시각적 에너지를 부여한다. `transform: rotate(15deg)`. 단, 1-2개로 제한한다.
+6. **Rotation accent**: Place one element tilted at 15-45° in a static composition to add visual energy. `transform: rotate(15deg)`. Limit to 1-2 elements, however.
 
-### 적합한 UI 유형
-- **미니멀 랜딩 페이지**: Black Square처럼 하나의 메시지, 하나의 액션
-- **아트 갤러리/전시**: 작품을 기하학적 그리드로 배치, 흰 배경 위 형태 부유
-- **디자인 도구**: 캔버스 위 자유 배치, 드래그 앤 드롭 인터페이스
-- **대시보드(벤토)**: 다양한 크기의 위젯이 자유롭게 배치된 벤토 그리드
-- **타이포그래피 사이트**: 글자 자체가 기하학적 형태로 작동, 텍스트 중심 레이아웃
-- **온보딩 플로우**: 한 화면에 하나의 핵심 형태/메시지만 표시
+### Suitable UI Types
+- **Minimal landing page**: like Black Square, one message, one action
+- **Art gallery/exhibition**: arrange works in a geometric grid, forms floating on a white background
+- **Design tools**: free placement on a canvas, drag-and-drop interface
+- **Dashboard (bento)**: bento grid with widgets of various sizes placed freely
+- **Typography site**: letters themselves act as geometric forms, text-centric layout
+- **Onboarding flow**: show only one core form/message per screen
 
-### 주의사항
-- **장식적 곡선 금지**: 유기적 곡선, 물결, 자유 곡선은 절대주의에 정면 위배된다. 원만 허용하고 타원이나 불규칙 곡선은 배제한다.
-- **과도한 그라디언트 금지**: 말레비치의 색면은 평면적이고 균질하다. 색면 내 그라디언트는 형태의 순수성을 훼손한다.
-- **사진/일러스트 최소화**: 구상적 이미지는 "비대상성" 원칙에 위배된다. 불가피하면 기하학적 마스크(사각/원) 안에 제한한다.
-- **색상 남발 금지**: 한 화면에 3가지 이하의 유채색만 사용한다. 무채색이 항상 주인공이다.
-- **균등 배치 주의**: 모든 요소를 균일한 크기와 간격으로 배치하면 절대주의적 역동성이 사라진다. 크기 차이와 비정규 간격이 핵심이다.
-- **그림자 남용 주의**: 절대주의 형태는 평면적이다. `box-shadow`로 물리적 깊이감을 과하게 부여하면 미학이 파괴된다. White on White의 색상 차이 전략을 우선한다.
-- **과밀 배치 금지**: 한 화면에 12개 이상의 기하 형태를 배치하면 "순수 감정"이 아닌 "정보 과부하"가 된다.
-- **반응형 회전 주의**: 기울어진 요소가 작은 화면에서 잘리거나 레이아웃을 깨뜨릴 수 있다. `transform: rotate()`는 충분한 여백이 확보된 경우에만 적용한다.
+### Cautions
+- **No decorative curves**: Organic curves, waves, and free curves directly violate Suprematism. Allow only the circle and exclude ellipses or irregular curves.
+- **No excessive gradients**: Malevich's color planes are flat and homogeneous. A gradient within a color plane damages the purity of the form.
+- **Minimize photos/illustrations**: Figurative images violate the "non-objectivity" principle. If unavoidable, confine them within a geometric mask (square/circle).
+- **No color overuse**: Use 3 or fewer chromatic colors per screen. Achromatic is always the protagonist.
+- **Beware uniform placement**: Placing all elements at uniform size and spacing destroys Suprematist dynamism. Size differences and irregular spacing are key.
+- **Beware shadow abuse**: Suprematist forms are flat. Overly applying physical depth with `box-shadow` destroys the aesthetic. Prioritize the color-difference strategy of White on White.
+- **No overcrowding**: Placing 12 or more geometric forms on one screen becomes "information overload" rather than "pure feeling."
+- **Beware responsive rotation**: Tilted elements can be clipped or break the layout on small screens. Apply `transform: rotate()` only when sufficient margin is secured.

@@ -1,98 +1,98 @@
-# iOS 플랫폼 매핑 (SwiftUI / UIKit)
+# iOS Platform Mapping (SwiftUI / UIKit)
 
-통합 토큰을 iOS 구현값으로 변환한다.
+Translate unified tokens into iOS implementation values.
 
 ## Layout & Spacing
 
-| 통합 토큰 | iOS 값 | SwiftUI API | 비고 |
+| Unified token | iOS value | SwiftUI API | Notes |
 |----------|--------|-------------|------|
-| base-unit | 4pt | 직접 수치 사용 | HIG 최소 단위 |
-| grid-base | 8pt | `.padding(8)` | 모든 간격 8의 배수 |
-| spacing-scale | 4-48pt | `.padding()`, `Spacer(minLength:)` | 4pt 단위 스케일 |
+| base-unit | 4pt | use raw value | HIG minimum unit |
+| grid-base | 8pt | `.padding(8)` | all spacing a multiple of 8 |
+| spacing-scale | 4-48pt | `.padding()`, `Spacer(minLength:)` | 4pt-unit scale |
 | screen-margin-compact | 16pt | `.padding(.horizontal, 16)` | size class compact |
 | screen-margin-regular | 20pt | `.padding(.horizontal, 20)` | size class regular |
 | content-width-max | 672pt | `.frame(maxWidth: 672)` | readableContentGuide |
-| touch-target-min | 44x44pt | `.frame(minWidth: 44, minHeight: 44)` | HIG 필수 |
-| nav-bar-height | 44/96pt | `.navigationBarTitleDisplayMode(.large)` | UIKit 자동 관리 |
-| tab-bar-height | 49/83pt | `TabView` | home indicator 포함 |
-| golden-ratio | 1:1.618 | `GeometryReader` 비율 계산 | Rams 비례 체계 |
-| hierarchy-levels | 3단계 | `.font(.title)/.body/.caption` | 시각 위계 제한 |
-| void-ratio | 70-90% | `Spacer()` 다수 배치 | Lee Ufan 미니멀 |
-| albers-nesting | 3-4단계 | 중첩 `ZStack` / `overlay` | 컨테이너 깊이 제한 |
+| touch-target-min | 44x44pt | `.frame(minWidth: 44, minHeight: 44)` | HIG required |
+| nav-bar-height | 44/96pt | `.navigationBarTitleDisplayMode(.large)` | managed automatically by UIKit |
+| tab-bar-height | 49/83pt | `TabView` | includes home indicator |
+| golden-ratio | 1:1.618 | ratio computed via `GeometryReader` | Rams proportion system |
+| hierarchy-levels | 3 levels | `.font(.title)/.body/.caption` | limit visual hierarchy |
+| void-ratio | 70-90% | place multiple `Spacer()` | Lee Ufan minimalism |
+| albers-nesting | 3-4 levels | nested `ZStack` / `overlay` | limit container depth |
 
 ## Typography
 
-| 통합 토큰 | iOS 값 | SwiftUI API | 비고 |
+| Unified token | iOS value | SwiftUI API | Notes |
 |----------|--------|-------------|------|
-| font-system | SF Pro / SF Compact | `.font(.system(size:weight:))` | 시스템 기본 |
-| body-size | 17pt | `.font(.body)` | Dynamic Type 기본 |
+| font-system | SF Pro / SF Compact | `.font(.system(size:weight:))` | system default |
+| body-size | 17pt | `.font(.body)` | Dynamic Type default |
 | headline-size | 28-34pt | `.font(.largeTitle)` / `.title` | Large Title |
-| caption-size | 11-12pt | `.font(.caption)` / `.caption2` | 최소 가독 크기 |
-| type-scale | 11-34pt 8단계 | `.font(.caption2)` ~ `.font(.largeTitle)` | Dynamic Type |
-| dynamic-type-range | 14-60pt | `.dynamicTypeSize(...)` | 접근성 전체 범위 |
-| line-height-ratio | 1.2-1.4x | `.lineSpacing()` | SF Pro 기본 메트릭 |
-| line-height-korean | 1.4-1.6x | `.lineSpacing(font * 0.5)` | 한글 행간 보정 |
-| letter-spacing-title | -0.4~-1.6pt | `.tracking(-0.4)` | 대형 텍스트 타이트닝 |
-| korean-tracking | -0.01em | `.tracking(-0.2)` (17pt 기준) | 한글 자간 보정 |
-| font-weight-range | 100-900 | `.fontWeight(.ultraLight)` ~ `.black` | 9단계 |
-| text-align | 좌측 정렬 | `.multilineTextAlignment(.leading)` | 기본값 |
-| readable-line-length | 65ch | `.frame(maxWidth: .readableContentWidth)` | 가독성 최대폭 |
+| caption-size | 11-12pt | `.font(.caption)` / `.caption2` | minimum legible size |
+| type-scale | 11-34pt, 8 steps | `.font(.caption2)` ~ `.font(.largeTitle)` | Dynamic Type |
+| dynamic-type-range | 14-60pt | `.dynamicTypeSize(...)` | full accessibility range |
+| line-height-ratio | 1.2-1.4x | `.lineSpacing()` | SF Pro default metrics |
+| line-height-korean | 1.4-1.6x | `.lineSpacing(font * 0.5)` | Korean line-height correction |
+| letter-spacing-title | -0.4~-1.6pt | `.tracking(-0.4)` | large-text tightening |
+| korean-tracking | -0.01em | `.tracking(-0.2)` (at 17pt) | Korean letter-spacing correction |
+| font-weight-range | 100-900 | `.fontWeight(.ultraLight)` ~ `.black` | 9 steps |
+| text-align | left-aligned | `.multilineTextAlignment(.leading)` | default |
+| readable-line-length | 65ch | `.frame(maxWidth: .readableContentWidth)` | max width for readability |
 
 ## Color & Surface
 
-| 통합 토큰 | iOS 값 | SwiftUI API | 비고 |
+| Unified token | iOS value | SwiftUI API | Notes |
 |----------|--------|-------------|------|
-| system-blue | #007AFF/#0A84FF | `Color.blue` / `.tint(.blue)` | 시맨틱 컬러 |
-| system-red | #FF3B30/#FF453A | `Color.red` | 시맨틱 컬러 |
-| system-green | #34C759/#30D158 | `Color.green` | 시맨틱 컬러 |
-| bg-primary | #FFF/#000 | `Color(.systemBackground)` | 라이트/다크 자동 |
-| bg-secondary | #F2F2F7/#1C1C1E | `Color(.secondarySystemBackground)` | 그룹 배경 |
-| blur-material | 5종 | `.background(.ultraThinMaterial)` ~ `.thick` | 반투명 블러 |
-| separator-color | rgba(60,60,67,0.29) | `Color(.separator)` | 시스템 구분선 |
-| disabled-opacity | 0.38 | `.opacity(0.38)` + `.disabled(true)` | 비활성 상태 |
-| dark-elevation | +4-8% 밝기 | `Color(.tertiarySystemBackground)` | 깊이별 밝기 |
-| accent-usage | 5-15% | `.tint(.accentColor)` | 포인트 컬러 제한 |
-| rothko-surface-dark | #1A1520~#4D3B52 | `Color(red:0.1, green:0.08, blue:0.12)` | 색조 다크 서피스 |
+| system-blue | #007AFF/#0A84FF | `Color.blue` / `.tint(.blue)` | semantic color |
+| system-red | #FF3B30/#FF453A | `Color.red` | semantic color |
+| system-green | #34C759/#30D158 | `Color.green` | semantic color |
+| bg-primary | #FFF/#000 | `Color(.systemBackground)` | light/dark automatic |
+| bg-secondary | #F2F2F7/#1C1C1E | `Color(.secondarySystemBackground)` | grouped background |
+| blur-material | 5 kinds | `.background(.ultraThinMaterial)` ~ `.thick` | translucent blur |
+| separator-color | rgba(60,60,67,0.29) | `Color(.separator)` | system separator |
+| disabled-opacity | 0.38 | `.opacity(0.38)` + `.disabled(true)` | disabled state |
+| dark-elevation | +4-8% brightness | `Color(.tertiarySystemBackground)` | brightness per depth |
+| accent-usage | 5-15% | `.tint(.accentColor)` | limit accent color |
+| rothko-surface-dark | #1A1520~#4D3B52 | `Color(red:0.1, green:0.08, blue:0.12)` | tonal dark surface |
 
-### 접근성 주석
-- `turrell-kelvin`: 자동 색온도 전환은 몰입/웰니스 화면에서만 opt-in으로 제공하고, 기본 읽기/업무 화면은 고정 색온도 preset을 우선한다. 설정에서 언제든 opt-out 가능해야 한다.
-- `rothko-surface-dark`: 본문 텍스트는 최소 WCAG AA 4.5:1, 대형 텍스트·아이콘·구분선·입력 경계는 최소 3:1 대비를 유지한다. 긴 텍스트는 반투명 패널 또는 분리된 secondary surface 위에 올리고, pure black로 대체하지 않는다.
+### Accessibility notes
+- `turrell-kelvin`: offer automatic color-temperature shifting as opt-in only on immersive/wellness screens; keep a fixed color-temperature preset as the default for reading/work screens. Opt-out must be available at any time in settings.
+- `rothko-surface-dark`: body text maintains at least WCAG AA 4.5:1, and large text, icons, separators, and input borders maintain at least 3:1 contrast. Place long text on a translucent panel or a separated secondary surface, and do not substitute pure black.
 
 ## Shape & Geometry
 
-| 통합 토큰 | iOS 값 | SwiftUI API | 비고 |
+| Unified token | iOS value | SwiftUI API | Notes |
 |----------|--------|-------------|------|
-| corner-radius-small | 8pt | `.clipShape(.rect(cornerRadius: 8, style: .continuous))` | 버튼/필드 |
-| corner-radius-medium | 13pt | `.clipShape(.rect(cornerRadius: 13, style: .continuous))` | 카드/셀 |
-| corner-radius-large.ios | 22pt | `.clipShape(.rect(cornerRadius: 22, style: .continuous))` | 위젯/모달 |
-| corner-style | squircle (G2) | `RoundedRectangle(cornerRadius:, style: .continuous)` | Apple 독자 곡선 |
-| pill-shape | height/2 | `Capsule()` | 알약형 버튼 |
-| depth-layers.ios | 3단계 | `.shadow(radius:)` 단계별 | base/raised/overlay |
-| sf-symbol | 9 weight x 3 scale | `Image(systemName:).symbolRenderingMode(.hierarchical)` | 자동 매칭 |
-| icon-stroke | 1.5-2pt | SF Symbols 기본 | 텍스트 weight 연동 |
+| corner-radius-small | 8pt | `.clipShape(.rect(cornerRadius: 8, style: .continuous))` | buttons/fields |
+| corner-radius-medium | 13pt | `.clipShape(.rect(cornerRadius: 13, style: .continuous))` | cards/cells |
+| corner-radius-large.ios | 22pt | `.clipShape(.rect(cornerRadius: 22, style: .continuous))` | widgets/modals |
+| corner-style | squircle (G2) | `RoundedRectangle(cornerRadius:, style: .continuous)` | Apple proprietary curve |
+| pill-shape | height/2 | `Capsule()` | pill-shaped button |
+| depth-layers.ios | 3 levels | `.shadow(radius:)` per level | base/raised/overlay |
+| sf-symbol | 9 weight x 3 scale | `Image(systemName:).symbolRenderingMode(.hierarchical)` | automatic matching |
+| icon-stroke | 1.5-2pt | SF Symbols default | tied to text weight |
 
 ## Motion & Interaction
 
-| 통합 토큰 | iOS 값 | SwiftUI API | 비고 |
+| Unified token | iOS value | SwiftUI API | Notes |
 |----------|--------|-------------|------|
-| duration-fast | 0.15-0.2s | `.animation(.easeOut(duration: 0.2))` | 미세 피드백 |
-| duration-standard | 0.25-0.35s | `.animation(.spring(response: 0.35, dampingFraction: 0.8))` | 표준 전환 |
-| duration-slow | 0.4-0.5s | `.animation(.spring(response: 0.5, dampingFraction: 0.7))` | 모달 등장 |
-| spring-damping | 0.7-0.85 | `dampingFraction: 0.8` | 약간 탄성 |
-| spring-response | 0.3-0.5s | `response: 0.35` | 스프링 반응 |
+| duration-fast | 0.15-0.2s | `.animation(.easeOut(duration: 0.2))` | micro feedback |
+| duration-standard | 0.25-0.35s | `.animation(.spring(response: 0.35, dampingFraction: 0.8))` | standard transition |
+| duration-slow | 0.4-0.5s | `.animation(.spring(response: 0.5, dampingFraction: 0.7))` | modal entrance |
+| spring-damping | 0.7-0.85 | `dampingFraction: 0.8` | slight bounce |
+| spring-response | 0.3-0.5s | `response: 0.35` | spring response |
 | easing-default | ease-in-out | `.easeInOut` | Core Animation |
-| haptic-feedback | 3종+6종 | `UIImpactFeedbackGenerator(style: .medium)` | 촉각 피드백 |
-| reduce-motion | crossfade 0.3s | `.animation(reduceMotion ? .easeOut(0.3) : .spring())` | 접근성 대응 |
-| gesture-velocity | 500pt/s | `DragGesture.Value.velocity` | 스와이프 임계 |
-| rubber-band | 1/3 감속 | `ScrollView` 기본 내장 | 오버스크롤 |
-| frame-rate | 60fps | `CADisplayLink` / Metal | 최소 성능 기준 |
+| haptic-feedback | 3 kinds + 6 kinds | `UIImpactFeedbackGenerator(style: .medium)` | haptic feedback |
+| reduce-motion | crossfade 0.3s | `.animation(reduceMotion ? .easeOut(0.3) : .spring())` | accessibility handling |
+| gesture-velocity | 500pt/s | `DragGesture.Value.velocity` | swipe threshold |
+| rubber-band | 1/3 deceleration | built into `ScrollView` | overscroll |
+| frame-rate | 60fps | `CADisplayLink` / Metal | minimum performance bar |
 
-### 접근성 주석
-- `turrell-breath`: `UIAccessibility.isReduceMotionEnabled` 또는 동등 설정이 켜지면 호흡 애니메이션을 정지하거나 crossfade로 대체한다. 반복 시 밝기 변화는 ±5%, 주기는 4-8초 범위를 넘지 않는다.
+### Accessibility notes
+- `turrell-breath`: when `UIAccessibility.isReduceMotionEnabled` or an equivalent setting is on, stop the breathing animation or replace it with a crossfade. On repeat, brightness change must not exceed ±5% and the period must stay within the 4-8 second range.
 
 
 ## Token-level usage envelope (round-004)
 
-- `riley-bw`, `riley-stripe-width`: `Canvas`/장식 패널/로딩 면에서만 사용하고 `Text`, `TextField`, 포커스 가능한 control 뒤 배경으로는 금지한다. 줄무늬는 2pt 이상 유지하고, 패턴 면은 전환성 UI를 제외하면 화면의 50% 이하로 제한한다.
-- `turrell-kelvin`, `turrell-breath`: `UIAccessibility.isReduceMotionEnabled == false`인 경우에만 ambient layer에서 활성화하고, 30% 이상 viewport를 차지하는 몰입/웰니스 화면으로 한정한다. 자동 색온도 변화는 opt-in + opt-out이 모두 있어야 하며, 전환은 2초 이상·호흡은 ±5%/4-8초 범위를 지킨다.
-- `rothko-surface-dark`: `surface-0`~`surface-3` 성격의 색조 다크 배경으로만 쓰고, 장문 텍스트는 `secondarySystemBackground` 또는 glass/overlay 패널 위에 올린다. 본문은 4.5:1, large text와 separator/icon/border는 3:1을 충족해야 하며 texture/pattern/pure black 대체는 금지한다.
+- `riley-bw`, `riley-stripe-width`: use only on `Canvas`/decorative panels/loading surfaces, and forbid as a background behind `Text`, `TextField`, or focusable controls. Keep stripes at 2pt or wider, and limit patterned surfaces to 50% or less of the screen except on transitional UI.
+- `turrell-kelvin`, `turrell-breath`: activate in an ambient layer only when `UIAccessibility.isReduceMotionEnabled == false`, and restrict to immersive/wellness screens occupying 30% or more of the viewport. Automatic color-temperature change must have both opt-in and opt-out; transitions stay at 2 seconds or longer and breathing within the ±5%/4-8 second range.
+- `rothko-surface-dark`: use only as a tonal dark background of `surface-0`~`surface-3` character, and place long-form text on `secondarySystemBackground` or a glass/overlay panel. Body text must meet 4.5:1, and large text plus separator/icon/border must meet 3:1; texture/pattern/pure-black substitution is forbidden.

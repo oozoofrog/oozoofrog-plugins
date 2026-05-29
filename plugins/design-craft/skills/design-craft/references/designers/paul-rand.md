@@ -1,117 +1,117 @@
-# Paul Rand -- 디자인 토큰 사전
+# Paul Rand -- Design Token Dictionary
 
-## 프로필
-- **활동 기간**: 1936-1996, 핵심기 1956-1991 (기업 아이덴티티)
-- **주요 소속**: 예일대 그래픽 디자인 교수(1956-1993), IBM/ABC/UPS/Westinghouse/NeXT/Enron 컨설턴트
-- **핵심 공헌**: IBM 8-bar 로고(1972), ABC 로고(1962), UPS 로고(1961), NeXT 로고(1986), Westinghouse 로고(1960), "Thoughts on Design"(1947)
-- **디자인 계보**: 바우하우스(Moholy-Nagy) → 미국 모더니즘 → 기업 아이덴티티 디자인의 선구자
+## Profile
+- **Active period**: 1936-1996, core period 1956-1991 (corporate identity)
+- **Main affiliations**: Yale University graphic design professor (1956-1993); IBM/ABC/UPS/Westinghouse/NeXT/Enron consultant
+- **Key contributions**: IBM 8-bar logo (1972), ABC logo (1962), UPS logo (1961), NeXT logo (1986), Westinghouse logo (1960), "Thoughts on Design" (1947)
+- **Design lineage**: Bauhaus (Moholy-Nagy) → American modernism → pioneer of corporate identity design
 
-## 디자인 철학 (정량화 가능한 원칙)
+## Design Philosophy (quantifiable principles)
 
-| 원칙 | 정량 변환 | UI 메트릭 |
+| Principle | Quantitative conversion | UI metric |
 |------|----------|----------|
-| 단순함 (Simplicity) | 로고 구성 요소 ≤ 3개 | UI 요소 최소화 |
-| 유희성 (Wit) | 1개 시각적 반전/의외성 포함 | 마이크로인터랙션 1개/화면 |
-| 기하학적 기반 | 원·사각·삼각 기본 형태 조합 | 기하학적 아이콘 100% |
-| 반복과 변주 | 동일 모듈 반복 + 1개 변주 | 패턴 일관성 90% + 예외 10% |
-| 보편적 소통 | 문화 독립적 형태 인식률 95%+ | 아이콘 인식률 테스트 통과 |
+| Simplicity | logo components ≤ 3 | minimize UI elements |
+| Wit | include 1 visual reversal/surprise | 1 microinteraction/screen |
+| Geometric foundation | combination of circle/square/triangle primitives | 100% geometric icons |
+| Repetition and variation | repeat same module + 1 variation | pattern consistency 90% + exception 10% |
+| Universal communication | culture-independent form recognition rate 95%+ | pass icon recognition test |
 
-## 정량적 디자인 토큰
+## Quantitative Design Tokens
 
-### 레이아웃 & 간격
+### Layout & Spacing
 
-| 토큰명 | 값/범위 | 출처 | 신뢰도 |
+| Token | Value/Range | Source | Confidence |
 |--------|---------|------|--------|
-| logo-grid | 정사각형 기반 그리드 (IBM 로고 8:13 비율) | IBM 그래픽 표준 매뉴얼 (1972) | S |
-| clear-space | 로고 높이의 50-100% (사방 여백) | IBM/UPS 브랜드 가이드라인 | S |
-| minimum-size | 로고 최소 표시 크기 = 폭 25mm | IBM 브랜드 가이드라인 | A |
-| page-grid | 비정형 — 콘텐츠에 따라 유동적 | Rand 포스터/광고 레이아웃 분석 | B |
-| hierarchy-levels | 2-3단계 (로고-제목-본문) | Rand 광고 디자인 시각 위계 분석 | A |
-| composition | 비대칭 구성, 시각적 무게 중심 좌상단 | Rand 포스터 구도 분석 | A |
-| grid-base-ui | 8pt (디지털 변환) | 기하학적 비례의 UI 스케일링 | F |
-| whitespace-ratio | 여백 40-60% (로고 프레젠테이션) | Rand 로고 제안서 레이아웃 분석 | A |
+| logo-grid | square-based grid (IBM logo 8:13 ratio) | IBM Graphic Standards Manual (1972) | S |
+| clear-space | 50-100% of logo height (margin on all sides) | IBM/UPS brand guidelines | S |
+| minimum-size | logo minimum display size = width 25mm | IBM brand guidelines | A |
+| page-grid | irregular — fluid according to content | analysis of Rand poster/advertising layouts | B |
+| hierarchy-levels | 2-3 levels (logo-title-body) | analysis of visual hierarchy in Rand advertising design | A |
+| composition | asymmetric composition, visual center of gravity at top-left | analysis of Rand poster composition | A |
+| grid-base-ui | 8pt (digital conversion) | UI scaling of geometric proportion | F |
+| whitespace-ratio | margin 40-60% (logo presentation) | analysis of Rand logo proposal layouts | A |
 
-### 타이포그래피
+### Typography
 
-| 토큰명 | 값/범위 | 출처 | 신뢰도 |
+| Token | Value/Range | Source | Confidence |
 |--------|---------|------|--------|
-| font-ibm | City Medium (슬래브 세리프) → IBM Plex | IBM 로고 서체 + 후속 시스템 서체 | S |
-| font-family-count | 1-2종 (로고 서체 + 본문 서체) | Rand 기업 아이덴티티 서체 규칙 | A |
-| font-weight | Medium(500)-Bold(700) — 명확한 존재감 | IBM 타이포그래피 가이드라인 | A |
-| logo-letterform | 기하학적 변형 — 글자를 형태로 취급 | NeXT 로고(기울인 정육면체 + 글자) | S |
-| font-size-ratio | 제목:본문 = 2:1 ~ 3:1 (강한 대비) | Rand 광고 타이포 분석 | A |
-| letter-spacing | 로고: 커스텀 커닝, 본문: 표준 | IBM 로고 글자 간격 실측 | A |
-| text-color | 흑(#000) 기본, 브랜드 컬러 보조 | Rand 인쇄물 텍스트 컬러 | A |
-| font-size-ui | 16pt (본문), 32-48pt (제목) | 강한 대비 원칙의 UI 변환 | F |
+| font-ibm | City Medium (slab serif) → IBM Plex | IBM logo typeface + subsequent system typeface | S |
+| font-family-count | 1-2 families (logo typeface + body typeface) | Rand corporate identity typeface rules | A |
+| font-weight | Medium(500)-Bold(700) — clear presence | IBM typography guidelines | A |
+| logo-letterform | geometric transformation — treat letters as forms | NeXT logo (tilted cube + letters) | S |
+| font-size-ratio | title:body = 2:1 ~ 3:1 (strong contrast) | analysis of Rand advertising typography | A |
+| letter-spacing | logo: custom kerning, body: standard | measurement of IBM logo letter spacing | A |
+| text-color | black (#000) base, brand color secondary | text color in Rand print work | A |
+| font-size-ui | 16pt (body), 32-48pt (title) | UI conversion of strong-contrast principle | F |
 
-### 색상 & 표면
+### Color & Surface
 
-| 토큰명 | 값/범위 | 출처 | 신뢰도 |
+| Token | Value/Range | Source | Confidence |
 |--------|---------|------|--------|
-| ibm-blue | #0530AD (IBM 파랑) | IBM 브랜드 표준 컬러 | S |
-| palette-primary | 흑·백 + 브랜드 컬러 1색 | Rand 기업 아이덴티티 컬러 원칙 | S |
-| color-playful | 원색 대비 (빨강·파랑·노랑·녹색) | Rand 어린이 책/포스터 컬러 분석 | A |
-| color-count | 3-5색/프로젝트 (흑·백 + 2-3 악센트) | Rand 컬러 팔레트 분석 | A |
-| accent-ratio | 브랜드 컬러 면적 30-50% | IBM 포스터/문서 컬러 면적 분석 | A |
-| contrast-ratio | 최소 4.5:1 (WCAG AA) | Rand 고대비 디자인 실측 | B |
-| surface | 단색 flat, 텍스처 최소화 | Rand 포스터 표면 분석 | A |
-| background | 순백 또는 단색 (브랜드 컬러 배경 허용) | Rand 디자인 배경 분석 | A |
+| ibm-blue | #0530AD (IBM blue) | IBM brand standard color | S |
+| palette-primary | black·white + 1 brand color | Rand corporate identity color principle | S |
+| color-playful | primary color contrast (red·blue·yellow·green) | analysis of Rand children's book/poster color | A |
+| color-count | 3-5 colors/project (black·white + 2-3 accents) | analysis of Rand color palette | A |
+| accent-ratio | brand color area 30-50% | analysis of color area in IBM posters/documents | A |
+| contrast-ratio | minimum 4.5:1 (WCAG AA) | measurement of Rand high-contrast design | B |
+| surface | solid flat, minimal texture | analysis of Rand poster surfaces | A |
+| background | pure white or solid color (brand color background permitted) | analysis of Rand design backgrounds | A |
 
-### 형태 & 곡률
+### Form & Curvature
 
-| 토큰명 | 값/범위 | 출처 | 신뢰도 |
+| Token | Value/Range | Source | Confidence |
 |--------|---------|------|--------|
-| ibm-stripe | 8줄 수평선(bar), 선폭:간격 = 1:1 | IBM 8-bar 로고 (1972) 실측 | S |
-| ibm-bar-angle | 0° (수평) — 기울임 없음 | IBM 로고 기하학 분석 | S |
-| abc-circle | 정원 내접 소문자 abc | ABC 로고 (1962) — 정원 지름 = 전체 크기 | S |
-| next-cube | 28° 기울인 정육면체, 4색 면 | NeXT 로고 (1986) 기하학 분석 | S |
-| corner-radius-logo | 0px (직각) 또는 정원 — 중간 둥글림 없음 | Rand 로고 형태 분석 — 극단적 선택 | S |
-| form-ratio | 황금비(1:1.618) 또는 정사각형(1:1) | IBM 로고 전체 비율 ≈ 8:13 ≈ 1:1.625 | A |
-| icon-style | 기하학적 단순 형태, 시각적 유희 포함 | Rand 일러스트레이션 스타일 | A |
-| shape-combination | 2-3종 기본 형태 조합으로 의미 생성 | Rand 로고 구성 분석 | A |
-| corner-radius-ui | 0-4pt (직각 선호, 둥글림 최소) | Rand 기하학 원칙의 UI 변환 | F |
+| ibm-stripe | 8 horizontal bars, stroke width:gap = 1:1 | measurement of IBM 8-bar logo (1972) | S |
+| ibm-bar-angle | 0° (horizontal) — no tilt | analysis of IBM logo geometry | S |
+| abc-circle | lowercase abc inscribed in a perfect circle | ABC logo (1962) — circle diameter = overall size | S |
+| next-cube | cube tilted 28°, 4 colored faces | analysis of NeXT logo (1986) geometry | S |
+| corner-radius-logo | 0px (right angle) or perfect circle — no intermediate rounding | analysis of Rand logo forms — extreme choice | S |
+| form-ratio | golden ratio (1:1.618) or square (1:1) | IBM logo overall ratio ≈ 8:13 ≈ 1:1.625 | A |
+| icon-style | simple geometric forms, includes visual wit | Rand illustration style | A |
+| shape-combination | combination of 2-3 primitive forms to generate meaning | analysis of Rand logo composition | A |
+| corner-radius-ui | 0-4pt (right angle preferred, minimal rounding) | UI conversion of Rand geometric principle | F |
 
-### 인터랙션 & 모션
+### Interaction & Motion
 
-| 토큰명 | 값/범위 | 출처 | 신뢰도 |
+| Token | Value/Range | Source | Confidence |
 |--------|---------|------|--------|
-| transition-duration | 0.2-0.3s (유희적 여유) | Rand "유희성" 원칙의 모션 해석 | F |
-| reveal-animation | 형태 조립 애니메이션 (로고 빌드업) | IBM 로고 줄무늬 순차 등장 효과 | F |
-| hover-feedback | 색상 반전 또는 보색 전환 | Rand 컬러 대비 원칙 인터랙션 변환 | F |
-| micro-interaction | 1개/화면 — 유희적 발견 요소 | Rand "wit" 원칙의 디지털 해석 | F |
-| easing | ease-in-out (부드러운 유희성) | Rand 장난스러운 형태의 모션 변환 | F |
-| state-change | 형태 변형 허용 (색상 변경 + 형태 변주) | Rand 로고 변주 규칙 (IBM rebus) | A |
+| transition-duration | 0.2-0.3s (playful ease) | motion interpretation of Rand "wit" principle | F |
+| reveal-animation | form-assembly animation (logo build-up) | sequential-appearance effect of IBM logo stripes | F |
+| hover-feedback | color inversion or complementary-color shift | interaction conversion of Rand color contrast principle | F |
+| micro-interaction | 1/screen — playful discovery element | digital interpretation of Rand "wit" principle | F |
+| easing | ease-in-out (smooth playfulness) | motion conversion of Rand playful forms | F |
+| state-change | form transformation permitted (color change + form variation) | Rand logo variation rules (IBM rebus) | A |
 
-## 시대별 변화
+## Changes Over Time
 
-| 시기 | 전환점 | 주요 수치 변화 |
+| Period | Turning point | Key numeric changes |
 |------|--------|---------------|
-| 1936-1955 | 초기 광고/잡지 디자인 | 유기적 형태 30%+, 콜라주 기법 활용 |
-| 1956-1965 | 기업 아이덴티티 확립기 | 기하학적 형태 90%+, ABC·UPS·Westinghouse 로고 |
-| 1966-1975 | IBM 관계 심화 | 8-bar 로고(1972), 줄무늬 모티프 확립, Eye-Bee-M rebus |
-| 1976-1990 | 교육·저술 + NeXT | 디자인 원칙 체계화, NeXT 로고(1986) — Steve Jobs와 협업 |
-| 1991-1996 | 만년 — 원칙 종합 | "Design, Form, and Chaos"(1993) 출간, 유산 정리 |
+| 1936-1955 | early advertising/magazine design | organic forms 30%+, use of collage technique |
+| 1956-1965 | corporate identity establishment | geometric forms 90%+, ABC·UPS·Westinghouse logos |
+| 1966-1975 | deepening IBM relationship | 8-bar logo (1972), stripe motif established, Eye-Bee-M rebus |
+| 1976-1990 | teaching/writing + NeXT | systematization of design principles, NeXT logo (1986) — collaboration with Steve Jobs |
+| 1991-1996 | late years — synthesis of principles | "Design, Form, and Chaos" (1993) published, legacy consolidated |
 
-## 영향 관계
+## Influence Relationships
 
-- **바우하우스 → Rand**: Moholy-Nagy, Cassandre의 구성주의 포스터 영향
-- **스위스 타이포그래피 → Rand**: 그리드와 산세리프를 미국 상업 디자인에 접목
-- **Rand → Steve Jobs**: NeXT 로고 과정이 Jobs의 디자인 철학에 직접 영향
-- **Rand → 현대 로고 디자인**: "로고는 설명하지 않고 식별한다" 원칙
-- **Rand → 기업 아이덴티티 산업**: 단일 디자이너가 기업 전체 시각 체계를 설계하는 모델 확립
-- **주요 참고 문헌**: "Thoughts on Design" (1947), "A Designer's Art" (1985), "Design, Form, and Chaos" (1993)
+- **Bauhaus → Rand**: influence of Moholy-Nagy and Cassandre constructivist posters
+- **Swiss typography → Rand**: grafting grid and sans-serif onto American commercial design
+- **Rand → Steve Jobs**: the NeXT logo process directly influenced Jobs's design philosophy
+- **Rand → modern logo design**: principle that "a logo identifies rather than explains"
+- **Rand → corporate identity industry**: established the model of a single designer designing an entire corporate visual system
+- **Key references**: "Thoughts on Design" (1947), "A Designer's Art" (1985), "Design, Form, and Chaos" (1993)
 
-## UI 적용 매핑
+## UI Application Mapping
 
-| Rand 원칙 | 현대 UI 토큰 변환 규칙 |
+| Rand principle | Modern UI token conversion rule |
 |----------|----------------------|
-| 기하학적 단순성 | 아이콘 = 원·사각·삼각 조합, `SVG path` 최소 노드 |
-| 유희적 발견 | 마이크로인터랙션 1개/화면 — 이스터에그, 로딩 애니메이션 |
-| 줄무늬 모티프 | `background: repeating-linear-gradient()` 패턴 활용 |
-| 로고 = 식별 | 파비콘·앱 아이콘 = 단일 기하학적 심볼, 텍스트 없이 인식 |
-| 강한 색상 대비 | 브랜드 컬러 1색 + 흑·백, `--brand: #XXXX` |
-| 형태-의미 일치 | 아이콘이 기능을 암시, 레이블 없이 인식률 80%+ |
-| 여백의 존중 | 로고·핵심 요소 주변 `padding: 2em+` |
-| 변주 허용 | 로고/아이콘의 컨텍스트별 변주 (다크모드, 축소판, 모노크롬) |
-| 극단적 둥글림 | `border-radius: 0` 또는 `50%` — 중간값 회피 |
-| 기업 일관성 | 디자인 토큰 시스템으로 전사 시각 통일 |
+| geometric simplicity | icon = combination of circle·square·triangle, `SVG path` with minimal nodes |
+| playful discovery | 1 microinteraction/screen — easter egg, loading animation |
+| stripe motif | use `background: repeating-linear-gradient()` pattern |
+| logo = identification | favicon·app icon = single geometric symbol, recognizable without text |
+| strong color contrast | 1 brand color + black·white, `--brand: #XXXX` |
+| form-meaning alignment | icon suggests function, 80%+ recognition without label |
+| respect for whitespace | `padding: 2em+` around logo·key elements |
+| variation permitted | context-specific variation of logo/icon (dark mode, reduced version, monochrome) |
+| extreme rounding | `border-radius: 0` or `50%` — avoid intermediate values |
+| corporate consistency | unify enterprise-wide visuals via design token system |

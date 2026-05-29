@@ -1,144 +1,144 @@
-# GPT-PRO 프롬프팅 모범 사례
+# GPT-PRO Prompting Best Practices
 
-## 맥락/질문 비율 원칙
+## Context/Question Ratio Principle
 
-효과적인 리서치 프롬프트는 충분한 맥락과 명확한 질문의 균형이 핵심입니다.
+An effective research prompt balances sufficient context with a clear question.
 
-| 비율 | 상황 | 설명 |
+| Ratio | Situation | Description |
 |------|------|------|
-| 맥락 80% / 질문 20% | 코드 분석, 리팩토링 | 코드를 충분히 제공하고 간결하게 질문 |
-| 맥락 60% / 질문 40% | 아키텍처 결정 | 구조를 보여주되 제약 조건과 고려사항을 상세히 |
-| 맥락 40% / 질문 60% | 디버깅 | 에러와 최소 재현 코드 + 상세한 증상 설명 |
+| Context 80% / Question 20% | Code analysis, refactoring | Provide enough code, ask concisely |
+| Context 60% / Question 40% | Architecture decisions | Show the structure, but detail constraints and considerations |
+| Context 40% / Question 60% | Debugging | Error + minimal reproduction code + detailed symptom description |
 
-**원칙**: 맥락 없는 질문은 일반적 답변만 얻고, 질문 없는 맥락은 방향을 잃습니다.
-
----
-
-## 역할 지정 전략
-
-### 효과적인 역할 예시
-
-```
-# 좋은 예 — 구체적 전문성 + 관점
-"당신은 10년 경력의 iOS 앱 아키텍트로, 대규모 Swift 코드베이스의 모듈화에 전문성이 있습니다."
-
-# 나쁜 예 — 너무 일반적
-"당신은 프로그래밍 전문가입니다."
-```
-
-### 모드별 역할 커스터마이징
-
-사용자가 특정 관점을 원하면 역할에 반영합니다:
-
-- **성능 관점**: "... 특히 메모리 최적화와 실행 성능에 중점을 둡니다"
-- **보안 관점**: "... 특히 보안 취약점 식별과 방어적 프로그래밍에 중점을 둡니다"
-- **테스트 관점**: "... 특히 테스트 전략 설계와 테스트 용이성에 중점을 둡니다"
-- **마이그레이션 관점**: "... 특히 점진적 마이그레이션과 하위 호환성에 중점을 둡니다"
+**Principle**: A question without context yields only generic answers; context without a question loses direction.
 
 ---
 
-## 출력 형식 명시
+## Role-Setting Strategy
 
-GPT-PRO가 구조화된 응답을 제공하도록 Expected Output에서 형식을 명시합니다.
+### Effective Role Examples
 
-### 효과적인 형식 지정
+```
+# Good example — specific expertise + perspective
+"You are an iOS app architect with 10 years of experience, specializing in modularizing large-scale Swift codebases."
+
+# Bad example — too generic
+"You are a programming expert."
+```
+
+### Customizing the Role per Mode
+
+When the user wants a specific perspective, reflect it in the role:
+
+- **Performance perspective**: "... with particular focus on memory optimization and runtime performance"
+- **Security perspective**: "... with particular focus on identifying security vulnerabilities and defensive programming"
+- **Testing perspective**: "... with particular focus on test strategy design and testability"
+- **Migration perspective**: "... with particular focus on incremental migration and backward compatibility"
+
+---
+
+## Specifying Output Format
+
+Specify the format in the Expected Output so GPT-PRO returns a structured response.
+
+### Effective Format Specification
 
 ```
 ## Expected Output
 
-다음 구조로 응답해주세요:
+Please respond with the following structure:
 
-1. **요약** (3줄 이내)
-2. **상세 분석** (섹션별 마크다운)
-3. **코드 예시** (수정 전/후 diff 형식)
-4. **권장 사항** (우선순위 순서대로)
+1. **Summary** (within 3 lines)
+2. **Detailed analysis** (markdown by section)
+3. **Code examples** (before/after diff format)
+4. **Recommendations** (in priority order)
 ```
 
-### 피해야 할 것
+### What to Avoid
 
-- "자세히 설명해주세요" → 방향 없는 장문 응답
-- 형식 미지정 → 일관성 없는 출력
-- 너무 많은 요구 → 각 항목의 깊이 저하
+- "Please explain in detail" → long, directionless response
+- No format specified → inconsistent output
+- Too many requirements → reduced depth on each item
 
 ---
 
-## 언어 일관성
+## Language Consistency
 
-### 기본 원칙
+### Basic Principle
 
-| 요소 | 언어 | 예시 |
+| Element | Language | Example |
 |------|------|------|
-| 프롬프트 설명 / 질문 | 한국어 | "이 모듈의 책임을 분석해주세요" |
-| 코드 | 원문 유지 | `func authenticate(token: String)` |
-| 기술 용어 | 원문 유지 | "Protocol Oriented Programming" |
-| 파일 경로 | 원문 유지 | `src/auth/AuthManager.swift` |
-| 응답 요청 | 한국어 | "한국어로 설명해주세요" |
+| Prompt description / question | Korean | "Please analyze the responsibilities of this module" |
+| Code | Keep original | `func authenticate(token: String)` |
+| Technical terms | Keep original | "Protocol Oriented Programming" |
+| File paths | Keep original | `src/auth/AuthManager.swift` |
+| Response request | Korean | "Please explain in Korean" |
 
-### 언어 지시 삽입
+### Inserting the Language Instruction
 
-프롬프트 마지막에 다음을 추가합니다:
-
-```
-> 응답은 한국어로 작성해주세요. 코드, 기술 용어, 파일 경로는 원문을 유지합니다.
-```
-
----
-
-## 효과적인 리서치 질문 유형
-
-### 분석 질문 (What/How)
+Append the following at the end of the prompt:
 
 ```
-"이 모듈이 어떤 책임을 가지고 있으며, Single Responsibility Principle을 따르고 있는지 분석해주세요."
-"이 아키텍처에서 데이터가 어떻게 흐르는지 설명해주세요."
-```
-
-### 비교 질문 (Trade-off)
-
-```
-"현재 구현과 Strategy 패턴을 적용한 구현의 장단점을 비교해주세요."
-"Protocol 기반 추상화 vs 제네릭 기반 추상화 중 이 맥락에서 어떤 것이 적합한지 분석해주세요."
-```
-
-### 개선 질문 (Improve)
-
-```
-"이 코드의 테스트 용이성을 높이기 위해 어떤 리팩토링이 필요한지 구체적인 코드와 함께 제안해주세요."
-"성능 병목을 식별하고 최적화 방안을 제시해주세요."
-```
-
-### 디버깅 질문 (Fix)
-
-```
-"이 에러의 근본 원인을 파악하고, 수정 코드를 diff 형식으로 제공해주세요."
-"이 크래시가 발생할 수 있는 모든 시나리오를 열거하고, 각각의 방어 코드를 제안해주세요."
-```
-
-### 설계 질문 (Design)
-
-```
-"이 기능을 추가할 때 기존 아키텍처와 일관성을 유지하면서 확장하는 방법을 제안해주세요."
-"이 모듈을 독립 패키지로 분리할 때 인터페이스를 어떻게 설계해야 하는지 제안해주세요."
+> Please write the response in Korean. Keep code, technical terms, and file paths in their original form.
 ```
 
 ---
 
-## 맥락 구성 팁
+## Effective Research Question Types
 
-### 파일 순서
+### Analysis Questions (What/How)
 
-맥락의 파일은 다음 순서로 배치합니다:
+```
+"Please analyze what responsibilities this module has and whether it follows the Single Responsibility Principle."
+"Please explain how data flows through this architecture."
+```
 
-1. **핵심 대상 파일** — 질문의 중심이 되는 코드
-2. **의존하는 인터페이스** — 대상이 구현하거나 사용하는 프로토콜/인터페이스
-3. **관련 구현** — 대상과 상호작용하는 코드
-4. **테스트** — 현재 동작을 보여주는 테스트
-5. **설정/환경** — 빌드 설정, 환경 변수 등
+### Comparison Questions (Trade-off)
 
-### 불필요한 정보 제거
+```
+"Please compare the pros and cons of the current implementation versus an implementation using the Strategy pattern."
+"Please analyze which is more suitable in this context: Protocol-based abstraction vs. generics-based abstraction."
+```
 
-- 라이선스 헤더: 제거
-- 긴 주석 블록: 핵심만 유지
-- 중복 import: 하나만 유지
-- 자동 생성 코드: 시그니처만 유지
-- 관련 없는 메서드: 해당 클래스에서 질문과 무관한 메서드 제거
+### Improvement Questions (Improve)
+
+```
+"Please suggest, with concrete code, what refactoring is needed to improve the testability of this code."
+"Please identify performance bottlenecks and propose optimization approaches."
+```
+
+### Debugging Questions (Fix)
+
+```
+"Please identify the root cause of this error and provide the fix as a diff."
+"Please enumerate all scenarios in which this crash could occur, and propose defensive code for each."
+```
+
+### Design Questions (Design)
+
+```
+"Please propose how to add this feature while extending the existing architecture and maintaining consistency with it."
+"Please propose how the interface should be designed when separating this module into a standalone package."
+```
+
+---
+
+## Context Composition Tips
+
+### File Order
+
+Arrange files in the context in this order:
+
+1. **Core target file** — the code at the center of the question
+2. **Dependent interfaces** — protocols/interfaces the target implements or uses
+3. **Related implementations** — code that interacts with the target
+4. **Tests** — tests that show current behavior
+5. **Config/environment** — build settings, environment variables, etc.
+
+### Removing Unnecessary Information
+
+- License headers: remove
+- Long comment blocks: keep only the essentials
+- Duplicate imports: keep only one
+- Auto-generated code: keep only signatures
+- Unrelated methods: remove methods in the class that are unrelated to the question

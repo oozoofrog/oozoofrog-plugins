@@ -1,12 +1,12 @@
-# Web Report 출력 템플릿
+# Web Report Output Template
 
-yoda share 모드의 `--format web` 출력을 위한 구조 템플릿. 인터랙티브 HTML 페이지를 직접 생성하거나 `frontend-design` 스킬에 위임한다.
+Structure template for the `--format web` output of yoda share mode. Generate the interactive HTML page directly or delegate to the `frontend-design` skill.
 
 ---
 
-## 페이지 구조
+## Page Structure
 
-### 1. Header 대시보드
+### 1. Header Dashboard
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -23,9 +23,9 @@ yoda share 모드의 `--format web` 출력을 위한 구조 템플릿. 인터랙
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### 2. Tab 네비게이션
+### 2. Tab Navigation
 
-4개 탭으로 분리하여 독자가 관심 있는 영역만 선택적으로 탐색:
+Split into 4 tabs so readers can selectively explore only the areas they care about:
 
 | 탭 | 내용 |
 |----|------|
@@ -34,31 +34,31 @@ yoda share 모드의 `--format web` 출력을 위한 구조 템플릿. 인터랙
 | 📖 딥다이브 | Praise, Insight, 아키텍처 시각화, 메타인지 질문 |
 | 🧩 패턴 | 일반화된 패턴, 설계 원칙 카드, 레퍼런스 링크 |
 
-### 3. Finding 카드 (접이식)
+### 3. Finding Card (collapsible)
 
-각 발견 사항은 collapsed/expanded 카드로 표현 (점진적 공개).
+Each finding is rendered as a collapsed/expanded card (progressive disclosure).
 
-- Collapsed: 심각도 아이콘 + 제목 + 위치 + 한 줄 요약
-- Expanded: Before(빨간 테두리) + Why + After(초록 테두리)
+- Collapsed: severity icon + title + location + one-line summary
+- Expanded: Before (red border) + Why + After (green border)
 
-### 4. 인출 연습 섹션
+### 4. Retrieval Practice Section
 
-코드 블록 + 질문 → 클릭하면 Why/After 공개.
+Code block + question → reveals Why/After on click.
 
 ---
 
-## 기술 요구사항
+## Technical Requirements
 
-| 항목 | 요구사항 |
+| Item | Requirement |
 |------|---------|
-| 파일 형식 | 단일 HTML 파일 (외부 의존성 CDN 로드) |
-| 구문 강조 | highlight.js, 대상 언어 지원 필수 |
-| 반응형 | 모바일/태블릿/데스크톱 3단계 |
-| 테마 | 다크/라이트 모드 토글, OS 설정 자동 감지 |
+| File format | Single HTML file (external dependencies loaded via CDN) |
+| Syntax highlighting | highlight.js, target language support required |
+| Responsive | Mobile / tablet / desktop, 3 breakpoints |
+| Theme | Dark/light mode toggle, auto-detect OS setting |
 
 ---
 
-## 저장 경로
+## Save Path
 
 ```
 docs/yoda/YYYY-MM-DD-{slug}.html

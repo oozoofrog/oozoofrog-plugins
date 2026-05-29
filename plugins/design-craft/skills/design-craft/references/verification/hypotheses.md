@@ -1,69 +1,69 @@
-# 디자인 토큰 가설 목록
+# Design Token Hypotheses
 
-검증 리포트에서 도출한 검증 가능한 가설 5개.
+Five testable hypotheses derived from the verification report.
 
-## H1: corner-radius-large 플랫폼 동등성
-
-```
-H: corner-radius-large를 iOS 22pt / Android 16dp로 설정하면,
-   동일 카드 컴포넌트에서 iOS 사용자가 인지하는 둥글림과
-   Android 사용자가 인지하는 둥글림이 시각적으로 동등하지 않다.
-출처: Ive(B), Dye(S), M3 Shape(S)
-검증 방법: 양 플랫폼에서 동일 비율 카드(16:9)를 렌더링하고
-          사용자 10명에게 "둥글림 정도" 5점 척도 평가를 수행한다.
-          추가로 물리적 곡률 비율(corner-radius / 컴포넌트 단변)을 계산하여 비교한다.
-반증 조건: 5점 척도 평균 차이가 0.5 이내이고, 곡률 비율 차이가 10% 이내이면 기각.
-```
-
-## H2: F등급 토큰 비표기에 의한 오적용
+## H1: corner-radius-large cross-platform equivalence
 
 ```
-H: 통합 토큰 사전에서 출처 신뢰도 등급을 생략하면,
-   F등급 출처(grid-base-ui Rams, easing Rams, transition-duration Vignelli)의 토큰을
-   S등급과 동일한 확신으로 적용하여, 원본 디자이너 의도와 다른 결과물이 나온다.
-출처: Rams grid-base-ui(F), Rams easing(F), Vignelli transition-duration(F)
-검증 방법: 통합 토큰으로 UI를 구현하는 디자이너 5명에게 등급 표기 버전과 미표기 버전을
-          각각 제공한 뒤, F등급 토큰의 "확신도(1-5)" 설문을 비교한다.
-          F등급 토큰에 대한 대안 탐색 빈도를 측정한다.
-반증 조건: 등급 표기 여부에 관계없이 F등급 토큰 확신도 차이가 0.3 이내이면 기각.
+H: If corner-radius-large is set to iOS 22pt / Android 16dp,
+   then for the same card component the roundedness perceived by iOS users
+   and the roundedness perceived by Android users are not visually equivalent.
+Source: Ive(B), Dye(S), M3 Shape(S)
+Test method: Render an identically proportioned card (16:9) on both platforms and
+          have 10 users rate "degree of roundedness" on a 5-point scale.
+          Additionally compute and compare the physical curvature ratio (corner-radius / shorter side of the component).
+Refutation condition: Reject if the 5-point-scale mean difference is within 0.5 and the curvature ratio difference is within 10%.
 ```
 
-## H3: Web line-height 0.1 차이의 가독성 영향
+## H2: Misapplication due to omitted F-grade token labeling
 
 ```
-H: Web 본문(16px)의 line-height를 1.4로 설정하면,
-   WCAG 권장(1.5)과 비교하여 한글 혼용 텍스트의 가독성 점수가 유의미하게 하락한다.
-출처: web.md Body line-height 1.5(S), unified line-height-ratio 1.2-1.4
-검증 방법: 동일 한글-라틴 혼용 텍스트를 line-height 1.4와 1.5로 렌더링하고,
-          읽기 속도(WPM)와 주관적 가독성(7점 리커트)을 20명 대상 비교한다.
-          추가로 line-height-korean(1.5-1.6) 토큰 적용 시와도 비교한다.
-반증 조건: 읽기 속도 차이 5% 이내, 주관적 가독성 차이 0.5점 이내이면 기각.
+H: If source-reliability grades are omitted from the unified token dictionary,
+   then F-grade-source tokens (grid-base-ui Rams, easing Rams, transition-duration Vignelli)
+   are applied with the same confidence as S-grade tokens, producing results that diverge from the original designer's intent.
+Source: Rams grid-base-ui(F), Rams easing(F), Vignelli transition-duration(F)
+Test method: Give 5 designers who implement UI with unified tokens a graded version and an ungraded version,
+          then compare a "confidence (1-5)" survey for the F-grade tokens.
+          Measure the frequency of alternative exploration for F-grade tokens.
+Refutation condition: Reject if the F-grade token confidence difference is within 0.3 regardless of whether grades are labeled.
 ```
 
-## H4: depth-layers 3단계 vs 5단계 인지 구분
+## H3: Readability impact of a 0.1 line-height difference on Web
 
 ```
-H: depth-layers를 3단계(base/raised/overlay)로 제한하면,
-   5단계(M3 Level 0-5)와 비교하여 사용자가 카드/시트/모달의
-   깊이 계층을 동등하게 구분할 수 있다.
-출처: Dye(S) 3단계, M3 Elevation(S) 6단계
-검증 방법: 동일 레이아웃을 3단계 깊이와 5단계 깊이로 구현한 프로토타입을 만들고,
-          사용자 15명에게 "이 요소가 다른 요소보다 위에 있는가?"를 판단하게 한다.
-          정답률과 판단 소요시간을 측정한다.
-반증 조건: 3단계 구현에서 깊이 구분 정답률이 85% 미만이거나,
-          5단계 구현 대비 정답률이 15%p 이상 낮으면 H4를 기각하고 5단계 채택을 권고.
+H: If Web body text (16px) is set to a line-height of 1.4,
+   then compared with the WCAG recommendation (1.5) the readability score of mixed Hangul text drops significantly.
+Source: web.md Body line-height 1.5(S), unified line-height-ratio 1.2-1.4
+Test method: Render the same mixed Hangul-Latin text at line-height 1.4 and 1.5,
+          and compare reading speed (WPM) and subjective readability (7-point Likert) across 20 participants.
+          Additionally compare against applying the line-height-korean(1.5-1.6) token.
+Refutation condition: Reject if the reading-speed difference is within 5% and the subjective-readability difference is within 0.5 points.
 ```
 
-## H5: accent-usage 5-15% 범위가 모든 맥락을 포괄하는가
+## H4: depth-layers 3-tier vs 5-tier perceptual distinction
 
 ```
-H: accent-usage를 5-15%로 통합하면,
-   미니멀 UI(Rams 의도: 5% 이하)에서 악센트 과잉이 발생하고,
-   브랜드 강조 UI(Rand 의도: 30-50%)에서 악센트 부족이 발생한다.
-출처: Rams accent-usage(B, 5%이하), Mondrian(C, 15-30%), Rand(D, 30-50%)
-검증 방법: 3가지 맥락(미니멀 유틸리티, 표준 앱, 브랜드 랜딩)에 대해
-          accent-usage 5%/10%/15%/25%/35%의 5단계 시안을 제작하고,
-          디자이너 10명의 "이 맥락에 적합한 악센트 비율" 선호도를 수집한다.
-반증 조건: 3가지 맥락 모두에서 5-15% 범위 내 값이 최선호로 선택되면 기각.
-          하나라도 범위 밖 값이 최선호이면 가설 채택 — 통합 범위 재설정 필요.
+H: If depth-layers is limited to 3 tiers (base/raised/overlay),
+   then compared with 5 tiers (M3 Level 0-5) users can distinguish the depth hierarchy
+   of cards/sheets/modals equally well.
+Source: Dye(S) 3 tiers, M3 Elevation(S) 6 tiers
+Test method: Build prototypes implementing the same layout with 3-tier depth and 5-tier depth,
+          and have 15 users judge "Is this element above the others?".
+          Measure accuracy rate and judgment time.
+Refutation condition: If the depth-distinction accuracy of the 3-tier implementation is below 85%,
+          or is 15pp or more lower than the 5-tier implementation, reject H4 and recommend adopting 5 tiers.
+```
+
+## H5: Does the accent-usage 5-15% range cover every context?
+
+```
+H: If accent-usage is unified to 5-15%,
+   then minimal UI (Rams intent: under 5%) suffers accent overuse,
+   and brand-emphasis UI (Rand intent: 30-50%) suffers accent shortage.
+Source: Rams accent-usage(B, under 5%), Mondrian(C, 15-30%), Rand(D, 30-50%)
+Test method: For 3 contexts (minimal utility, standard app, brand landing),
+          produce 5 variants at accent-usage 5%/10%/15%/25%/35%,
+          and collect 10 designers' preferences for "the accent ratio suited to this context".
+Refutation condition: Reject if a value within the 5-15% range is the top preference in all 3 contexts.
+          If a value outside the range is the top preference in even one, accept the hypothesis — the unified range needs to be reset.
 ```

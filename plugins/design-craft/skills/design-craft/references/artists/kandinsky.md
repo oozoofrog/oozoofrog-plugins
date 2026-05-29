@@ -1,115 +1,115 @@
-# Wassily Kandinsky -- 시각 언어 디자인 토큰
+# Wassily Kandinsky -- Visual Language Design Tokens
 
-## 프로필
-- **활동 기간**: 1896-1944 (추상 전환기: 1910-1944)
-- **운동/유파**: Der Blaue Reiter, Bauhaus, 추상 구성(Abstract Composition)
-- **핵심 공헌**: 1926년 이론서 "점·선·면(Punkt und Linie zu Fläche)"에서 시각 요소의 체계적 문법을 확립. 색상-형태-감정의 삼각 대응 이론(삼각형=노랑, 원=파랑, 사각형=빨강)을 정량화. 추상 미술을 음악적 구성 원리로 설명한 최초의 체계.
+## Profile
+- **Active period**: 1896-1944 (abstract turn: 1910-1944)
+- **Movement/school**: Der Blaue Reiter, Bauhaus, Abstract Composition
+- **Core contribution**: In the 1926 treatise "Point and Line to Plane (Punkt und Linie zu Fläche)," established a systematic grammar of visual elements. Quantified the triangular color-form-emotion correspondence theory (triangle=yellow, circle=blue, square=red). The first system to explain abstract art through musical compositional principles.
 
-## 시각 언어 원칙
+## Visual Language Principles
 
-1. **내적 필연성(Inner Necessity)**: 모든 형태와 색상 선택은 내적 감정의 필연적 표현이어야 한다. 장식이 아닌 의미가 형태를 결정한다. UI에서 "모든 시각 요소는 기능적 이유가 있어야 한다"는 원칙이다.
-2. **색상-형태 대응(Color-Form Correspondence)**: 노랑은 삼각형(날카로움, 전진), 파랑은 원(후퇴, 깊이), 빨강은 사각형(안정, 무게). 색상과 형태가 감정적으로 일치해야 시너지가 발생한다.
-3. **음악적 구성(Musical Composition)**: 회화를 음악처럼 구성한다. 반복(리듬), 대비(화성), 주제 전개(멜로디). 칸딘스키의 작품 제목이 "Composition", "Improvisation"인 이유이다. UI에서 시각적 리듬과 계층 구조의 근거.
-4. **온도와 무게(Temperature & Weight)**: 노랑은 따뜻하고 가벼우며, 파랑은 차갑고 무겁다. 빨강은 따뜻하고 무겁다. 색상이 물리적 속성을 가진다. UI에서 색상으로 시각적 무게를 조절하는 원칙.
-5. **긴장과 이완(Tension & Release)**: 대각선은 긴장, 수평선은 이완, 수직선은 상승. 선의 방향이 감정을 결정한다. UI에서 레이아웃의 역동성을 조절하는 원칙.
-6. **전체 구성(Total Composition)**: 개별 요소가 아닌 전체 관계가 작품을 결정한다. 어떤 요소도 독립적으로 판단하지 않고 전체 맥락에서 평가한다. UI에서 개별 컴포넌트가 아닌 페이지 전체의 조화를 우선하는 원칙.
-7. **점의 에너지(Point Energy)**: 점은 "가장 간결한 형태"이며 내적 긴장을 가진다. 크기, 위치, 주변 관계에 따라 에너지가 변한다. UI에서 dot indicator, bullet, 알림 배지의 미학적 근거.
+1. **Inner Necessity**: Every form and color choice must be a necessary expression of inner emotion. Meaning, not decoration, determines form. In UI, this is the principle that "every visual element must have a functional reason."
+2. **Color-Form Correspondence**: Yellow is the triangle (sharpness, advancing), blue is the circle (receding, depth), red is the square (stability, weight). Synergy arises only when color and form match emotionally.
+3. **Musical Composition**: Compose painting like music. Repetition (rhythm), contrast (harmony), thematic development (melody). This is why Kandinsky's works are titled "Composition" and "Improvisation." The basis for visual rhythm and hierarchy in UI.
+4. **Temperature & Weight**: Yellow is warm and light; blue is cold and heavy; red is warm and heavy. Color carries physical properties. The principle for tuning visual weight through color in UI.
+5. **Tension & Release**: The diagonal is tension, the horizontal is release, the vertical is ascent. The direction of a line determines emotion. The principle for tuning layout dynamism in UI.
+6. **Total Composition**: The whole relationship, not individual elements, determines the work. No element is judged in isolation; each is evaluated in the context of the whole. The principle of prioritizing the harmony of the whole page over individual components in UI.
+7. **Point Energy**: The point is "the most concise form" and carries inner tension. Its energy varies with size, position, and surrounding relationships. The aesthetic basis for dot indicators, bullets, and notification badges in UI.
 
-## 정량적 디자인 토큰
+## Quantitative Design Tokens
 
-### 색상 체계
-| 토큰명 | 값/범위 | 출처 | 신뢰도 | UI 적용 |
+### Color System
+| Token | Value/Range | Source | Confidence | UI application |
 |--------|---------|------|--------|---------|
-| kandinsky-yellow | #F0C800 ~ #FFD700 | Composition VIII (1923) 측색 | B | 경고, 강조, 전진하는 요소, CTA 배경 |
-| kandinsky-blue-deep | #1A237E ~ #283593 | Several Circles (1926) 배경 측색 | B | 심층 배경, 다크모드, 몰입 영역 |
-| kandinsky-blue-light | #42A5F5 ~ #64B5F6 | Composition VIII 원형 요소 | C | 정보성 요소, 링크, 보조 액션 |
-| kandinsky-red | #C62828 ~ #E53935 | Composition VIII 삼각형/사각형 요소 | B | 주요 액션, 경고, 무게감 있는 요소 |
-| kandinsky-black | #1A1A1A ~ #212121 | 전 작품 선과 형태 윤곽 | B | 텍스트, 아이콘, 구조선 |
-| kandinsky-violet | #6A1B9A ~ #8E24AA | Several Circles (1926) | C | 프리미엄, 창의적 영역, 보조 강조 |
-| kandinsky-orange | #E65100 ~ #F57C00 | Composition VIII 삼각 영역 | C | 보조 CTA, 호버 상태, 활성 인디케이터 |
-| kandinsky-green | #2E7D32 ~ #43A047 | Several Circles (1926) 원형 요소 | C | 성공, 완료, 긍정 피드백 |
-| kandinsky-bg-warm | #FFF8E1 ~ #FFFDE7 | 바우하우스 시기 배경색 추정 | D | 라이트모드 따뜻한 배경 |
-| kandinsky-bg-dark | #0D1B2A ~ #1B2838 | Several Circles 배경 기반 | B | 다크모드 깊은 배경 |
+| kandinsky-yellow | #F0C800 ~ #FFD700 | Composition VIII (1923) colorimetry | B | Warning, emphasis, advancing elements, CTA background |
+| kandinsky-blue-deep | #1A237E ~ #283593 | Several Circles (1926) background colorimetry | B | Deep background, dark mode, immersive areas |
+| kandinsky-blue-light | #42A5F5 ~ #64B5F6 | Composition VIII circular elements | C | Informational elements, links, secondary actions |
+| kandinsky-red | #C62828 ~ #E53935 | Composition VIII triangle/square elements | B | Primary actions, warnings, weighty elements |
+| kandinsky-black | #1A1A1A ~ #212121 | Lines and form outlines across all works | B | Text, icons, structural lines |
+| kandinsky-violet | #6A1B9A ~ #8E24AA | Several Circles (1926) | C | Premium, creative areas, secondary emphasis |
+| kandinsky-orange | #E65100 ~ #F57C00 | Composition VIII triangular areas | C | Secondary CTA, hover state, active indicator |
+| kandinsky-green | #2E7D32 ~ #43A047 | Several Circles (1926) circular elements | C | Success, completion, positive feedback |
+| kandinsky-bg-warm | #FFF8E1 ~ #FFFDE7 | Estimated Bauhaus-period background color | D | Light-mode warm background |
+| kandinsky-bg-dark | #0D1B2A ~ #1B2838 | Based on Several Circles background | B | Dark-mode deep background |
 
-### 구성 & 레이아웃
-| 토큰명 | 값/범위 | 출처 | 신뢰도 | UI 적용 |
+### Composition & Layout
+| Token | Value/Range | Source | Confidence | UI application |
 |--------|---------|------|--------|---------|
-| element-count | 10-50+ 개 요소 per 구성 | Composition VII-X 통계 | B | 복잡한 대시보드, 다요소 화면 허용 |
-| focal-point-count | 2-4개 주요 초점 | Composition VIII 시선 추적 분석 | C | 주요 CTA/정보 포인트 최대 수 |
-| grid-freedom | 비정형 — 그리드 없는 자유 배치 | 전 작품 구조 분석 | B | position: absolute 기반 자유 레이아웃 |
-| diagonal-axis | 주요 구성축 30-60° 대각선 | Composition VIII 축 분석 | C | 시선 유도 대각선 방향 |
-| layer-depth | 3-7 레이어 중첩 | Composition 연작 레이어 분석 | C | z-index 단계 수, 레이어 구조 |
+| element-count | 10-50+ elements per composition | Composition VII-X statistics | B | Complex dashboards, multi-element screens allowed |
+| focal-point-count | 2-4 primary focal points | Composition VIII gaze-tracking analysis | C | Max number of primary CTA/info points |
+| grid-freedom | Irregular — free placement without a grid | Structural analysis of all works | B | position: absolute-based free layout |
+| diagonal-axis | Primary composition axis 30-60° diagonal | Composition VIII axis analysis | C | Diagonal direction for gaze guidance |
+| layer-depth | 3-7 overlapping layers | Composition series layer analysis | C | Number of z-index levels, layer structure |
 
-### 비율 & 균형
-| 토큰명 | 값/범위 | 출처 | 신뢰도 | UI 적용 |
+### Proportion & Balance
+| Token | Value/Range | Source | Confidence | UI application |
 |--------|---------|------|--------|---------|
-| triangle-aspect | 정삼각형 기본, 높이:밑변 = 0.87:1 | 점·선·면 이론서 (1926) | B | 삼각형 UI 요소(화살표, 방향)의 기본 비율 |
-| circle-prominence | 원 요소가 전체의 20-40% 차지 | Several Circles (1926) 실측 | B | 원형 컴포넌트 사용 빈도 상한 |
-| size-range | 최대:최소 = 10:1 ~ 30:1 | Composition VIII 크기 분포 | C | 시각 계층의 극적 크기 차이 허용 |
-| color-form-map | 삼각형=노랑, 원=파랑, 사각형=빨강 | 점·선·면 이론서 (1926) p.73-78 | B | 형태와 색상의 감정적 짝짓기 원칙 |
-| weight-balance | 시각적 무게가 중심에서 ±15% 내에서 균형 | Composition VIII 무게중심 분석 | C | 시각적 무게 중심이 화면 중앙 근처 |
+| triangle-aspect | Equilateral triangle base, height:base = 0.87:1 | Point and Line to Plane treatise (1926) | B | Default ratio for triangular UI elements (arrows, direction) |
+| circle-prominence | Circle elements occupy 20-40% of the whole | Several Circles (1926) measurement | B | Upper limit on circular component usage frequency |
+| size-range | max:min = 10:1 ~ 30:1 | Composition VIII size distribution | C | Dramatic size differences in visual hierarchy allowed |
+| color-form-map | triangle=yellow, circle=blue, square=red | Point and Line to Plane treatise (1926) p.73-78 | B | Emotional pairing principle of form and color |
+| weight-balance | Visual weight balanced within ±15% of center | Composition VIII center-of-weight analysis | C | Visual center of weight near screen center |
 
-### 공간 & 여백
-| 토큰명 | 값/범위 | 출처 | 신뢰도 | UI 적용 |
+### Space & Whitespace
+| Token | Value/Range | Source | Confidence | UI application |
 |--------|---------|------|--------|---------|
-| breathing-room | 주요 요소 주위 최소 5% 여백 | Composition VIII 요소 간격 | C | 컴포넌트 최소 마진 |
-| density-zones | 고밀도(cluster) + 저밀도(rest) 구역 공존 | 전 작품 밀도 분석 | B | 정보 밀도 변화 — 밀집 영역과 휴식 영역 교대 |
-| edge-proximity | 주요 요소가 가장자리에서 5-15% 안쪽 | 전 작품 가장자리 분석 | C | safe area 패딩 |
-| void-purpose | 빈 공간은 요소 간 관계를 정의 | 점·선·면 이론서 | B | 여백이 그루핑/분리의 시각적 도구 |
+| breathing-room | Minimum 5% whitespace around primary elements | Composition VIII element spacing | C | Minimum component margin |
+| density-zones | High-density (cluster) + low-density (rest) zones coexist | Density analysis of all works | B | Information-density variation — clustered areas alternate with rest areas |
+| edge-proximity | Primary elements 5-15% inward from the edge | Edge analysis of all works | C | safe area padding |
+| void-purpose | Empty space defines the relationships between elements | Point and Line to Plane treatise | B | Whitespace as a visual tool for grouping/separation |
 
-### 시각적 리듬 & 반복
-| 토큰명 | 값/범위 | 출처 | 신뢰도 | UI 적용 |
+### Visual Rhythm & Repetition
+| Token | Value/Range | Source | Confidence | UI application |
 |--------|---------|------|--------|---------|
-| line-types | 직선, 곡선, 각진 선, 자유 곡선 4종 | 점·선·면 이론서 (1926) | B | 구분선/경로/화살표 스타일 분류 |
-| tension-direction | 수평=차가움, 수직=따뜻함, 대각=긴장 | 점·선·면 이론서 | B | 레이아웃 축의 감정적 속성 선택 |
-| concentric-rhythm | 동심원 2-7겹 반복 | Several Circles (1926) 실측 | B | 라디알 메뉴, 동심원 차트, 레이더 차트 |
-| polyphonic-layering | 3-5개 독립 시각 "목소리"가 동시에 진행 | Composition VII (1913) 분석 | C | 다중 정보 레이어 동시 표시 (지도 + 마커 + 경로) |
-| geometric-vocabulary | 점, 선, 삼각형, 원, 사각형 5가지 | 점·선·면 이론서 전체 | B | UI 형태 어휘를 5가지로 제한 |
+| line-types | 4 types: straight, curved, angular, free curve | Point and Line to Plane treatise (1926) | B | Classification of divider/path/arrow styles |
+| tension-direction | horizontal=cold, vertical=warm, diagonal=tension | Point and Line to Plane treatise | B | Selecting the emotional property of layout axes |
+| concentric-rhythm | Concentric circles repeated 2-7 rings | Several Circles (1926) measurement | B | Radial menus, concentric-circle charts, radar charts |
+| polyphonic-layering | 3-5 independent visual "voices" proceeding simultaneously | Composition VII (1913) analysis | C | Multiple information layers shown simultaneously (map + markers + paths) |
+| geometric-vocabulary | 5 forms: point, line, triangle, circle, square | Entire Point and Line to Plane treatise | B | Limit the UI form vocabulary to 5 forms |
 
-## 대표작 분석
+## Major Work Analysis
 
 ### 1. Composition VIII (1923)
-- **캔버스**: 140 x 201cm (가로형)
-- **소장**: Solomon R. Guggenheim Museum, New York
-- **구성**: 바우하우스 시기의 대표작. 좌상단에 대형 원 2개(동심원, 검정 외곽 + 보라 내부), 우측에 체커보드 패턴의 삼각형, 전체에 걸쳐 다양한 각도의 직선과 곡선이 교차. 약 30-40개의 개별 형태 요소.
-- **색상 분포**: 배경 = 밝은 노랑-크림(~60%), 검정 선/형태(~15%), 파랑/보라 원형(~10%), 빨강/주황 삼각/사각(~10%), 기타(~5%)
-- **계층**: 좌상단 대형 원(지름 약 캔버스 높이의 20%)이 1차 초점. 우상단 삼각형 집합이 2차 초점. 대각선이 두 초점을 연결.
-- **UI 변환**: 복잡한 대시보드의 구성 원리. 2-3개 주요 위젯(대형 차트) + 다수의 소형 인디케이터 + 연결선(관계 표시). `grid-template-areas`로 주요 영역을 지정하고 나머지는 자유 배치.
+- **Canvas**: 140 x 201cm (landscape)
+- **Collection**: Solomon R. Guggenheim Museum, New York
+- **Composition**: A masterwork of the Bauhaus period. Two large circles at upper left (concentric, black outer ring + violet interior), a checkerboard-pattern triangle on the right, and straight and curved lines at various angles crossing throughout. About 30-40 individual form elements.
+- **Color distribution**: background = bright yellow-cream (~60%), black lines/forms (~15%), blue/violet circles (~10%), red/orange triangles/squares (~10%), other (~5%)
+- **Hierarchy**: The large circle at upper left (diameter about 20% of canvas height) is the primary focal point. The cluster of triangles at upper right is the secondary focal point. A diagonal connects the two focal points.
+- **UI translation**: The compositional principle for a complex dashboard. 2-3 primary widgets (large charts) + many small indicators + connecting lines (showing relationships). Specify primary regions with `grid-template-areas` and freely place the rest.
 
 ### 2. Several Circles (1926)
-- **캔버스**: 140.3 x 140.7cm (거의 정사각형)
-- **소장**: Solomon R. Guggenheim Museum, New York
-- **구성**: 짙은 남색 배경 위에 크기가 다른 원 약 20-25개가 분포. 좌상단에 대형 원(검정 외곽 + 내부 동심원), 나머지는 중소형. 원들이 부분적으로 겹침.
-- **색상**: 배경 = 짙은 남색(#0D1B2A), 원 = 검정, 파랑, 보라, 빨강, 주황, 노랑, 초록 다색. 대형 원에 3-4겹 동심원. 투명도가 다른 원이 겹쳐 혼합색 생성.
-- **크기 분포**: 최대 원 지름 = 캔버스의 ~30%, 최소 원 = ~2%. 크기 비 약 15:1. 대부분 중소형(5-10%).
-- **UI 변환**: 다크모드 대시보드의 버블 차트, 태그 클라우드, 스킬맵 시각화. 원의 크기 = 중요도, 색상 = 카테고리, 중첩 = 관련성. `mix-blend-mode: screen`으로 겹침 영역의 색상 혼합 효과.
+- **Canvas**: 140.3 x 140.7cm (nearly square)
+- **Collection**: Solomon R. Guggenheim Museum, New York
+- **Composition**: About 20-25 circles of varying size distributed over a deep navy background. A large circle at upper left (black outer ring + interior concentric circles), the rest small to medium. The circles partially overlap.
+- **Color**: background = deep navy (#0D1B2A), circles = black, blue, violet, red, orange, yellow, green — multicolor. The large circle has 3-4 concentric rings. Circles of differing transparency overlap to produce blended colors.
+- **Size distribution**: largest circle diameter = ~30% of canvas, smallest circle = ~2%. Size ratio about 15:1. Most are small to medium (5-10%).
+- **UI translation**: Bubble charts, tag clouds, skill-map visualizations for a dark-mode dashboard. Circle size = importance, color = category, overlap = relevance. Use `mix-blend-mode: screen` for the color-blending effect in overlap areas.
 
 ### 3. Composition VII (1913)
-- **캔버스**: 200 x 300cm (대형 가로)
-- **소장**: Tretyakov Gallery, Moscow
-- **구성**: 칸딘스키 전체 작품 중 가장 복잡한 구성. 50개 이상의 형태 요소가 캔버스 전체에 분포. 중앙에 소용돌이치는 형태의 핵이 있고, 그로부터 에너지가 방사상으로 퍼짐. 선, 원, 삼각형, 자유 형태가 다층적으로 중첩.
-- **밀도**: 고밀도 중심부(캔버스의 30%)에 요소의 60%가 집중. 가장자리는 상대적으로 여유.
-- **음악적 대응**: "시각적 교향곡"으로 불림. 복수의 독립적 시각 테마가 동시에 진행되는 다성음악(polyphony) 구조.
-- **UI 변환**: 복잡한 데이터 시각화의 구성 원리. 밀도 변화로 관심을 유도하고, 주변부에서 중심부로의 시선 흐름을 설계. 지도 기반 인터페이스의 줌 레벨별 밀도 조절.
+- **Canvas**: 200 x 300cm (large landscape)
+- **Collection**: Tretyakov Gallery, Moscow
+- **Composition**: The most complex composition among all of Kandinsky's works. Over 50 form elements distributed across the entire canvas. A swirling-form nucleus sits at the center, with energy radiating outward from it. Lines, circles, triangles, and free forms overlap in multiple layers.
+- **Density**: 60% of the elements concentrate in the high-density center (30% of the canvas). The edges are relatively open.
+- **Musical correspondence**: Called a "visual symphony." A polyphonic structure in which multiple independent visual themes proceed simultaneously.
+- **UI translation**: The compositional principle for complex data visualization. Guide attention through density variation, and design the gaze flow from periphery to center. Density control per zoom level in a map-based interface.
 
-## UI 적용 매핑
+## UI Application Mapping
 
-### 변환 규칙
+### Translation Rules
 
-1. **색상-형태 짝짓기**: 칸딘스키의 대응 이론을 UI 시맨틱으로 변환한다.
+1. **Color-form pairing**: Translate Kandinsky's correspondence theory into UI semantics.
    ```
-   삼각형(노랑) → 경고/주의 아이콘, 방향 표시
-   원(파랑)     → 정보, 아바타, 상태 인디케이터
-   사각형(빨강) → 주요 액션 버튼, 강조 카드
+   triangle(yellow) → warning/caution icons, direction indicators
+   circle(blue)     → information, avatars, status indicators
+   square(red)      → primary action buttons, emphasis cards
    ```
 
-2. **밀도 변화 설계**: 화면에 균일한 밀도를 적용하지 않는다. 핵심 정보가 모인 고밀도 영역과 시각적 휴식의 저밀도 영역을 의도적으로 교대 배치한다.
+2. **Density-variation design**: Do not apply uniform density to the screen. Deliberately alternate high-density areas where key information clusters with low-density areas of visual rest.
    ```css
    .dense-zone { gap: 8px; padding: 16px; }
    .rest-zone  { gap: 32px; padding: 64px; }
    ```
 
-3. **다층 구성**: 요소를 단일 평면에 배치하지 않고 3-5개 레이어로 구성한다. 배경, 보조 구조, 주요 콘텐츠, 인터랙티브 요소, 오버레이.
+3. **Multi-layer composition**: Do not place elements on a single plane; compose with 3-5 layers. Background, supporting structure, primary content, interactive elements, overlay.
    ```css
    .layer-bg     { z-index: 0; opacity: 0.3; }
    .layer-struct { z-index: 1; opacity: 0.6; }
@@ -117,29 +117,29 @@
    .layer-action { z-index: 3; }
    ```
 
-4. **선의 감정적 사용**: 구분선, 경로, 화살표에 칸딘스키의 선 이론을 적용한다.
-   - 수평선 → 차분한 구분(섹션 분리)
-   - 수직선 → 상승감(사이드바, 타임라인)
-   - 대각선 → 역동성(프로그레스, 트렌드)
-   - 곡선 → 유기적 연결(관계선, 플로우 차트)
+4. **Emotional use of lines**: Apply Kandinsky's line theory to dividers, paths, and arrows.
+   - horizontal → calm separation (section division)
+   - vertical → sense of ascent (sidebar, timeline)
+   - diagonal → dynamism (progress, trend)
+   - curve → organic connection (relationship lines, flow charts)
 
-5. **동심원 패턴**: 중첩되는 원으로 깊이와 계층을 표현한다. 라디알 메뉴, 레이더 차트, 원형 프로그레스에 적합하다.
+5. **Concentric-circle pattern**: Express depth and hierarchy with overlapping circles. Suited to radial menus, radar charts, and circular progress.
 
-6. **폴리포닉 정보**: 여러 정보 레이어를 동시에 표시하되 각각 독립적 시각 리듬을 가지게 한다. 지도 + 마커 + 경로 + 레이블이 각각의 스타일을 유지하며 공존.
+6. **Polyphonic information**: Display multiple information layers simultaneously, giving each its own independent visual rhythm. Map + markers + paths + labels coexist while each retains its own style.
 
-### 적합한 UI 유형
-- **데이터 시각화**: 버블 차트, 네트워크 그래프, 레이더 차트, 다층 지도
-- **복잡한 대시보드**: 다양한 크기의 위젯이 공존하는 다요소 화면
-- **크리에이티브 도구**: 드로잉, 프레젠테이션, 마인드맵 에디터
-- **음악/오디오 앱**: 시각적 리듬이 중요한 인터페이스, 이퀄라이저, 비주얼라이저
-- **교육 플랫폼**: 개념 관계도, 학습 경로 시각화, 인터랙티브 다이어그램
-- **포트폴리오**: 다양한 형태와 색상으로 구성된 갤러리 레이아웃
+### Suitable UI Types
+- **Data visualization**: bubble charts, network graphs, radar charts, multi-layer maps
+- **Complex dashboards**: multi-element screens where widgets of various sizes coexist
+- **Creative tools**: drawing, presentation, mind-map editors
+- **Music/audio apps**: interfaces where visual rhythm matters, equalizers, visualizers
+- **Education platforms**: concept relationship diagrams, learning-path visualizations, interactive diagrams
+- **Portfolios**: gallery layouts composed of varied forms and colors
 
-### 주의사항
-- **무질서와 혼동 금지**: 칸딘스키의 복잡한 구성은 무작위가 아니다. 모든 요소는 전체 "교향곡"의 일부이다. 의도 없는 요소 나열은 미학이 아니라 혼란이다.
-- **색상-형태 불일치 주의**: 삼각형에 파랑, 원에 노랑을 배치하면 시각적 불협화가 발생한다. 의도적 불협화가 아니라면 대응 이론을 따른다.
-- **밀도 과부하 경계**: Composition VII 수준의 복잡성은 예외적이다. 대부분의 UI에서 Several Circles 수준(20-25개 요소)을 상한으로 삼는다.
-- **선 남용 금지**: 구조선은 시각적 의미가 있어야 한다. 장식적 선은 "내적 필연성" 원칙에 위배된다.
-- **단색 UI 부적합**: 칸딘스키 미학은 다색이 핵심이다. 흑백이나 단색 인터페이스에는 적합하지 않다. 최소 3-4색을 활용한다.
-- **정적 배치 회피**: 모든 요소를 정렬된 그리드에 넣으면 칸딘스키적 역동성이 사라진다. 일부 요소는 의도적으로 그리드에서 벗어나게 배치한다.
-- **작은 화면 주의**: 다요소 구성은 모바일에서 혼란을 줄 수 있다. 모바일에서는 Several Circles 스타일(단순한 원 기반)을 선호하고, 복잡한 Composition은 태블릿/데스크톱에 한정한다.
+### Cautions
+- **No disorder or confusion**: Kandinsky's complex compositions are not random. Every element is part of the whole "symphony." Listing elements without intent is not aesthetics but chaos.
+- **Beware color-form mismatch**: Placing blue on a triangle or yellow on a circle produces visual dissonance. Unless the dissonance is intentional, follow the correspondence theory.
+- **Guard against density overload**: Composition VII-level complexity is exceptional. For most UI, take the Several Circles level (20-25 elements) as the upper limit.
+- **No line overuse**: Structural lines must carry visual meaning. Decorative lines violate the "Inner Necessity" principle.
+- **Unsuitable for monochrome UI**: Kandinsky's aesthetic is fundamentally multicolor. It is unsuited to black-and-white or monochrome interfaces. Use at least 3-4 colors.
+- **Avoid static placement**: Putting every element into an aligned grid removes the Kandinsky-like dynamism. Deliberately place some elements off the grid.
+- **Mind small screens**: Multi-element compositions can be confusing on mobile. On mobile, prefer the Several Circles style (simple circle-based), and limit complex Compositions to tablet/desktop.

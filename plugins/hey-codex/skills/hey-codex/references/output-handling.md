@@ -1,46 +1,46 @@
-# 결과 처리 전략
+# Output Handling Strategy
 
-## ANSI Escape 코드 제거
+## Stripping ANSI Escape Codes
 
-Codex CLI 출력에서 ANSI escape 시퀀스를 제거합니다:
+Strip ANSI escape sequences from Codex CLI output:
 
     codex exec "프롬프트" 2>&1 | sed 's/\x1b\[[0-9;]*[a-zA-Z]//g'
 
-## 출력 크기별 표시 전략
+## Display Strategy by Output Size
 
-출력 줄 수는 ANSI 제거 후 측정합니다.
+Measure line count after stripping ANSI.
 
-| 크기 | 처리 |
+| Size | Handling |
 |------|------|
-| < 50줄 | 원문 그대로 표시 |
-| 50~200줄 | 핵심 내용 요약 + "전체 출력을 보시겠습니까?" 확인 |
-| > 200줄 | 요약만 표시 + `/tmp/codex-output-$(date +%s).txt`에 저장 후 경로 안내 |
+| < 50 lines | Show raw output as-is |
+| 50–200 lines | Summarize key content + confirm "전체 출력을 보시겠습니까?" |
+| > 200 lines | Show summary only + save to `/tmp/codex-output-$(date +%s).txt` then report the path |
 
-## 모드별 후처리
+## Post-processing by Mode
 
-### read 모드 (단방향)
-1. Codex stdout 표시
-2. 종료
+### read mode (one-way)
+1. Show Codex stdout
+2. Exit
 
-### suggest 모드 (양방향)
-1. Codex stdout 요약 표시
-2. 사용자에게 "이 제안을 적용할까요?" 확인
-3. 승인 시: Claude Code가 Edit/Write 도구로 코드에 반영
-4. 거부 시: "제안을 적용하지 않았습니다" 안내 후 종료
+### suggest mode (two-way)
+1. Show summary of Codex stdout
+2. Confirm with user: "이 제안을 적용할까요?"
+3. On approval: Claude Code applies to code via Edit/Write tools
+4. On rejection: report "제안을 적용하지 않았습니다" then exit
 
-### write 모드 — git 저장소 (양방향)
-1. Codex 실행 전 `git status` 기록
-2. Codex 실행 (`--full-auto`)
-3. `git diff`로 변경 캡처
-4. 변경 파일 수 기준:
-   - 1~5개: 변경 요약 표시
-   - 6개+: `git diff --stat` 표시 + 상세 리뷰 제안
-5. 문제 시 `git checkout .` 롤백 옵션
+### write mode — git repository (two-way)
+1. Record `git status` before running Codex
+2. Run Codex (`--full-auto`)
+3. Capture changes with `git diff`
+4. Based on number of changed files:
+   - 1–5: show change summary
+   - 6+: show `git diff --stat` + propose detailed review
+5. On problems, offer `git checkout .` rollback option
 
-### write 모드 — non-git 디렉토리 (양방향)
-1. 실행 전 스냅샷: `find . -type f -exec stat -f '%m %N' {} \; | sort > /tmp/codex-pre-snapshot.txt`
-   (파일 경로 + 수정 시간을 함께 기록하여 변경 감지 가능)
-2. Codex 실행
-3. 실행 후 동일 명령으로 스냅샷: `/tmp/codex-post-snapshot.txt`
-4. `diff /tmp/codex-pre-snapshot.txt /tmp/codex-post-snapshot.txt`로 변경/생성/삭제/수정된 파일 보고
-5. 롤백 불가 안내
+### write mode — non-git directory (two-way)
+1. Pre-run snapshot: `find . -type f -exec stat -f '%m %N' {} \; | sort > /tmp/codex-pre-snapshot.txt`
+   (record file path + modification time together to enable change detection)
+2. Run Codex
+3. Post-run snapshot with the same command: `/tmp/codex-post-snapshot.txt`
+4. Report changed/created/deleted/modified files with `diff /tmp/codex-pre-snapshot.txt /tmp/codex-post-snapshot.txt`
+5. Note that rollback is not available

@@ -1,82 +1,82 @@
-# Mark Rothko -- 시각 언어 디자인 토큰
+# Mark Rothko -- Visual Language Design Tokens
 
-## 프로필
-- **활동 기간**: 1936-1970 (성숙기: 1949-1970)
-- **운동/유파**: Color Field Painting (색면 회화), Abstract Expressionism
-- **핵심 공헌**: 색채 자체를 감정 전달의 매체로 승격시킴. 2-3개 색면의 수직 적층과 경계의 페더링(soft edge)으로 관람자를 색채 경험에 몰입시키는 구조를 창안. 규모(scale)를 감정적 도구로 사용한 최초의 체계적 실험.
+## Profile
+- **Active period**: 1936-1970 (mature period: 1949-1970)
+- **Movement/school**: Color Field Painting, Abstract Expressionism
+- **Core contribution**: Elevated color itself to a medium for conveying emotion. Invented a structure that immerses the viewer in a color experience through vertical stacking of 2-3 color fields and feathering (soft edge) of their boundaries. The first systematic experiment to use scale as an emotional tool.
 
-## 시각 언어 원칙
+## Visual Language Principles
 
-1. **몰입적 규모(Immersive Scale)**: 대형 캔버스(150-300cm)로 시야를 채워 관람자를 색채 안으로 끌어들인다. UI에서 전체 화면 배경색, 히어로 이미지, 몰입형 경험의 원형이다.
-2. **색면 적층(Stacked Fields)**: 2-3개 색면을 수직으로 쌓는다. 각 면은 독립적 감정을 담되 전체 구성으로 하나의 감정 서사를 형성한다. 수직 스크롤 UI의 섹션 구조와 일치한다.
-3. **페더링 경계(Feathered Edge)**: 색면 경계를 날카롭게 구분하지 않고 서서히 번지게 한다. 경계의 모호함이 색면 간 호흡을 만든다. CSS gradient, blur, 투명도 전환의 미학적 근거이다.
-4. **색채 진동(Color Vibration)**: 인접 색면이 시각적으로 진동하는 보색/유사색 조합을 의도적으로 배치한다. 색상 관계가 정적이지 않고 살아 움직이는 느낌을 준다.
-5. **내적 발광(Inner Luminosity)**: 여러 겹의 반투명 물감층으로 빛이 안에서 나오는 듯한 효과를 만든다. UI에서 `opacity`, `backdrop-filter`, 중첩 레이어의 미학적 근거이다.
-6. **감정적 진실(Emotional Truth)**: Rothko는 "나는 색채와 형태의 관계에 관심이 없다. 기본적인 인간 감정 — 비극, 환희, 운명 — 을 표현하는 것에만 관심이 있다"고 말했다. UI 색상 선택이 기능적 목적을 넘어 사용자의 감정 상태에 영향을 준다는 원칙이다.
-7. **관조적 거리(Contemplative Distance)**: Rothko는 관람자가 작품에서 45cm 거리에서 볼 것을 권했다. UI에서 전체 화면을 채우는 배경색이 사용자를 감싸는 경험을 만든다. 작은 요소가 아닌 화면 전체의 색조가 핵심이다.
+1. **Immersive Scale**: Large canvases (150-300cm) fill the field of view and pull the viewer into the color. The archetype for full-screen background color, hero images, and immersive experiences in UI.
+2. **Stacked Fields**: Stack 2-3 color fields vertically. Each field holds an independent emotion, yet the overall composition forms a single emotional narrative. Matches the section structure of vertically scrolling UI.
+3. **Feathered Edge**: Field boundaries are not sharply divided but bleed gradually. The ambiguity of the boundary creates breathing room between fields. The aesthetic basis for CSS gradient, blur, and opacity transitions.
+4. **Color Vibration**: Deliberately place complementary/analogous color combinations where adjacent fields visually vibrate. Color relationships feel alive and moving rather than static.
+5. **Inner Luminosity**: Multiple translucent paint layers create the effect of light emanating from within. The aesthetic basis for `opacity`, `backdrop-filter`, and layered overlays in UI.
+6. **Emotional Truth**: Rothko said, "나는 색채와 형태의 관계에 관심이 없다. 기본적인 인간 감정 — 비극, 환희, 운명 — 을 표현하는 것에만 관심이 있다." The principle that UI color choices affect the user's emotional state beyond functional purpose.
+7. **Contemplative Distance**: Rothko recommended that viewers stand 45cm from the work. In UI, full-screen background color creates an experience that envelops the user. The overall screen tone, not small elements, is the key.
 
-## 정량적 디자인 토큰
+## Quantitative Design Tokens
 
-### 색상 체계
-| 토큰명 | 값/범위 | 출처 | 신뢰도 | UI 적용 |
+### Color System
+| Token | Value/Range | Source | Confidence | UI Application |
 |--------|---------|------|--------|---------|
-| rothko-orange-warm | #CC4400 ~ #E86B2A | Orange and Yellow (1956) 실측 | B | 에너지 높은 CTA, 활성 상태 |
-| rothko-yellow-glow | #E8B800 ~ #FFCC33 | Orange and Yellow (1956) | B | 하이라이트, 호버 상태, 알림 |
-| rothko-red-deep | #8B1A1A ~ #A02020 | No. 61 (Rust and Blue, 1953) | B | 경고, 강한 감정 유발 요소 |
-| rothko-blue-night | #1A1A4D ~ #2B2B6B | No. 61 (Rust and Blue, 1953) | B | 다크모드 배경, 깊은 몰입 영역 |
-| rothko-maroon-dark | #3B0A0A ~ #5C1515 | 후기 Rothko Chapel 작품군 | B | 다크모드 심층 배경 |
-| rothko-black-luminous | #1A1520 ~ #2A2030 | Black in Deep Red (1957) | B | 최고 깊이 레이어, 오버레이 |
-| rothko-plum | #4A1942 ~ #6B2D5E | No. 301 (1959) | C | 프리미엄 UI, 고급 브랜딩 |
-| rothko-chapel-gray | #2A2A25 ~ #3D3D35 | Rothko Chapel 패널 (1964-67) | B | 다크모드 서피스, 명상적 UI |
-| rothko-green-muted | #2D4A3E ~ #3E6B55 | No. 3/No. 13 (Magenta, Black, Green on Orange, 1949) | B | 보조 상태, 자연/건강 관련 UI |
-| rothko-white-warm | #F0E8D8 ~ #FAF2E6 | 초기 작품 배경색 분석 | C | 라이트모드 따뜻한 배경, 종이 질감 시뮬레이션 |
-| rothko-transition-zone | 인접 두 색의 중간값, opacity 30-70% | 전 작품 경계 영역 색상 추출 | F | 색면 경계의 그라디언트 중간값 |
+| rothko-orange-warm | #CC4400 ~ #E86B2A | Orange and Yellow (1956) measured | B | High-energy CTA, active state |
+| rothko-yellow-glow | #E8B800 ~ #FFCC33 | Orange and Yellow (1956) | B | Highlight, hover state, notification |
+| rothko-red-deep | #8B1A1A ~ #A02020 | No. 61 (Rust and Blue, 1953) | B | Warning, strong emotional triggers |
+| rothko-blue-night | #1A1A4D ~ #2B2B6B | No. 61 (Rust and Blue, 1953) | B | Dark mode background, deep immersion zones |
+| rothko-maroon-dark | #3B0A0A ~ #5C1515 | Late Rothko Chapel works | B | Dark mode deep background |
+| rothko-black-luminous | #1A1520 ~ #2A2030 | Black in Deep Red (1957) | B | Deepest layer, overlay |
+| rothko-plum | #4A1942 ~ #6B2D5E | No. 301 (1959) | C | Premium UI, luxury branding |
+| rothko-chapel-gray | #2A2A25 ~ #3D3D35 | Rothko Chapel panels (1964-67) | B | Dark mode surface, meditative UI |
+| rothko-green-muted | #2D4A3E ~ #3E6B55 | No. 3/No. 13 (Magenta, Black, Green on Orange, 1949) | B | Secondary state, nature/health-related UI |
+| rothko-white-warm | #F0E8D8 ~ #FAF2E6 | Early-work background color analysis | C | Light mode warm background, paper texture simulation |
+| rothko-transition-zone | midpoint of two adjacent colors, opacity 30-70% | Boundary-zone color extraction across all works | F | Gradient midpoint of the field boundary |
 
-### 구성 & 레이아웃
-| 토큰명 | 값/범위 | 출처 | 신뢰도 | UI 적용 |
+### Composition & Layout
+| Token | Value/Range | Source | Confidence | UI Application |
 |--------|---------|------|--------|---------|
-| field-count | 2-3개 (극소수 4개) | 전 작품 통계 | B | 주요 섹션 수 (화면당 2-3 영역) |
-| field-orientation | 수직 적층 (가로 형태의 면을 세로로 쌓음) | 전 작품 구조 | B | 수직 스크롤 섹션 구성 |
-| canvas-aspect-ratio | 세로형 4:5 ~ 3:4 (일부 가로형 존재) | 대표작 실측 | B | 모바일 우선 화면 비율 |
-| field-margin-from-edge | 캔버스 좌우에서 2-5% 안쪽 | 실측 (색면이 가장자리에 닿지 않음) | B | 컨텐츠의 좌우 인셋, safe-area 패딩 |
-| field-shape | 가로로 긴 직사각형 (너비:높이 ≈ 3:1 ~ 5:1) | 색면 형태 측정 | B | 섹션/카드의 가로 비율, 와이드 배너 형태 |
-| field-corner | 모서리가 불확정적 (직각도 둥근 것도 아님, 물감이 번진 상태) | 기법 관찰 | B | border-radius: 2-6px의 미세 둥근 모서리 또는 mask로 유기적 윤곽 |
+| field-count | 2-3 (rarely 4) | Statistics across all works | B | Number of major sections (2-3 zones per screen) |
+| field-orientation | Vertical stacking (horizontal fields stacked vertically) | Structure across all works | B | Vertical scroll section composition |
+| canvas-aspect-ratio | Portrait 4:5 ~ 3:4 (some landscape exist) | Representative works measured | B | Mobile-first screen ratio |
+| field-margin-from-edge | 2-5% inset from left/right of canvas | Measured (fields do not touch the edge) | B | Left/right inset of content, safe-area padding |
+| field-shape | Wide horizontal rectangle (width:height ≈ 3:1 ~ 5:1) | Field shape measurement | B | Horizontal ratio of sections/cards, wide banner form |
+| field-corner | Indeterminate corners (neither right-angled nor rounded, paint bled) | Technique observation | B | border-radius: 2-6px subtle rounded corners, or organic outline via mask |
 
-### 비율 & 균형
-| 토큰명 | 값/범위 | 출처 | 신뢰도 | UI 적용 |
+### Proportion & Balance
+| Token | Value/Range | Source | Confidence | UI Application |
 |--------|---------|------|--------|---------|
-| top-field-ratio | 전체 높이의 35-50% | 2색면 작품 실측 | B | 상단 섹션(히어로) 높이 비율 |
-| bottom-field-ratio | 전체 높이의 30-45% | 2색면 작품 실측 | B | 하단 섹션(컨텐츠) 높이 비율 |
-| middle-field-ratio | 전체 높이의 15-30% (3색면 시) | 3색면 작품 실측 | B | 중간 전환 영역 비율 |
-| field-width-to-canvas | 90-96% | 전 작품 (색면 좌우 마진) | B | max-width 대비 컨텐츠 폭 비율 |
-| inter-field-gap | 캔버스 높이의 2-5% | 색면 간격 실측 | B | 섹션 간 호흡 간격 |
+| top-field-ratio | 35-50% of total height | 2-field works measured | B | Top section (hero) height ratio |
+| bottom-field-ratio | 30-45% of total height | 2-field works measured | B | Bottom section (content) height ratio |
+| middle-field-ratio | 15-30% of total height (in 3-field works) | 3-field works measured | B | Middle transition zone ratio |
+| field-width-to-canvas | 90-96% | All works (field left/right margins) | B | Content width ratio relative to max-width |
+| inter-field-gap | 2-5% of canvas height | Field spacing measured | B | Breathing gap between sections |
 
-### 공간 & 여백
-| 토큰명 | 값/범위 | 출처 | 신뢰도 | UI 적용 |
+### Space & Whitespace
+| Token | Value/Range | Source | Confidence | UI Application |
 |--------|---------|------|--------|---------|
-| background-bleed | 색면 뒤 배경색이 테두리처럼 노출 (2-5%) | 전 작품 | B | 컨테이너와 배경 사이의 여백 색상 |
-| top-margin | 캔버스 상단에서 첫 색면까지 3-8% | 실측 | B | 상단 세이프 영역, 상태바 공간 |
-| bottom-margin | 캔버스 하단에서 마지막 색면까지 5-10% | 실측 | B | 하단 여백, 탭바/FAB 공간 |
-| breathing-space | 색면 사이 배경 노출 = 총 면적의 5-15% | 전 작품 통계 | C | 섹션 간 여백의 총합 비율 |
+| background-bleed | Background color behind fields exposed like a border (2-5%) | All works | B | Whitespace color between container and background |
+| top-margin | 3-8% from canvas top to first field | Measured | B | Top safe area, status bar space |
+| bottom-margin | 5-10% from canvas bottom to last field | Measured | B | Bottom margin, tab bar/FAB space |
+| breathing-space | Background exposure between fields = 5-15% of total area | Statistics across all works | C | Total ratio of inter-section whitespace |
 
-### 시각적 리듬 & 반복
-| 토큰명 | 값/범위 | 출처 | 신뢰도 | UI 적용 |
+### Visual Rhythm & Repetition
+| Token | Value/Range | Source | Confidence | UI Application |
 |--------|---------|------|--------|---------|
-| edge-feather-width | 색면 경계에서 10-25px (캔버스 대비 1-3%) | 실측 | B | gradient 전환 영역, blur 반경 |
-| luminosity-layers | 3-7개 반투명 레이어 겹침 | 기법 분석 (NGA 보존 보고서) | C | opacity 0.6-0.9 레이어 중첩 효과 |
-| color-temperature-shift | 한 작품 내 난색-한색 대비 | 전 작품 패턴 | C | 상단(따뜻함)-하단(차가움) 온도 그라디언트 |
-| pulse-rhythm | 색면 내부 명도 미세 변화 (±5-10%) | 디지털 스캔 분석 | F | 배경색 미세 애니메이션, 호흡 효과 |
+| edge-feather-width | 10-25px at field boundary (1-3% relative to canvas) | Measured | B | Gradient transition zone, blur radius |
+| luminosity-layers | 3-7 translucent layers overlaid | Technique analysis (NGA conservation report) | C | opacity 0.6-0.9 layered overlay effect |
+| color-temperature-shift | Warm-cool contrast within one work | Pattern across all works | C | Top (warm)-bottom (cool) temperature gradient |
+| pulse-rhythm | Subtle brightness variation within a field (±5-10%) | Digital scan analysis | F | Subtle background color animation, breathing effect |
 
-## 대표작 분석
+## Representative Work Analysis
 
 ### 1. Orange and Yellow (1956)
-- **캔버스**: 231 x 180cm (세로형, 약 1.28:1)
-- **소장**: Albright-Knox Art Gallery, Buffalo
-- **구성**: 2개 색면 수직 적층. 상단 = 노랑-주황 (전체 높이의 ~48%), 하단 = 진한 주황 (~40%). 배경 = 주황빛 노랑. 배경색이 색면 사이와 가장자리에서 얇은 테두리처럼 노출됨.
-- **색면 관계**: 상단이 하단보다 밝고 넓다. 두 면의 밝기 차이가 약 20%로 부드러운 대비. 유사색 조합(orange-yellow)으로 조화로움과 따뜻함을 극대화.
-- **페더링**: 경계 전환 영역 약 15-20px (캔버스 높이의 ~1%). 완전한 혼합이 아닌 "숨 쉬는" 경계. 상단 색면의 하변과 하단 색면의 상변이 서로를 향해 번짐.
-- **감정 효과**: 전체적으로 밝고 따뜻한 톤. "기쁨"과 "낙관"의 감정을 유발하는 것으로 기록됨 (Rothko 본인의 의도와 비평 일치)
-- **UI 변환**: 히어로(상단 밝은 면) + 컨텐츠(하단 진한 면) 2섹션 구조. 긍정적 경험을 주는 온보딩, 성공 화면에 적합.
+- **Canvas**: 231 x 180cm (portrait, approx. 1.28:1)
+- **Collection**: Albright-Knox Art Gallery, Buffalo
+- **Composition**: 2 color fields stacked vertically. Top = yellow-orange (~48% of total height), bottom = deep orange (~40%). Background = orange-tinted yellow. The background color is exposed like a thin border between fields and at the edges.
+- **Field relationship**: The top is brighter and wider than the bottom. The brightness difference between the two fields is about 20%, a soft contrast. The analogous combination (orange-yellow) maximizes harmony and warmth.
+- **Feathering**: Boundary transition zone of about 15-20px (~1% of canvas height). A "breathing" boundary rather than full blending. The bottom edge of the top field and the top edge of the bottom field bleed toward each other.
+- **Emotional effect**: Overall bright and warm tone. Recorded as evoking emotions of "joy" and "optimism" (consistent with Rothko's own intent and critical reception).
+- **UI conversion**: Hero (top bright field) + content (bottom deep field) 2-section structure. Suited to onboarding and success screens that deliver a positive experience.
   ```css
   .rothko-warm {
     background: linear-gradient(180deg, #FFCC33 0%, #FFCC33 46%, #E8A020 50%, #E86B2A 54%, #E86B2A 100%);
@@ -84,89 +84,89 @@
   ```
 
 ### 2. No. 61 (Rust and Blue, 1953)
-- **캔버스**: 294 x 232cm (대형 세로)
-- **소장**: Museum of Contemporary Art, Los Angeles
-- **구성**: 상단 = 녹슨 빨강/갈색 (~45%), 하단 = 짙은 파랑 (~42%), 사이 좁은 배경 노출 (~3%). 두 색면의 경계에서 색이 미세하게 겹침.
-- **감정 대비**: 따뜻한 상단(불안, 열정) vs 차가운 하단(침잠, 깊이). 극적 온도 대비. 보색에 가까운 관계(빨강-파랑)가 긴장감을 형성.
-- **명도 분석**: 상단 L* ≈ 35-40, 하단 L* ≈ 15-25. 약 15-20 L* 차이로 강한 대비이면서도 둘 다 중-저명도 범위에 있어 묵직함 유지.
-- **UI 변환**: 라이트모드 ↔ 다크모드 전환의 시각적 원형. 따뜻한 톤 헤더 + 차가운 톤 컨텐츠 영역. 또는 경고/위험 상태 화면의 상단(경고) + 하단(심각) 단계 표현.
+- **Canvas**: 294 x 232cm (large portrait)
+- **Collection**: Museum of Contemporary Art, Los Angeles
+- **Composition**: Top = rust red/brown (~45%), bottom = deep blue (~42%), narrow background exposure between (~3%). The colors overlap subtly at the boundary of the two fields.
+- **Emotional contrast**: Warm top (anxiety, passion) vs. cool bottom (subsidence, depth). Dramatic temperature contrast. The near-complementary relationship (red-blue) creates tension.
+- **Brightness analysis**: Top L* ≈ 35-40, bottom L* ≈ 15-25. About 15-20 L* difference makes for strong contrast while both remain in the mid-low brightness range, maintaining heaviness.
+- **UI conversion**: The visual archetype of light mode ↔ dark mode switching. Warm-tone header + cool-tone content area. Or representing the top (warning) + bottom (severe) stages of warning/danger state screens.
 
-### 3. Rothko Chapel 패널 (1964-67, 14점)
-- **규모**: 벽면 전체를 둘러싼 14개 캔버스, 팔각형 공간. 각 벽면에 1-3개 패널 배치.
-- **소장**: Rothko Chapel, Houston, Texas
-- **색상**: 진한 마룬, 검정에 가까운 보라, 짙은 갈색 — 명도 차이 5-15% 범위의 미세 변주. 조명 조건에 따라 동일 패널이 다른 색으로 보임.
-- **구성 유형**: 단색 패널(monoform), 2색면 수직 적층(dyad), 3색면 수직 적층(triad)이 혼재. 건물 구조와 작품 구성이 통합된 총체 예술(Gesamtkunstwerk).
-- **다크모드 토큰**: 극도로 낮은 명도 범위(L*: 5-20)에서의 미세 구분이 핵심. 순수 검정(#000)을 쓰지 않고 색조를 유지한 어둠. 시간이 지나면서 눈이 적응하면 미세한 색조 차이가 드러남 — 다크모드에서 사용자가 오래 머물수록 서피스 간 차이를 인지하게 되는 원리와 같음.
-- **UI 변환**: 다크모드의 서피스 레벨 시스템.
+### 3. Rothko Chapel panels (1964-67, 14 works)
+- **Scale**: 14 canvases surrounding the entire wall, octagonal space. 1-3 panels arranged on each wall.
+- **Collection**: Rothko Chapel, Houston, Texas
+- **Colors**: Deep maroon, near-black purple, deep brown — subtle variations in the 5-15% brightness difference range. The same panel appears as a different color depending on lighting conditions.
+- **Composition types**: A mix of single-color panels (monoform), 2-field vertical stacks (dyad), and 3-field vertical stacks (triad). A total art (Gesamtkunstwerk) integrating building structure and work composition.
+- **Dark mode tokens**: Subtle distinction within an extremely low brightness range (L*: 5-20) is the key. Darkness that maintains hue rather than using pure black (#000). As time passes and the eye adapts, subtle hue differences emerge — the same principle by which a user perceives differences between surfaces the longer they stay in dark mode.
+- **UI conversion**: Surface level system for dark mode.
   ```css
   :root[data-mode="dark"] {
-    --surface-0: #1A1520;  /* 최심 배경 (chapel 벽면) */
-    --surface-1: #2A2030;  /* 카드, 시트 (중간 패널) */
-    --surface-2: #3B2A40;  /* 올라온 요소 (밝은 패널) */
-    --surface-3: #4D3B52;  /* 호버/포커스 (빛 받는 면) */
+    --surface-0: #1A1520;  /* deepest background (chapel wall) */
+    --surface-1: #2A2030;  /* card, sheet (middle panel) */
+    --surface-2: #3B2A40;  /* raised element (bright panel) */
+    --surface-3: #4D3B52;  /* hover/focus (lit surface) */
   }
   ```
-  Material Design 3의 surface tint 개념의 예술적 선행.
+  An artistic precursor to the surface tint concept of Material Design 3.
 
-## UI 적용 매핑
+## UI Application Mapping
 
-### 변환 규칙
+### Conversion Rules
 
-1. **배경색 시스템**: 단색 배경이 아닌 미세한 그라디언트를 적용한다. 단일 `background-color` 대신 `linear-gradient`로 2-5% 명도 차이를 둔다. 그라디언트 방향은 항상 수직(180deg)이다.
+1. **Background color system**: Apply a subtle gradient rather than a solid background. Instead of a single `background-color`, use `linear-gradient` with a 2-5% brightness difference. The gradient direction is always vertical (180deg).
    ```css
    background: linear-gradient(180deg, #2A2030 0%, #1A1520 100%);
    ```
 
-2. **섹션 전환**: 섹션 경계에 `backdrop-filter: blur(8-16px)` 또는 `linear-gradient` 전환 영역을 둔다. 날카로운 구분선(border) 대신 색상 페이드.
+2. **Section transitions**: Place a `backdrop-filter: blur(8-16px)` or `linear-gradient` transition zone at section boundaries. A color fade instead of a sharp dividing line (border).
 
-3. **몰입 레이어**: 모달, 오버레이에 `background: rgba(26, 21, 32, 0.85)`처럼 반투명 어두운 레이어를 겹쳐 깊이감 생성.
+3. **Immersion layers**: Overlay a translucent dark layer such as `background: rgba(26, 21, 32, 0.85)` on modals and overlays to create depth.
 
-4. **감정 색상 매핑**: 화면의 용도에 따라 색온도를 결정한다.
-   - 활동적/생산적 화면 → 난색 계열 (rothko-orange, rothko-yellow)
-   - 독서/명상/집중 화면 → 한색 계열 (rothko-blue, rothko-maroon)
+4. **Emotional color mapping**: Decide color temperature based on the screen's purpose.
+   - Active/productive screens → warm palette (rothko-orange, rothko-yellow)
+   - Reading/meditation/focus screens → cool palette (rothko-blue, rothko-maroon)
 
-5. **다크모드 서피스 레벨**: 순수 검정 (#000) 금지. 색조를 가진 어둠을 단계별로 사용한다.
+5. **Dark mode surface levels**: No pure black (#000). Use hue-bearing darkness in stages.
    ```
-   --surface-0: #1A1520;  /* 가장 깊은 배경 */
-   --surface-1: #2A2030;  /* 카드, 시트 */
-   --surface-2: #3D3045;  /* 올라온 요소 */
-   --surface-3: #4F4058;  /* 호버, 포커스 */
+   --surface-0: #1A1520;  /* deepest background */
+   --surface-1: #2A2030;  /* card, sheet */
+   --surface-2: #3D3045;  /* raised element */
+   --surface-3: #4F4058;  /* hover, focus */
    ```
 
-### 적합한 UI 유형
-- **명상/웰니스 앱**: 색면의 호흡 효과, 부드러운 전환, 몰입형 배경
-- **독서/뷰어 앱**: 다크모드의 미세 톤 차이, 눈의 피로를 줄이는 색조 있는 어둠
-- **음악/오디오 플레이어**: 감정적 색상 전환, 시간에 따라 변하는 배경 그라디언트
-- **온보딩/스토리텔링**: 수직 스크롤로 2-3개 색면 섹션을 순차적으로 경험
-- **프리미엄 브랜드 사이트**: 깊은 색감, 내적 발광 효과, 절제된 여백
-- **전시/갤러리 앱**: 작품 감상을 방해하지 않는 다크 서피스 시스템
+### Suitable UI Types
+- **Meditation/wellness apps**: Breathing effect of color fields, soft transitions, immersive backgrounds
+- **Reading/viewer apps**: Subtle tonal differences in dark mode, hue-bearing darkness that reduces eye strain
+- **Music/audio players**: Emotional color transitions, background gradients that change over time
+- **Onboarding/storytelling**: Experience 2-3 color field sections sequentially via vertical scroll
+- **Premium brand sites**: Deep color, inner luminosity effect, restrained whitespace
+- **Exhibition/gallery apps**: Dark surface system that does not interfere with appreciating the works
 
-### 주의사항
-- **날카로운 경계선 남용 금지**: `border: 1px solid` 같은 날카로운 구분은 Rothko 미학에 정면 위배된다. 색상 차이와 그라디언트로 영역을 구분한다.
-- **순수 검정(#000) 금지**: 다크모드에서도 반드시 색조를 가진 어둠을 사용한다. 순수 검정은 "죽은" 느낌을 준다.
-- **과도한 요소 배치 금지**: 한 화면에 4개 이상의 독립 섹션을 넣지 않는다. Rothko의 작품은 2-3개 면으로 충분한 감정을 전달한다.
-- **작은 화면 부적합 주의**: 아이콘 크기, 버튼 크기의 소형 요소에 이 토큰을 적용하면 효과가 사라진다. 최소 화면의 30% 이상을 차지하는 면에만 적용한다.
-- **높은 채도 회피**: Rothko의 색상은 높은 채도가 아닌 깊은 명도에서 힘을 가진다. 네온색이나 과채도 색상은 미학을 파괴한다.
-- **빠른 애니메이션 금지**: 색면 전환은 500ms-2000ms의 느린 전환을 사용한다. 100ms 이하의 빠른 색상 변경은 Rothko적 "호흡"을 해친다.
-- **텍스트 과잉 주의**: 색면 위에 많은 텍스트를 올리면 색면의 감정적 힘이 약화된다. 색면 자체가 메시지이므로 텍스트는 최소한으로 제한한다.
-- **패턴/텍스처 금지**: 색면 위에 패턴이나 텍스처를 올리지 않는다. 색면의 순수성이 핵심이다. `background-image: url(texture.png)` 같은 처리는 미학을 파괴한다.
+### Cautions
+- **Do not overuse sharp dividing lines**: Sharp divisions like `border: 1px solid` directly violate Rothko's aesthetic. Distinguish zones with color difference and gradients.
+- **No pure black (#000)**: Always use hue-bearing darkness, even in dark mode. Pure black feels "dead."
+- **Do not place excessive elements**: Do not put 4 or more independent sections on one screen. Rothko's works convey sufficient emotion with 2-3 fields.
+- **Caution: unsuitable for small screens**: Applying these tokens to small elements like icon size or button size makes the effect disappear. Apply only to fields that occupy at least 30% of the screen.
+- **Avoid high saturation**: Rothko's colors gain their power from deep brightness, not high saturation. Neon or over-saturated colors destroy the aesthetic.
+- **No fast animation**: Use slow transitions of 500ms-2000ms for field changes. Fast color changes of 100ms or less harm the Rothko-esque "breathing."
+- **Caution: text overload**: Placing a lot of text over a color field weakens the field's emotional power. The color field itself is the message, so keep text to a minimum.
+- **No pattern/texture**: Do not place patterns or textures over color fields. The purity of the field is the key. Treatments like `background-image: url(texture.png)` destroy the aesthetic.
 
-## Rothko의 감정-색상 매핑 참고
+## Rothko's Emotion-Color Mapping Reference
 
-Rothko의 작품 시기별 색상 변화는 감정 상태의 변화를 반영한다:
+The change in Rothko's colors across periods reflects changes in his emotional state:
 
-| 시기 | 대표 색상 | 감정 톤 | UI 분위기 매핑 |
+| Period | Representative Colors | Emotional Tone | UI Mood Mapping |
 |------|----------|---------|---------------|
-| 1949-1952 (초기 성숙기) | 밝은 노랑, 빨강, 주황 | 낙관, 에너지, 환희 | 온보딩, 성공, 축하 화면 |
-| 1953-1957 (중기) | 진한 빨강, 갈색, 파랑 | 긴장, 대비, 강렬함 | 경고, 중요 결정, 몰입 상태 |
-| 1958-1963 (후기) | 어두운 빨강, 검정, 마룬 | 무거움, 내향, 관조 | 다크모드, 야간 모드, 집중 모드 |
-| 1964-1970 (최말기) | 검정, 회색, 갈색 | 고요, 비움, 명상 | 명상 앱, 슬립모드, 최소 UI |
+| 1949-1952 (early mature period) | Bright yellow, red, orange | Optimism, energy, joy | Onboarding, success, celebration screens |
+| 1953-1957 (middle period) | Deep red, brown, blue | Tension, contrast, intensity | Warning, important decisions, immersion states |
+| 1958-1963 (late period) | Dark red, black, maroon | Heaviness, introversion, contemplation | Dark mode, night mode, focus mode |
+| 1964-1970 (final period) | Black, gray, brown | Calm, emptiness, meditation | Meditation apps, sleep mode, minimal UI |
 
-이 변화는 Rothko의 개인사와 건강 악화를 반영하지만, UI 설계에서는 "사용자의 활동 수준에 따른 색온도 및 명도 조절"이라는 보편적 원칙으로 변환할 수 있다. 활동적 맥락에는 밝고 따뜻한 톤, 휴식/집중 맥락에는 어둡고 차가운 톤을 사용한다.
+This change reflects Rothko's personal history and declining health, but in UI design it can be converted into the universal principle of "adjusting color temperature and brightness according to the user's activity level." Use bright, warm tones for active contexts and dark, cool tones for rest/focus contexts.
 
-## Rothko가 권한 관람 조건 → UI 환경 매핑
+## Rothko's Recommended Viewing Conditions → UI Environment Mapping
 
-- **조명**: 약한 간접 조명. UI에서 화면 밝기를 낮추고 주변 조명(ambient light)에 반응하는 자동 밝기 조절.
-- **거리**: 45cm (매우 가까움). 모바일에서 손에 들고 보는 거리와 일치. 데스크톱보다 모바일에 더 적합한 미학.
-- **크기**: 시야를 채울 것. 색면이 화면의 최소 60% 이상을 차지해야 몰입 효과 발생.
-- **시간**: 오래 바라볼 것. 빠른 스크롤이 아닌 한 화면에 머무르는 경험을 설계한다.
+- **Lighting**: Weak indirect lighting. In UI, lower screen brightness and auto-adjust brightness in response to ambient light.
+- **Distance**: 45cm (very close). Matches the distance of holding a phone in hand. An aesthetic more suited to mobile than desktop.
+- **Size**: Fill the field of view. The color field must occupy at least 60% of the screen for the immersion effect to occur.
+- **Time**: Look for a long time. Design an experience of staying on one screen rather than fast scrolling.

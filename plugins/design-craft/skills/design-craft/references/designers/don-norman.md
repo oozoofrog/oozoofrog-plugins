@@ -1,172 +1,172 @@
-# Don Norman -- 디자인 토큰 사전
+# Don Norman -- Design Token Dictionary
 
-## 프로필
-- **활동 기간**: 1980s-현재, 핵심 저서 1988 ("The Design of Everyday Things")
-- **주요 소속**: UCSD 인지과학 교수, Apple Advanced Technology Group(1993-1998), Nielsen Norman Group 공동설립(1998)
-- **핵심 공헌**: 어포던스·시그니파이어 개념 정립, "사용자 중심 디자인(UCD)" 보급, 감성 디자인 3단계 모델, "UX" 용어 대중화
-- **디자인 계보**: James J. Gibson(생태심리학) → Norman(인지과학 UX) → 현대 UCD/HCI 전체
+## Profile
+- **Active period**: 1980s-present, key book 1988 ("The Design of Everyday Things")
+- **Main affiliations**: UCSD cognitive science professor, Apple Advanced Technology Group(1993-1998), Nielsen Norman Group co-founder(1998)
+- **Key contributions**: established affordance/signifier concepts, popularized "user-centered design (UCD)", 3-level emotional design model, popularized the term "UX"
+- **Design lineage**: James J. Gibson(ecological psychology) → Norman(cognitive science UX) → all of modern UCD/HCI
 
-## 디자인 철학 (정량화 가능한 원칙)
+## Design Philosophy (quantifiable principles)
 
-| 원칙 | 정량 변환 | 측정 기준 |
+| Principle | Quantitative conversion | Measurement basis |
 |------|----------|----------|
-| 어포던스(Affordance) | 조작 가능 요소의 95%+ 시각적 단서 제공 | 사용성 테스트 최초 성공률 |
-| 시그니파이어(Signifier) | 인터랙티브 요소에 시각 구분 최소 2가지 (색상+형태 등) | 시각 단서 수 |
-| 피드백(Feedback) | 사용자 액션 후 ≤ 100ms 반응 | 지연 시간 |
-| 매핑(Mapping) | 컨트롤-결과 공간 일치율 100% | 자연적 매핑 비율 |
-| 제약(Constraint) | 오류 가능 경로 차단율 80%+ | 방어적 UI 비율 |
-| 개념 모델(Conceptual Model) | 시스템 상태 가시성 90%+ | 사용자 멘탈모델 일치율 |
-| 오류 관용(Error Tolerance) | Undo 가능 액션 95%+, 파괴적 액션 확인 대화 100% | 복구 가능성 |
+| Affordance | Visual cues on 95%+ of operable elements | First-time success rate in usability testing |
+| Signifier | At least 2 visual distinctions on interactive elements (color+shape etc.) | Number of visual cues |
+| Feedback | Response ≤ 100ms after user action | Latency |
+| Mapping | Control-result spatial match rate 100% | Natural mapping ratio |
+| Constraint | 80%+ blocking rate of error-prone paths | Defensive UI ratio |
+| Conceptual Model | System-state visibility 90%+ | User mental-model match rate |
+| Error Tolerance | Undoable actions 95%+, destructive actions confirmation dialog 100% | Recoverability |
 
-## 정량적 디자인 토큰
+## Quantitative Design Tokens
 
-### 레이아웃 & 간격
+### Layout & Spacing
 
-| 토큰명 | 값/범위 | 출처 | 신뢰도 |
+| Token | Value/range | Source | Confidence |
 |--------|---------|------|--------|
-| cognitive-chunk-max | 7 ±2 개 (화면 당 주요 요소 그룹) | Miller's Law (1956) | C |
-| nav-depth-max | ≤ 3단계 (깊이 제한) | Norman "3-click rule" 변형 | D |
-| choices-per-screen | ≤ 7개 (주요 선택지) | Hick's Law 최적 범위 | C |
-| grouping-proximity | 관련 요소 간격 ≤ 비관련 요소 간격의 50% | Gestalt 근접성 원리 | C |
-| visual-hierarchy-levels | 3-4단계 (제목/소제목/본문/캡션) | Norman 인지 부하 권장 | D |
-| action-zone | 엄지 도달 범위 내 핵심 CTA (하단 1/3 영역) | Steven Hoober 연구 (2013) | C |
-| fitts-target-min | 44x44pt (터치), 24x24pt (포인터) | Fitts's Law + Apple/Google HIG | S |
-| label-proximity | 레이블-필드 간격 ≤ 8pt (시각적 연결) | Gestalt 근접성 | C |
-| error-message-proximity | 오류 발생 필드로부터 ≤ 4pt | Norman 피드백 즉시성 원칙 | D |
-| whitespace-cognitive | 정보 블록 간 여백 ≥ 16pt | 인지 분리 최소 간격 | C |
+| cognitive-chunk-max | 7 ±2 items (major element groups per screen) | Miller's Law (1956) | C |
+| nav-depth-max | ≤ 3 levels (depth limit) | Norman "3-click rule" variant | D |
+| choices-per-screen | ≤ 7 items (major choices) | Hick's Law optimal range | C |
+| grouping-proximity | Spacing between related elements ≤ 50% of spacing between unrelated elements | Gestalt proximity principle | C |
+| visual-hierarchy-levels | 3-4 levels (title/subtitle/body/caption) | Norman cognitive-load recommendation | D |
+| action-zone | Key CTA within thumb reach (bottom 1/3 area) | Steven Hoober research (2013) | C |
+| fitts-target-min | 44x44pt (touch), 24x24pt (pointer) | Fitts's Law + Apple/Google HIG | S |
+| label-proximity | Label-field spacing ≤ 8pt (visual connection) | Gestalt proximity | C |
+| error-message-proximity | ≤ 4pt from the field where the error occurred | Norman feedback-immediacy principle | D |
+| whitespace-cognitive | Margin between information blocks ≥ 16pt | Minimum spacing for cognitive separation | C |
 
-### 타이포그래피
+### Typography
 
-| 토큰명 | 값/범위 | 출처 | 신뢰도 |
+| Token | Value/range | Source | Confidence |
 |--------|---------|------|--------|
-| readable-line-length | 45-75자/줄 (최적 60자) | Baymard Institute 가독성 연구 | C |
-| font-size-min | 16px (모바일 본문 최소) | WCAG + 가독성 연구 | C |
-| font-size-body | 16-18px (데스크탑), 16px (모바일) | NN/g 가독성 권장 | D |
+| readable-line-length | 45-75 chars/line (optimal 60 chars) | Baymard Institute readability research | C |
+| font-size-min | 16px (mobile body minimum) | WCAG + readability research | C |
+| font-size-body | 16-18px (desktop), 16px (mobile) | NN/g readability recommendation | D |
 | contrast-ratio-normal | ≥ 4.5:1 (AA), ≥ 7:1 (AAA) | WCAG 2.1 | S |
-| contrast-ratio-large | ≥ 3:1 (AA), ≥ 4.5:1 (AAA) — 18pt+ 텍스트 | WCAG 2.1 | S |
-| heading-scale-ratio | 1.2-1.5x (단계별 증가) | 타이포그래피 스케일 관례 | C |
-| label-weight | 필드 레이블 ≥ medium(500) — 본문과 구분 | Norman 시그니파이어 원칙 | D |
-| error-text-color | 빨강 + 아이콘 (색각 이상 대응 이중 코딩) | Norman 이중 코딩 원칙 | D |
-| instruction-text | 회색 텍스트 금지 — 대비 4.5:1 보장 | WCAG + NN/g | C |
-| text-alignment | 좌측 정렬 기본 (LTR) — 양쪽 정렬 금지 | 가독성 연구 | C |
+| contrast-ratio-large | ≥ 3:1 (AA), ≥ 4.5:1 (AAA) — 18pt+ text | WCAG 2.1 | S |
+| heading-scale-ratio | 1.2-1.5x (step-wise increase) | Typographic scale convention | C |
+| label-weight | Field label ≥ medium(500) — distinct from body | Norman signifier principle | D |
+| error-text-color | Red + icon (dual coding for color-vision deficiency) | Norman dual-coding principle | D |
+| instruction-text | No gray text — guarantee 4.5:1 contrast | WCAG + NN/g | C |
+| text-alignment | Left alignment default (LTR) — no justified alignment | Readability research | C |
 
-### 색상 & 표면
+### Color & Surface
 
-| 토큰명 | 값/범위 | 출처 | 신뢰도 |
+| Token | Value/range | Source | Confidence |
 |--------|---------|------|--------|
-| status-success | 녹색 + 체크 아이콘 (이중 코딩) | Norman 이중 코딩 | D |
-| status-error | 빨강 + 경고 아이콘 (이중 코딩) | Norman 이중 코딩 | D |
-| status-warning | 주황/황색 + 주의 아이콘 | Norman 피드백 원칙 | D |
-| status-info | 파랑 + 정보 아이콘 | Norman 피드백 원칙 | D |
-| interactive-distinction | 인터랙티브 요소 색상 ≠ 비인터랙티브 — 최소 3:1 대비 | 시그니파이어 원칙 | D |
-| focus-indicator | 2px+ 외곽선, 배경 대비 3:1 | WCAG 2.2 Focus Visible | S |
-| disabled-opacity | 0.38-0.5 (비활성 상태 명확 구분) | Material Design + Norman 제약 | A |
-| selected-state | 배경색 변화 + 체크 표시 (이중 코딩) | Norman 가시성 원칙 | D |
-| color-alone-never | 색상 단독 정보 전달 금지 — 항상 형태/텍스트 병행 | WCAG 1.4.1 + Norman | S |
-| palette-functional | 의미 기반 색상 — 시맨틱 토큰 사용 | Norman 매핑 원칙 | D |
+| status-success | Green + check icon (dual coding) | Norman dual coding | D |
+| status-error | Red + warning icon (dual coding) | Norman dual coding | D |
+| status-warning | Orange/yellow + caution icon | Norman feedback principle | D |
+| status-info | Blue + info icon | Norman feedback principle | D |
+| interactive-distinction | Interactive element color ≠ non-interactive — minimum 3:1 contrast | Signifier principle | D |
+| focus-indicator | 2px+ outline, 3:1 contrast against background | WCAG 2.2 Focus Visible | S |
+| disabled-opacity | 0.38-0.5 (clear distinction of disabled state) | Material Design + Norman constraint | A |
+| selected-state | Background-color change + check mark (dual coding) | Norman visibility principle | D |
+| color-alone-never | No information conveyed by color alone — always paired with shape/text | WCAG 1.4.1 + Norman | S |
+| palette-functional | Meaning-based color — use semantic tokens | Norman mapping principle | D |
 
-### 형태 & 곡률
+### Shape & Curvature
 
-| 토큰명 | 값/범위 | 출처 | 신뢰도 |
+| Token | Value/range | Source | Confidence |
 |--------|---------|------|--------|
-| button-min-size | 44x44pt (터치), 24x24px (포인터) | Fitts's Law + HIG | S |
-| button-padding | 수평 16-24pt, 수직 8-12pt | 터치 영역 확보 + 레이블 가독성 | A |
-| clickable-affordance | 버튼: 배경색 + 둥글림 + 높이감(선택) | 어포던스 3중 단서 | D |
-| link-affordance | 밑줄 + 색상 구분 (최소 2가지 단서) | 시그니파이어 이중 코딩 | D |
-| input-border | 1-2px 실선 테두리 — 입력 영역 명확 구분 | 어포던스 경계 표시 | D |
-| icon-with-label | 아이콘 단독 사용 금지 — 레이블 병행 (첫 사용 시) | Norman 매핑 원칙 | D |
-| icon-size-min | 24x24pt (가시성 확보) | NN/g 아이콘 연구 | C |
-| toggle-size | 최소 48pt 너비 (on/off 상태 구분 공간) | 어포던스 + Fitts | D |
-| form-field-height | 40-48pt (터치), 32-40px (데스크탑) | 터치 타겟 + 가독성 | A |
-| progress-indicator | 진행률 시각화 필수 — 3초+ 작업 시 | Norman 피드백 원칙 | D |
+| button-min-size | 44x44pt (touch), 24x24px (pointer) | Fitts's Law + HIG | S |
+| button-padding | Horizontal 16-24pt, vertical 8-12pt | Securing touch area + label readability | A |
+| clickable-affordance | Button: background color + rounding + elevation (optional) | Triple affordance cue | D |
+| link-affordance | Underline + color distinction (at least 2 cues) | Signifier dual coding | D |
+| input-border | 1-2px solid border — clear distinction of input area | Affordance boundary indication | D |
+| icon-with-label | No icon-only usage — pair with label (on first use) | Norman mapping principle | D |
+| icon-size-min | 24x24pt (securing visibility) | NN/g icon research | C |
+| toggle-size | Minimum 48pt width (space to distinguish on/off state) | Affordance + Fitts | D |
+| form-field-height | 40-48pt (touch), 32-40px (desktop) | Touch target + readability | A |
+| progress-indicator | Progress visualization required — for 3s+ tasks | Norman feedback principle | D |
 
-### 인터랙션 & 모션
+### Interaction & Motion
 
-| 토큰명 | 값/범위 | 출처 | 신뢰도 |
+| Token | Value/range | Source | Confidence |
 |--------|---------|------|--------|
-| response-instant | ≤ 100ms (즉각 반응 인지) | Jakob Nielsen 응답시간 3단계 | C |
-| response-seamless | ≤ 1s (연속성 유지) | Nielsen 응답시간 연구 (1993) | C |
-| response-attention | ≤ 10s (주의 유지 한계) | Nielsen 응답시간 연구 | C |
-| loading-feedback | 1s 초과 시 스피너, 3s 초과 시 진행률 표시 | Norman 피드백 원칙 + Nielsen | C |
-| undo-availability | 파괴적 액션 100% 되돌리기 제공 | Norman 오류 관용 원칙 | D |
-| confirm-destructive | 삭제·취소 불가 액션 전 확인 대화 필수 | Norman 제약 원칙 | D |
-| error-recovery-time | 오류 발견→수정 ≤ 15s (평균) | 사용성 연구 기준 | C |
-| hick-response-time | RT = a + b·log₂(n+1) — 선택지 n개 | Hick's Law (1952) | C |
-| fitts-movement-time | MT = a + b·log₂(2D/W) — 거리 D, 너비 W | Fitts's Law (1954) | C |
-| animation-purpose | 상태 전환 설명용만 — 장식 애니메이션 금지 | Norman 피드백 원칙 | D |
-| transition-cognitive | 0.2-0.4s (인지적 연속성 유지 범위) | NN/g 애니메이션 연구 | C |
+| response-instant | ≤ 100ms (perception of instant response) | Jakob Nielsen 3-level response time | C |
+| response-seamless | ≤ 1s (maintains continuity) | Nielsen response-time research (1993) | C |
+| response-attention | ≤ 10s (attention-retention limit) | Nielsen response-time research | C |
+| loading-feedback | Spinner above 1s, progress indicator above 3s | Norman feedback principle + Nielsen | C |
+| undo-availability | 100% undo provided for destructive actions | Norman error-tolerance principle | D |
+| confirm-destructive | Confirmation dialog required before delete/irreversible actions | Norman constraint principle | D |
+| error-recovery-time | Error detection→correction ≤ 15s (average) | Usability research benchmark | C |
+| hick-response-time | RT = a + b·log₂(n+1) — n choices | Hick's Law (1952) | C |
+| fitts-movement-time | MT = a + b·log₂(2D/W) — distance D, width W | Fitts's Law (1954) | C |
+| animation-purpose | State-transition explanation only — no decorative animation | Norman feedback principle | D |
+| transition-cognitive | 0.2-0.4s (range maintaining cognitive continuity) | NN/g animation research | C |
 
-### 인지 법칙 정량 토큰
+### Cognitive-Law Quantitative Tokens
 
-| 토큰명 | 공식/값 | 출처 | 신뢰도 |
+| Token | Formula/value | Source | Confidence |
 |--------|---------|------|--------|
-| millers-law | 작업 기억 용량 = 7 ±2 청크 | George Miller (1956) | C |
-| hicks-law | 반응시간 = a + b·log₂(n+1) | Hick (1952), Hyman (1953) | C |
-| fitts-law | 이동시간 = a + b·log₂(2D/W) | Paul Fitts (1954) | C |
-| jakobs-law | 사용자는 기존 사이트 경험 기반 기대 형성 | Jakob Nielsen | D |
-| teslers-law | 복잡성 보존 — 시스템이 흡수해야 할 최소 복잡성 존재 | Larry Tesler | D |
-| doherty-threshold | 응답 ≤ 400ms → 몰입 유지 | Doherty & Thadhani (1982) | C |
-| peak-end-rule | 경험 평가 = 피크 감정 + 종료 감정 | Kahneman (1993) | C |
-| serial-position | 첫 번째 + 마지막 항목 회상률 ≥ 70% | Ebbinghaus (1885) | C |
-| von-restorff | 시각적으로 구별되는 항목 회상률 2-3배 증가 | Von Restorff (1933) | C |
-| zeigarnik-effect | 미완료 작업 회상률 90%+ (완료 대비 2배) | Zeigarnik (1927) | C |
+| millers-law | Working-memory capacity = 7 ±2 chunks | George Miller (1956) | C |
+| hicks-law | Response time = a + b·log₂(n+1) | Hick (1952), Hyman (1953) | C |
+| fitts-law | Movement time = a + b·log₂(2D/W) | Paul Fitts (1954) | C |
+| jakobs-law | Users form expectations based on experience with existing sites | Jakob Nielsen | D |
+| teslers-law | Conservation of complexity — there is a minimum complexity the system must absorb | Larry Tesler | D |
+| doherty-threshold | Response ≤ 400ms → maintains engagement | Doherty & Thadhani (1982) | C |
+| peak-end-rule | Experience evaluation = peak emotion + end emotion | Kahneman (1993) | C |
+| serial-position | Recall rate of first + last items ≥ 70% | Ebbinghaus (1885) | C |
+| von-restorff | Recall rate of visually distinct items increases 2-3x | Von Restorff (1933) | C |
+| zeigarnik-effect | Recall rate of incomplete tasks 90%+ (2x vs. completed) | Zeigarnik (1927) | C |
 
-### 감성 디자인 토큰 (Emotional Design 3단계)
+### Emotional Design Tokens (Emotional Design 3 levels)
 
-| 토큰명 | 값/범위 | 출처 | 신뢰도 |
+| Token | Value/range | Source | Confidence |
 |--------|---------|------|--------|
-| visceral-first-impression | 첫 50ms 이내 시각적 매력 판단 | Lindgaard et al. (2006) | C |
-| visceral-color-warmth | 난색(빨강/주황/노랑) = 활성, 한색(파랑/녹색) = 안정 | 색채 심리학 연구 | C |
-| behavioral-task-success | 태스크 완료율 ≥ 95% (good usability) | NN/g 벤치마크 | D |
-| behavioral-error-rate | 오류율 ≤ 5% (good usability) | NN/g 벤치마크 | D |
-| behavioral-efficiency | 전문가 대비 초보자 소요시간 ≤ 2배 | 사용성 연구 기준 | C |
-| reflective-brand-trust | NPS ≥ 50 (높은 추천 의향) | Net Promoter Score 기준 | D |
-| reflective-delight | 예상 외 긍정 순간 ≥ 1회/세션 | UX 감성 연구 | D |
+| visceral-first-impression | Visual appeal judged within first 50ms | Lindgaard et al. (2006) | C |
+| visceral-color-warmth | Warm colors(red/orange/yellow) = active, cool colors(blue/green) = calm | Color psychology research | C |
+| behavioral-task-success | Task completion rate ≥ 95% (good usability) | NN/g benchmark | D |
+| behavioral-error-rate | Error rate ≤ 5% (good usability) | NN/g benchmark | D |
+| behavioral-efficiency | Novice time vs. expert ≤ 2x | Usability research benchmark | C |
+| reflective-brand-trust | NPS ≥ 50 (high recommendation intent) | Net Promoter Score benchmark | D |
+| reflective-delight | Unexpected positive moment ≥ 1/session | UX emotional research | D |
 
-## 시대별 변화
+## Changes Over Time
 
-| 시기 | 전환점 | 주요 수치 변화 |
+| Period | Turning point | Key numerical change |
 |------|--------|---------------|
-| 1988 | "The Design of Everyday Things" 초판 | 어포던스 개념 보급 → UI 버튼에 3D 효과 확산 |
-| 1993-1998 | Apple ATG 근무 | "UX" 용어 공식 사용, 사용자 테스트 정량화 시작 |
-| 2002 | "Emotional Design" 출간 | 본능·행동·반성 3단계 → 감성 메트릭 도입 |
-| 2004 | "시그니파이어" 개념 분리 | 어포던스(물리) ≠ 시그니파이어(인지) 구분 명확화 |
-| 2013 | "The Design of Everyday Things" 개정판 | 시그니파이어 공식 도입, 디지털 UI 사례 대폭 추가 |
-| 2023+ | AI/LLM 시대 | 자율 에이전트 UX, 대화형 인터페이스의 인지 부하 재정의 |
+| 1988 | "The Design of Everyday Things" first edition | Affordance concept popularized → spread of 3D effects on UI buttons |
+| 1993-1998 | Work at Apple ATG | Official use of the term "UX", start of quantifying user testing |
+| 2002 | "Emotional Design" published | Visceral/behavioral/reflective 3 levels → introduction of emotional metrics |
+| 2004 | "Signifier" concept separated | Clarified distinction between affordance(physical) ≠ signifier(cognitive) |
+| 2013 | "The Design of Everyday Things" revised edition | Formal introduction of signifier, large addition of digital UI examples |
+| 2023+ | AI/LLM era | Autonomous-agent UX, redefinition of cognitive load in conversational interfaces |
 
-## 영향 관계
+## Influence Relationships
 
-- **James J. Gibson → Norman**: 생태심리학의 "어포던스" 개념을 디자인 영역으로 이식
-- **Gestalt 심리학 → Norman**: 근접성·유사성·연속성·폐합 원리를 UI 레이아웃 원칙으로 변환
-- **Norman → Apple HIG**: 1993-1998 Apple 재직 시 HIG에 인지과학 원칙 직접 반영
-- **Norman → WCAG**: 접근성 표준에 인지 부하·이중 코딩 원칙 간접 영향
-- **Norman ↔ Jakob Nielsen**: Nielsen Norman Group — 사용성 휴리스틱 10가지와 Norman 원칙 상호 보완
-- **Norman → 현대 UCD 전체**: "사용자 중심 디자인" 방법론이 ISO 9241-210 표준의 기반
-- **주요 참고 문헌**: "The Design of Everyday Things" (1988/2013 개정), "Emotional Design" (2004), "Living with Complexity" (2010)
+- **James J. Gibson → Norman**: Transplanted the "affordance" concept from ecological psychology into the design domain
+- **Gestalt psychology → Norman**: Converted proximity/similarity/continuity/closure principles into UI layout principles
+- **Norman → Apple HIG**: Directly reflected cognitive-science principles into HIG during his 1993-1998 tenure at Apple
+- **Norman → WCAG**: Indirect influence of cognitive-load and dual-coding principles on accessibility standards
+- **Norman ↔ Jakob Nielsen**: Nielsen Norman Group — 10 usability heuristics complement Norman's principles
+- **Norman → all of modern UCD**: "user-centered design" methodology is the basis of the ISO 9241-210 standard
+- **Key references**: "The Design of Everyday Things" (1988/2013 revised), "Emotional Design" (2004), "Living with Complexity" (2010)
 
-## Norman 7단계 행위 모델 → UI 체크리스트
+## Norman 7-Stage Action Model → UI Checklist
 
-| 단계 | 설명 | UI 토큰/체크 |
+| Stage | Description | UI token/check |
 |------|------|-------------|
-| 1. 목표 형성 | 사용자가 달성하려는 바 | 화면 제목이 목표를 반영하는가 |
-| 2. 의도 형성 | 어떤 행동을 할지 결정 | CTA 레이블이 행동을 명시하는가 ("저장", "삭제") |
-| 3. 행동 명세 | 구체적 조작 계획 | 조작 순서가 자연스러운가 (좌→우, 위→아래) |
-| 4. 행동 실행 | 클릭/탭/입력 | 터치 타겟 ≥ 44pt, 클릭 피드백 ≤ 100ms |
-| 5. 상태 지각 | 시스템 반응 인지 | 시각/청각/햅틱 피드백 존재 |
-| 6. 상태 해석 | 반응의 의미 이해 | 성공/실패 메시지 명확, 이중 코딩 |
-| 7. 결과 평가 | 목표 달성 여부 판단 | 완료 상태 시각화 (체크, 진행률 100%) |
+| 1. Form goal | What the user wants to achieve | Does the screen title reflect the goal |
+| 2. Form intention | Deciding what action to take | Does the CTA label state the action ("Save", "Delete") |
+| 3. Specify action | Concrete operation plan | Is the operation sequence natural (left→right, top→bottom) |
+| 4. Execute action | Click/tap/input | Touch target ≥ 44pt, click feedback ≤ 100ms |
+| 5. Perceive state | Perceiving system response | Visual/auditory/haptic feedback present |
+| 6. Interpret state | Understanding the meaning of the response | Clear success/failure message, dual coding |
+| 7. Evaluate outcome | Judging whether the goal was achieved | Completion-state visualization (check, progress 100%) |
 
-## UI 적용 매핑
+## UI Application Mapping
 
-| Norman 원칙 | 현대 UI 토큰 변환 규칙 |
+| Norman principle | Modern UI token conversion rule |
 |-------------|----------------------|
-| 어포던스 | 버튼에 배경색+둥글림+hover 효과 부여, 플랫 텍스트 버튼 최소화 |
-| 시그니파이어 | 인터랙티브 요소에 최소 2가지 시각 단서 (색상+형태, 색상+밑줄 등) |
-| 피드백 | 모든 액션에 100ms 이내 시각/청각/햅틱 반응, 로딩 1s 초과 시 스피너 |
-| 매핑 | 슬라이더 좌→우 = 증가, 토글 우 = ON — 자연적 방향 일치 |
-| 제약 | 불가능한 액션 비활성화(`disabled`), 유효하지 않은 입력 실시간 차단 |
-| 개념 모델 | 시스템 상태 항상 가시화 (빵부스러기, 진행 표시, 현재 위치) |
-| 오류 관용 | Ctrl+Z 제공, 삭제 전 확인, 휴지통 패턴, 30일 복구 |
-| 이중 코딩 | 색상 단독 의미 전달 금지 — 아이콘·텍스트·패턴 병행 |
-| 인지 부하 | 화면 당 선택지 ≤ 7, 단계 ≤ 3, 정보 그룹핑 필수 |
-| Fitts's Law | 자주 쓰는 CTA는 크게(≥ 48pt), 화면 가장자리/모서리 활용 |
+| Affordance | Give buttons background color+rounding+hover effect, minimize flat text buttons |
+| Signifier | At least 2 visual cues on interactive elements (color+shape, color+underline, etc.) |
+| Feedback | Visual/auditory/haptic response within 100ms on every action, spinner when loading exceeds 1s |
+| Mapping | Slider left→right = increase, toggle right = ON — natural directional match |
+| Constraint | Disable impossible actions(`disabled`), block invalid input in real time |
+| Conceptual Model | Always make system state visible (breadcrumbs, progress indicator, current location) |
+| Error Tolerance | Provide Ctrl+Z, confirm before delete, trash-bin pattern, 30-day recovery |
+| Dual coding | No meaning conveyed by color alone — pair with icon/text/pattern |
+| Cognitive load | Choices per screen ≤ 7, steps ≤ 3, information grouping required |
+| Fitts's Law | Make frequently used CTAs large(≥ 48pt), use screen edges/corners |

@@ -1,47 +1,47 @@
-# 크기 관리 및 청킹 가이드
+# Size Management and Chunking Guide
 
-## GPT-PRO 실용적 컨텍스트 한도
+## GPT-PRO Practical Context Limits
 
-GPT-PRO는 대규모 컨텍스트를 처리할 수 있지만, 실용적 품질을 위해 다음 한도를 권장합니다:
+GPT-PRO can process large contexts, but for practical quality the following limits are recommended:
 
-| 한도 | 문자 수 | 대략적 토큰 수 | 비고 |
+| Limit | Characters | Approx. tokens | Notes |
 |------|---------|---------------|------|
-| 최적 | ~50K | ~15K 토큰 | 가장 정확한 분석 가능 |
-| 양호 | ~100K | ~30K 토큰 | 분석 품질 유지 |
-| 경고 | ~150K | ~45K 토큰 | 세부사항 놓칠 수 있음 |
-| 하드 리밋 | 200K | ~60K 토큰 | 초과 시 반드시 트리밍 또는 청킹 |
+| Optimal | ~50K | ~15K tokens | Most accurate analysis |
+| Good | ~100K | ~30K tokens | Analysis quality maintained |
+| Warning | ~150K | ~45K tokens | May miss details |
+| Hard limit | 200K | ~60K tokens | Must trim or chunk if exceeded |
 
 ---
 
-## 문자-토큰 변환 근사값
+## Character-to-Token Conversion Approximation
 
-| 콘텐츠 유형 | 문자/토큰 비율 | 설명 |
+| Content type | Chars/token ratio | Description |
 |-------------|---------------|------|
-| 영어 텍스트 | ~4 문자/토큰 | 일반적인 영어 산문 |
-| 한국어 텍스트 | ~2 문자/토큰 | 한글은 토큰당 문자가 적음 |
-| 소스 코드 | ~3.5 문자/토큰 | 키워드, 식별자, 기호 혼합 |
-| 혼합 (코드+한국어 설명) | ~3 문자/토큰 | 이 스킬의 일반적 출력 |
+| English text | ~4 chars/token | Typical English prose |
+| Korean text | ~2 chars/token | Hangul uses fewer chars per token |
+| Source code | ~3.5 chars/token | Mix of keywords, identifiers, symbols |
+| Mixed (code + Korean description) | ~3 chars/token | Typical output of this skill |
 
-**간편 계산**: 총 문자 수 ÷ 3 ≈ 예상 토큰 수
+**Quick estimate**: total characters ÷ 3 ≈ expected tokens
 
 ---
 
-## 크기 티어별 처리
+## Processing by Size Tier
 
-### Small (< 30K 문자, ~10K 토큰)
+### Small (< 30K chars, ~10K tokens)
 
-- 처리: 그대로 사용
-- 메시지: 없음
+- Processing: use as-is
+- Message: none
 
-### Medium (30K ~ 100K 문자, ~10K~30K 토큰)
+### Medium (30K ~ 100K chars, ~10K~30K tokens)
 
-- 처리: 그대로 사용
-- 메시지: 결과 보고 시 크기 정보 표시
+- Processing: use as-is
+- Message: show size info in result report
 
-### Large (100K ~ 200K 문자, ~30K~60K 토큰)
+### Large (100K ~ 200K chars, ~30K~60K tokens)
 
-- 처리: 경고 + 트리밍 제안
-- 메시지:
+- Processing: warning + trimming suggestion
+- Message:
 
 ```
 ⚠️ 컨텍스트 크기: {N}K 문자 (약 {M}K 토큰)
@@ -54,10 +54,10 @@ GPT-PRO의 분석 정확도를 위해 트리밍을 권장합니다.
 트리밍 없이 진행하시겠습니까? (y/n)
 ```
 
-### Oversized (> 200K 문자, ~60K+ 토큰)
+### Oversized (> 200K chars, ~60K+ tokens)
 
-- 처리: 자동 트리밍 또는 청킹 (사용자 선택)
-- 옵션 제시:
+- Processing: auto-trim or chunk (user choice)
+- Options offered:
 
 ```
 🚫 컨텍스트 크기 초과: {N}K 문자 (약 {M}K 토큰)
@@ -73,47 +73,47 @@ GPT-PRO의 분석 정확도를 위해 트리밍을 권장합니다.
 
 ---
 
-## 트리밍 우선순위
+## Trimming Priority
 
-높은 우선순위(유지)부터 낮은 우선순위(제거 가능)순으로:
+From highest priority (keep) to lowest priority (removable):
 
-| 순위 | 카테고리 | 설명 | 제거 시 영향 |
+| Rank | Category | Description | Impact if removed |
 |------|----------|------|-------------|
-| 1 | 핵심 소스 코드 | 질문/이슈의 직접 대상 | 치명적 — 분석 불가 |
-| 2 | 인터페이스/프로토콜 | 대상이 구현/사용하는 계약 | 높음 — 맥락 손실 |
-| 3 | 에러 로그/스택 트레이스 | 에러의 직접 증거 (issue 모드) | 높음 — 원인 추적 어려움 |
-| 4 | 설정 파일 | 빌드/환경 설정 | 중간 — 환경 맥락 손실 |
-| 5 | 테스트 코드 | 현재 동작 증거 | 중간 — 동작 이해 저하 |
-| 6 | 프로젝트 문서 | README, ARCHITECTURE 등 | 낮음 — 대체 설명 가능 |
-| 7 | 의존성 파일 | package.json, Podfile 등 | 낮음 — 목록만으로 충분 |
+| 1 | Core source code | Direct target of the question/issue | Critical — analysis impossible |
+| 2 | Interface/protocol | Contract the target implements/uses | High — context loss |
+| 3 | Error log/stack trace | Direct evidence of the error (issue mode) | High — hard to trace cause |
+| 4 | Config files | Build/environment settings | Medium — environment context loss |
+| 5 | Test code | Evidence of current behavior | Medium — reduced behavior understanding |
+| 6 | Project docs | README, ARCHITECTURE, etc. | Low — can be explained otherwise |
+| 7 | Dependency files | package.json, Podfile, etc. | Low — a list alone suffices |
 
-### 트리밍 전략
+### Trimming Strategies
 
-1. **의존성 파일 요약**: lock 파일 제거, 패키지 이름만 나열
-2. **문서 축약**: 첫 1K 문자 + "... (이하 생략)"
-3. **테스트 시그니처화**: 테스트 함수 시그니처만 유지, 본문 제거
-4. **설정 핵심만**: 관련 설정 키만 추출
-5. **코드 시그니처화**: 마지막 수단 — 함수/클래스 시그니처만 유지
+1. **Summarize dependency files**: remove lock files, list package names only
+2. **Condense docs**: first 1K chars + "... (truncated)"
+3. **Signaturize tests**: keep test function signatures only, remove bodies
+4. **Config essentials only**: extract only relevant config keys
+5. **Signaturize code**: last resort — keep function/class signatures only
 
 ---
 
-## 청킹 전략
+## Chunking Strategy
 
-### 자기완결형 청크 원칙
+### Self-Contained Chunk Principle
 
-각 청크는 가능한 한 독립적으로 이해 가능해야 합니다:
+Each chunk should be understandable as independently as possible:
 
-- 하나의 모듈/파일은 분할하지 않음
-- 관련 파일(인터페이스 + 구현)은 같은 청크에 배치
-- 테스트는 대상 코드와 같은 청크에 배치
+- Do not split a single module/file
+- Place related files (interface + implementation) in the same chunk
+- Place tests in the same chunk as their target code
 
-### 청크 크기
+### Chunk Size
 
-- 목표: 청크당 100K~150K 문자
-- 최소: 30K 문자 (너무 작으면 맥락 부족)
-- 최대: 180K 문자 (여유 공간 확보)
+- Target: 100K~150K chars per chunk
+- Minimum: 30K chars (too small lacks context)
+- Maximum: 180K chars (keep headroom)
 
-### 청크 분할 알고리즘
+### Chunk Splitting Algorithm
 
 ```
 1. 모든 파일을 카테고리별로 그룹화
@@ -130,9 +130,9 @@ GPT-PRO의 분석 정확도를 위해 트리밍을 권장합니다.
 4. 각 청크에 교차참조 헤더 추가
 ```
 
-### 교차참조 헤더
+### Cross-Reference Header
 
-청크 간 관계를 명시합니다:
+Specifies relationships between chunks:
 
 ```
 > 📎 이 파트에서 참조되는 파일 중 다른 파트에 포함된 것:
@@ -142,9 +142,9 @@ GPT-PRO의 분석 정확도를 위해 트리밍을 권장합니다.
 
 ---
 
-## 크기 측정 방법
+## Size Measurement Method
 
-프롬프트 조립 후 Bash로 측정:
+After assembling the prompt, measure with Bash:
 
 ```bash
 # 변수에 프롬프트가 저장된 경우
@@ -154,7 +154,7 @@ echo -n "$PROMPT" | wc -c
 wc -c < /tmp/gpt-research-prompt.txt
 ```
 
-결과 보고 시 표시:
+Show in result report:
 
 ```
 📋 클립보드에 복사되었습니다.
