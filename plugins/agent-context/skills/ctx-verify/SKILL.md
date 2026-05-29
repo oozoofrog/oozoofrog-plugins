@@ -21,7 +21,7 @@ Collect the following files across the project:
 - `AGENTS.md` (project root — not auto-loaded by Claude Code)
 - `**/CONTEXT.md` (all directories — not auto-loaded by Claude Code)
 
-If no files exist, output "컨텍스트 아키텍처가 아직 초기화되지 않았습니다. `/agent-context:init`을 먼저 실행하세요." and exit.
+If no files exist, output "컨텍스트 아키텍처가 아직 초기화되지 않았습니다. `/agent-context:ctx-init`을 먼저 실행하세요." and exit.
 
 If a stage number is given as an argument, run only that stage. The default is `all` (run everything).
 

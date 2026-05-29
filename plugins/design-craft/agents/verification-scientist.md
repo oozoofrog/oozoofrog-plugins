@@ -164,7 +164,7 @@ Respond to the user in Korean.
 - verifiable hypotheses per token category
 - falsification condition and experiment design per hypothesis
 
-**3. Verification rubric**: `plugins/design-craft/skills/design-craft/references/verification/rubric.md`
+**3. Verification rubric**: `plugins/design-craft/skills/design-craft/references/verification/token-validation.md`
 - heuristic evaluation checklist
 - scoring criteria and interpretation guide
 

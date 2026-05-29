@@ -13,9 +13,9 @@ Respond to the user in Korean.
 
 To introduce context architecture into a project, follow these three steps:
 
-1. **Initialize**: Run `/agent-context:init` — analyzes the project and generates CLAUDE.md, subdirectory CLAUDE.md, `.claude/rules/`, and AGENTS.md.
-2. **Verify**: Run `/agent-context:verify` — validates reference integrity, code references, and content accuracy in three stages.
-3. **Maintain**: Update context documents alongside code changes. Use `/agent-context:audit` to periodically audit token efficiency.
+1. **Initialize**: Run `/agent-context:ctx-init` — analyzes the project and generates CLAUDE.md, subdirectory CLAUDE.md, `.claude/rules/`, and AGENTS.md.
+2. **Verify**: Run `/agent-context:ctx-verify` — validates reference integrity, code references, and content accuracy in three stages.
+3. **Maintain**: Update context documents alongside code changes. Use `/agent-context:ctx-audit` to periodically audit token efficiency.
 
 ## Core Problem
 
@@ -138,9 +138,9 @@ Run the following verification periodically to maintain knowledge-tree integrity
 
 This plugin provides the following skills:
 
-- **`/agent-context:init`** — Use when introducing context architecture into a new project, or augmenting context files in an existing one. Auto-detects build tools and generates CLAUDE.md, subdirectory CLAUDE.md, `.claude/rules/`, and AGENTS.md.
-- **`/agent-context:verify`** — Use to confirm that context documents are in sync with the code. Run after refactoring, file moves, or dependency changes. Passing a stage number (1/2/3) as an argument runs only that stage.
-- **`/agent-context:audit`** — Use when CLAUDE.md has grown bloated or the hierarchy has become complex. Detects lack of conciseness, information duplication, and coverage gaps, and proposes improvements.
+- **`/agent-context:ctx-init`** — Use when introducing context architecture into a new project, or augmenting context files in an existing one. Auto-detects build tools and generates CLAUDE.md, subdirectory CLAUDE.md, `.claude/rules/`, and AGENTS.md.
+- **`/agent-context:ctx-verify`** — Use to confirm that context documents are in sync with the code. Run after refactoring, file moves, or dependency changes. Passing a stage number (1/2/3) as an argument runs only that stage.
+- **`/agent-context:ctx-audit`** — Use when CLAUDE.md has grown bloated or the hierarchy has become complex. Detects lack of conciseness, information duplication, and coverage gaps, and proposes improvements.
 
 ## Additional Resources
 

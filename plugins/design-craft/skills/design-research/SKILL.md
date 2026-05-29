@@ -121,7 +121,7 @@ Once token-architect's integration completes, assign work to verification-scient
 **Output:**
 - `$REF/verification/report.md` — verification report
 - `$REF/verification/hypotheses.md` — hypothesis list
-- `$REF/verification/rubric.md` — heuristic evaluation rubric
+- `$REF/verification/token-validation.md` — heuristic evaluation rubric
 
 **If any token is FAIL**: run a token-architect correction → verification-scientist re-verification loop. Repeat at most 3 times. If still FAIL after 3 rounds, mark it `unresolved` and report to the user. Re-verification must re-read the corrected file rather than trust the prior verdict — a FAIL stays FAIL until the file actually shows the fix.
 
@@ -162,7 +162,7 @@ $REF (= plugins/design-craft/skills/design-craft/references/)
 └── verification/
     ├── report.md              ← 검증 리포트
     ├── hypotheses.md          ← 가설 목록
-    └── rubric.md              ← 평가 루브릭
+    └── token-validation.md    ← 평가 루브릭
 ```
 
 ## Data-transfer protocol

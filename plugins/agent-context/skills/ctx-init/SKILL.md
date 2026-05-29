@@ -125,6 +125,6 @@ Respond to the user in Korean.
 
 ### 다음 단계
 1. 생성된 컨텍스트 파일의 내용을 검토하고 프로젝트 특성에 맞게 수정하세요.
-2. `/agent-context:verify`로 검증을 실행하세요.
-3. `/agent-context:audit`로 토큰 효율성을 확인하세요.
+2. `/agent-context:ctx-verify`로 검증을 실행하세요.
+3. `/agent-context:ctx-audit`로 토큰 효율성을 확인하세요.
 ```

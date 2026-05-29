@@ -1,6 +1,6 @@
 # Claude Code Session JSONL Schema
 
-This document catalogs the types and fields of the JSONL lines that Claude Code writes to `~/.claude/projects/<encoded-cwd>/<session-uuid>.jsonl`. The skill's parser (`extract_user_text`, `load_messages` in `src/src/main.rs`) follows this schema.
+This document catalogs the types and fields of the JSONL lines that Claude Code writes to `~/.claude/projects/<encoded-cwd>/<session-uuid>.jsonl`. The skill's parser (`extract_user_text`, `load_messages` in `src/src/data.rs`) follows this schema.
 
 ## Directory Encoding
 
