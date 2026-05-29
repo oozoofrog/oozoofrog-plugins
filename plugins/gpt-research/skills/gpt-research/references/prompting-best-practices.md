@@ -68,18 +68,18 @@ Please respond with the following structure:
 
 | Element | Language | Example |
 |------|------|------|
-| Prompt description / question | Korean | "Please analyze the responsibilities of this module" |
+| Prompt description / question | Korean | "이 모듈의 책임을 분석해주세요" |
 | Code | Keep original | `func authenticate(token: String)` |
 | Technical terms | Keep original | "Protocol Oriented Programming" |
 | File paths | Keep original | `src/auth/AuthManager.swift` |
-| Response request | Korean | "Please explain in Korean" |
+| Response request | Korean | "한국어로 설명해주세요" |
 
 ### Inserting the Language Instruction
 
 Append the following at the end of the prompt:
 
 ```
-> Please write the response in Korean. Keep code, technical terms, and file paths in their original form.
+> 응답은 한국어로 작성해주세요. 코드, 기술 용어, 파일 경로는 원문을 유지하세요.
 ```
 
 ---

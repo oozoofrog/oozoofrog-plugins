@@ -60,7 +60,7 @@ What the orchestrator passes:
 
 ### Step 1: Context analysis + HIG research
 
-1. Read `{HARNESS_DIR}/harness-spec.md` — confirm design taste from the "User Context" section.
+1. Read `{HARNESS_DIR}/harness-spec.md` — confirm design taste from the "사용자 맥락" section.
 2. Read `{HARNESS_DIR}/features.json` — identify `category: "ui"` features and determine which features need screens.
 3. Route apple-craft reference docs:
    ```
@@ -177,5 +177,5 @@ Create `{HARNESS_DIR}/design-spec.md`:
 
 - **Implementation details are Builder's job** — no code writing here.
 - Prefer reference doc APIs over training data, since Apple APIs change across releases.
-- Reflect design taste by referencing the "User Context" in harness-spec.md.
+- Reflect design taste by referencing the "사용자 맥락" in harness-spec.md.
 - Write design-spec.md in Korean, keeping token names / code / API names verbatim. Respond to the user in Korean.

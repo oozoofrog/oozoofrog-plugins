@@ -214,6 +214,7 @@ jobs:
           git add "Casks/$CASK_NAME.rb"
           git commit -m "Update $APP_NAME cask to ${{ steps.release.outputs.version }}"
           git push
+```
 
 ## Per-Project Customization Points
 
@@ -256,4 +257,3 @@ git push origin v1.5
 
 With this pattern, `release.yml` either calls `update-homebrew.yml` directly,
 or they are automatically chained via release events.
-```

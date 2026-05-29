@@ -82,17 +82,16 @@ Apply to all output. See `learning-science.md` for detailed rules.
 - Targets a single source file or a directory path.
 - For a directory, recursively traverse the source files underneath and review them all.
 
-### Internal pipeline (7 phases)
+### Internal pipeline (6 phases)
 
 | Phase | Name | Summary |
 |-------|------|------|
 | 1 | Context collection | Read the target code + git log/blame + explore tests/dependencies + infer author intent (run implicitly) |
-| 2 | Multi-perspective analysis | Independent analysis through 5 lenses: structure/clarity/safety/performance/tests. Collect findings exhaustively first (no count limit at this stage) |
-| 3 | Output selection | Sort collected findings by severity/learning value and select the top 7 or fewer for output |
-| 4 | Finding structuring | Structure each finding as a Before/After/Why triple (curiosity trigger → principle link → real impact) |
-| 5 | Severity + error type classification | 🔴🟡🔵🟢💡 severity + [Slip]/[Rule]/[Knowledge]/[Lapse] cognitive error type tags |
-| 6 | Mental model visualization | Generate one Mermaid diagram only when an architecture change is needed (conditional) |
-| 7 | Metacognition prompt | Stimulate thinking with 2 questions on scalability/change-readiness + transfer/application |
+| 2 | Multi-perspective analysis | Independent analysis through 5 lenses: structure/clarity/safety/performance/tests. Collect findings exhaustively first (no cap during analysis); apply the top-N selection (up to 3 per lens, 7 or fewer total) only at the output stage |
+| 3 | Finding structuring | Structure each finding as a Before/After/Why triple (curiosity trigger → principle link → real impact) |
+| 4 | Severity + error type classification | 🔴🟡🔵🟢💡 severity + [Slip]/[Rule]/[Knowledge]/[Lapse] cognitive error type tags |
+| 5 | Mental model visualization | Generate one Mermaid diagram only when an architecture change is needed (conditional) |
+| 6 | Metacognition prompt | Stimulate thinking with 2 questions on scalability/change-readiness + transfer/application |
 
 ### Output: 3-layer progressive disclosure
 

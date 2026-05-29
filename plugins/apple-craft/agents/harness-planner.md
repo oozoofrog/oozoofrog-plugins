@@ -46,7 +46,7 @@ The orchestrator (apple-craft-harness skill) passes the following:
    ```
    Read: ${CLAUDE_PLUGIN_ROOT}/skills/apple-harness/references/harness-design-principles.md
    ```
-   → Internalize the "핵심 원칙" and "V2 패턴" sections and reflect them in the spec design.
+   → Internalize the "Core Principles" and "V2 Pattern" sections and reflect them in the spec design.
    → The Planner is the highest-ROI agent at 0.4% of total cost — the questions you invest in at this stage determine the quality of everything downstream.
 2. Read the apple-craft reference document routing table:
    ```
