@@ -1,151 +1,153 @@
 ---
 name: ctx-guide
-description: This skill should be used when the user asks about "컨텍스트 아키텍처", "context architecture", "계층적 컨텍스트", "CONTEXT.md 설계", "주의력 예산", "attention budget", "컨텍스트 엔지니어링", "context engineering", "토큰 효율성", "컨텍스트 부패", "context rot", "점진적 노출", "progressive disclosure", or wants guidance on structuring CLAUDE.md, CONTEXT.md, AGENTS.md for large-scale projects. Common requests include "CLAUDE.md가 너무 길어요", "프로젝트 컨텍스트 파일을 어떻게 구성하죠?", "My CLAUDE.md is too long", "Set up context architecture for my project".
+description: Guidance on designing hierarchical context architecture for large-scale projects — structuring CLAUDE.md, CONTEXT.md, AGENTS.md to maximize agent reasoning precision and token efficiency. Use when the user asks about "컨텍스트 아키텍처", "context architecture", "계층적 컨텍스트", "CONTEXT.md 설계", "주의력 예산", "attention budget", "컨텍스트 엔지니어링", "context engineering", "토큰 효율성", "컨텍스트 부패", "context rot", "점진적 노출", "progressive disclosure". Common requests include "CLAUDE.md가 너무 길어요", "프로젝트 컨텍스트 파일을 어떻게 구성하죠?", "My CLAUDE.md is too long", "Set up context architecture for my project".
 ---
 
 # Hierarchical Context Architecture Guide
 
-대규모 프로젝트에서 AI 에이전트의 추론 정밀도를 극대화하기 위한 계층적 컨텍스트 아키텍처를 설계한다.
+Design a hierarchical context architecture that maximizes an AI agent's reasoning precision in large-scale projects.
+
+Respond to the user in Korean.
 
 ## Quick Start
 
-프로젝트에 컨텍스트 아키텍처를 도입하려면 다음 3단계를 따른다:
+To introduce context architecture into a project, follow these three steps:
 
-1. **초기화**: `/agent-context:init` 실행 — 프로젝트를 분석하여 CLAUDE.md, 서브디렉토리 CLAUDE.md, `.claude/rules/`, AGENTS.md를 자동 생성한다.
-2. **검증**: `/agent-context:verify` 실행 — 참조 무결성, 코드 참조, 내용 정확성을 3단계로 검증한다.
-3. **유지**: 코드 변경 시 컨텍스트 문서도 함께 업데이트한다. `/agent-context:audit`로 주기적으로 토큰 효율성을 감사한다.
+1. **Initialize**: Run `/agent-context:init` — analyzes the project and generates CLAUDE.md, subdirectory CLAUDE.md, `.claude/rules/`, and AGENTS.md.
+2. **Verify**: Run `/agent-context:verify` — validates reference integrity, code references, and content accuracy in three stages.
+3. **Maintain**: Update context documents alongside code changes. Use `/agent-context:audit` to periodically audit token efficiency.
 
 ## Core Problem
 
-LLM은 **주의력 예산(Attention Budget)** 제약 하에 작동한다. 토큰이 증가하면 정보 회상 능력이 저하되는 **컨텍스트 부패(Context Rot)** 현상이 발생할 수 있다. 정보를 전략적으로 구조화하여 고신호 토큰만 선별 노출하는 것이 핵심이다.
+LLMs operate under an **Attention Budget** constraint. As tokens grow, recall ability degrades — a phenomenon called **Context Rot**. The key is to structure information strategically so that only high-signal tokens are exposed.
 
 ## Two Fundamental Principles
 
-### 1. 국소성 (Locality)
+### 1. Locality
 
-정보는 그것이 설명하는 코드와 물리적으로 가장 인접하게 배치한다. 이를 **구조적 사일로화(Structural Siloing)**라 한다. 특정 디렉토리의 컨텍스트를 해당 위치에 격리하여 AI가 현재 작업 도메인에만 집중하게 한다.
+Place information physically as close as possible to the code it describes. This is called **Structural Siloing**. Isolating a directory's context at that location keeps the AI focused on the current working domain.
 
-### 2. 점진적 노출 (Progressive Disclosure)
+### 2. Progressive Disclosure
 
-모든 데이터를 한 번에 주입하지 않고 **적시(JIT) 컨텍스트 전략**을 사용한다. 초기에는 가벼운 식별자(파일 경로, 메타데이터)만 유지하고, 실제 필요 시점에만 상세 컨텍스트를 로드한다.
+Instead of injecting all data at once, use a **just-in-time (JIT) context strategy**. Keep only lightweight identifiers (file paths, metadata) initially, and load detailed context only when it is actually needed.
 
 ## Three-Tier File Standard
 
 ### CLAUDE.md — Project Root & Subdirectories (Layer 0-2)
 
-프로젝트 루트의 최상위 지속적 컨텍스트. 간결하게 유지하는 것을 권장한다.
+The top-level persistent context at the project root. Keep it concise.
 
-- **컴팩션 생존**: 대화 이력 요약 시 디스크에서 다시 읽어 재주입됨 (파일 길이와 무관)
-- **계층적 로딩**: Claude Code는 세션 시작 시 루트 CLAUDE.md를 자동 로딩하고, 서브디렉토리의 CLAUDE.md는 해당 디렉토리 파일 접근 시 on-demand 로딩
-- **`@` import**: `@path/to/file` 구문으로 외부 파일 참조 가능 (예: `@src/api/API-GUIDE.md`)
-- **포함**: 빌드/테스트 명령, 아키텍처 결정, 환경 변수
-- **제외**: 빈번히 변경되는 정보, 상세 API 문서, 스타일 가이드
+- **Compaction survival**: When conversation history is summarized, it is re-read from disk and re-injected (independent of file length).
+- **Hierarchical loading**: Claude Code auto-loads the root CLAUDE.md at session start; subdirectory CLAUDE.md files are loaded on-demand when files in that directory are accessed.
+- **`@` import**: Reference external files with the `@path/to/file` syntax (e.g., `@src/api/API-GUIDE.md`).
+- **Include**: Build/test commands, architecture decisions, environment variables.
+- **Exclude**: Frequently changing information, detailed API docs, style guides.
 
 ### `.claude/rules/` — Path-Specific Rules (Layer 1-2)
 
-Claude Code 네이티브 기능. glob 패턴으로 특정 경로의 파일 작업 시 자동 적용되는 규칙 파일.
+A native Claude Code feature. Rule files applied automatically via glob patterns when working on files at specific paths.
 
-- **자동 로딩**: 파일 경로가 glob 패턴에 매칭되면 해당 규칙이 자동 적용됨
-- **예시**: `.claude/rules/api-rules.md` (패턴: `src/api/**`) → API 관련 파일 작업 시 자동 로딩
-- CONTEXT.md의 "경로별 컨텍스트" 역할을 네이티브로 대체 가능
+- **Auto-loading**: When a file path matches a glob pattern, the corresponding rule applies automatically.
+- **Example**: `.claude/rules/api-rules.md` (pattern: `src/api/**`) → auto-loaded when working on API-related files.
+- Can natively replace CONTEXT.md's "path-specific context" role.
 
-### CONTEXT.md — Subsystem Context (수동 참조용)
+### CONTEXT.md — Subsystem Context (for manual reference)
 
-서브시스템별 상세 도메인 지식을 담은 계층적 지식 트리.
+A hierarchical knowledge tree holding detailed per-subsystem domain knowledge.
 
-> **주의**: Claude Code는 CONTEXT.md를 **자동 로딩하지 않는다**. 에이전트가 명시적으로 Read하거나, CLAUDE.md에서 `@CONTEXT.md`로 import해야 로딩된다. 자동 로딩이 필요하면 서브디렉토리 CLAUDE.md 또는 `.claude/rules/`를 사용한다.
+> **Note**: Claude Code does **not auto-load** CONTEXT.md. It is loaded only when the agent explicitly Reads it, or when CLAUDE.md imports it via `@CONTEXT.md`. If auto-loading is needed, use a subdirectory CLAUDE.md or `.claude/rules/`.
 
-- **포함**: 도메인 로직의 의도(Why), 서브시스템 고유 패턴, 하위 지식 링크
-- **제외**: 린터가 처리 가능한 스타일 규칙, 표준 라이브러리 설명
-- **타 도구 호환**: Cursor, Windsurf 등 CONTEXT.md를 인식하는 도구와의 호환성 유지
+- **Include**: The intent behind domain logic (Why), subsystem-specific patterns, links to lower-level knowledge.
+- **Exclude**: Style rules a linter can handle, standard library explanations.
+- **Cross-tool compatibility**: Maintains compatibility with tools that recognize CONTEXT.md, such as Cursor and Windsurf.
 
-### AGENTS.md — Universal Portability (타 도구 호환용)
+### AGENTS.md — Universal Portability (for cross-tool compatibility)
 
-Cursor, Aider, GitHub Copilot 등 다양한 AI 도구가 참조하는 범용 표준.
+A universal standard referenced by various AI tools such as Cursor, Aider, and GitHub Copilot.
 
-> **주의**: Claude Code는 AGENTS.md를 **자동 로딩하지 않는다**. CLAUDE.md에서 `@AGENTS.md`로 import하면 내용을 공유할 수 있다.
+> **Note**: Claude Code does **not auto-load** AGENTS.md. Importing it from CLAUDE.md via `@AGENTS.md` shares its content.
 
-- **포함**: 범용 에이전트 지침, 마크다운 기반 협업 규칙
-- **제외**: 복잡한 메타데이터, 도구 전용 설정값
+- **Include**: General agent instructions, markdown-based collaboration rules.
+- **Exclude**: Complex metadata, tool-specific configuration values.
 
 ## Layered Discovery Mechanism
 
-Claude Code는 CLAUDE.md 파일을 계층적으로 탐색한다. 하위의 구체적 지침이 상위의 일반 지침보다 우선한다.
+Claude Code discovers CLAUDE.md files hierarchically. More specific lower-level guidance takes precedence over more general higher-level guidance.
 
-**Claude Code의 실제 자동 로딩 동작:**
+**Claude Code's actual auto-loading behavior:**
 
 ```
-예: src/api/auth.ts 작업 시
+e.g. when working on src/api/auth.ts
 
-[세션 시작 시 자동 로딩]
-Layer 0: /CLAUDE.md              ← 아키텍처 표준, 도구 명령
+[auto-loaded at session start]
+Layer 0: /CLAUDE.md              ← architecture standards, tool commands
 
-[해당 파일 접근 시 on-demand 로딩]
-Layer 1: /src/CLAUDE.md          ← 소스 폴더 구조, 데이터 흐름
-Layer 2: /src/api/CLAUDE.md      ← API 명세, 인증 로직 특이사항
+[on-demand loading when the file is accessed]
+Layer 1: /src/CLAUDE.md          ← source folder structure, data flow
+Layer 2: /src/api/CLAUDE.md      ← API spec, auth logic specifics
 
-[glob 패턴 매칭 시 자동 로딩]
-Rules:  .claude/rules/api.md     ← src/api/** 패턴에 매칭되는 규칙
+[auto-loaded on glob pattern match]
+Rules:  .claude/rules/api.md     ← rule matching the src/api/** pattern
 
-[항상 접근 가능]
-Layer 3: src/api/auth.ts         ← 코드, Diff, 테스트 결과
+[always accessible]
+Layer 3: src/api/auth.ts         ← code, diff, test results
 ```
 
-> **참고**: CONTEXT.md와 AGENTS.md는 자동 로딩 대상이 아니다. `@` import 또는 명시적 Read로 접근해야 한다.
+> **Note**: CONTEXT.md and AGENTS.md are not auto-loaded. Access them via `@` import or an explicit Read.
 
 ## Token Optimization Techniques
 
-### XML 태깅으로 지침 누출 방지
+### Prevent Instruction Leakage with XML Tagging
 
-XML 태그를 사용하면 데이터와 지침 사이의 경계가 명확해져 지시 이행 정밀도가 향상된다. 데이터가 지침으로 오인되는 지침 누출(Instruction Leakage) 방지:
+XML tags make the boundary between data and instructions clear, improving instruction-following precision. This prevents Instruction Leakage, where data is mistaken for instructions:
 
 ```xml
 <instructions>
-  핵심 가이드라인을 여기에 배치
+  Place core guidelines here
 </instructions>
 <data>
-  도구 출력물, 로그 등을 여기에 격리
+  Isolate tool outputs, logs, etc. here
 </data>
 ```
 
-### 프롬프트 캐싱 (Prefix Preservation)
+### Prompt Caching (Prefix Preservation)
 
-> **참고**: Claude Code CLI는 프롬프트 캐싱을 내부적으로 관리한다. 아래 내용은 Claude API를 직접 사용하는 경우에 해당한다.
+> **Note**: The Claude Code CLI manages prompt caching internally. The following applies when using the Claude API directly.
 
-정적 지침(CLAUDE.md 등)을 프롬프트 앞부분에 배치하여 캐시 히트를 극대화한다. 동적 질문과 실시간 로그는 뒤에 배치한다.
+Place static instructions (such as CLAUDE.md) at the front of the prompt to maximize cache hits. Place dynamic questions and real-time logs at the end.
 
-### 고정된 반복 요약
+### Anchored Recurring Summaries
 
-대화 이력 한계 도달 시 핵심 아키텍처 결정과 미해결 버그 상태를 보존(Anchor)하고 도구 실행 결과를 압축한다.
+When the conversation history limit is reached, anchor key architecture decisions and unresolved bug status, and compress tool execution results.
 
 ## Fix the Rules Loop
 
-에이전트 실수 발생 시 코드만 수정하지 말고 해당 오류를 유발한 컨텍스트 문서도 함께 업데이트한다. 컨텍스트는 소스코드와 동일한 컴파일 타임 의존성이다.
+When an agent makes a mistake, update the context document that caused the error rather than fixing only the code, since unfixed rules cause the same mistake to repeat. Context is a compile-time dependency on par with source code.
 
-**예시**: 에이전트가 CLAUDE.md에 "Zustand 사용"이라 기술된 프로젝트에서 Redux 코드를 작성했다면, 코드 수정 후 CLAUDE.md의 해당 기술도 "Redux → Zustand 마이그레이션 진행 중"으로 업데이트한다. 규칙을 수정하지 않으면 동일한 실수가 반복된다.
+**Example**: If an agent wrote Redux code in a project where CLAUDE.md states "use Zustand", then after fixing the code, also update that statement in CLAUDE.md to "Redux → Zustand migration in progress".
 
 ## Three-Stage Verification
 
-주기적으로 다음 검증을 실행하여 지식 트리 무결성을 유지한다:
+Run the following verification periodically to maintain knowledge-tree integrity:
 
-1. **참조 무결성**: 링크된 컨텍스트 파일(CLAUDE.md, CONTEXT.md, `.claude/rules/`)의 실제 존재 여부, `@` import 유효성, 고립 파일 탐지
-2. **코드 참조 검증**: 컨텍스트 내 파일 경로가 실제 구현과 일치하는지 확인
-3. **내용 정확성**: 기술적 주장이 현재 코드베이스의 실제 패턴과 일치하는지 검증
+1. **Reference integrity**: Whether linked context files (CLAUDE.md, CONTEXT.md, `.claude/rules/`) actually exist, validity of `@` imports, detection of orphaned files.
+2. **Code reference validation**: Confirm that file paths in the context match the actual implementation.
+3. **Content accuracy**: Verify that technical claims match the actual patterns in the current codebase.
 
 ## Available Skills
 
-이 플러그인은 다음 스킬을 제공한다:
+This plugin provides the following skills:
 
-- **`/agent-context:init`** — 새 프로젝트에 컨텍스트 아키텍처를 도입하거나, 기존 프로젝트의 컨텍스트 파일을 보강할 때 사용. 빌드 도구를 자동 감지하여 CLAUDE.md, 서브디렉토리 CLAUDE.md, `.claude/rules/`, AGENTS.md를 생성한다.
-- **`/agent-context:verify`** — 컨텍스트 문서가 코드와 동기화되어 있는지 확인할 때 사용. 리팩토링, 파일 이동, 의존성 변경 후에 실행한다. 인자로 stage 번호(1/2/3)를 지정하면 특정 단계만 실행 가능하다.
-- **`/agent-context:audit`** — CLAUDE.md가 비대해지거나 계층 구조가 복잡해졌을 때 사용. 간결성 부족, 정보 중복, 커버리지 부족을 감지하고 개선안을 제시한다.
+- **`/agent-context:init`** — Use when introducing context architecture into a new project, or augmenting context files in an existing one. Auto-detects build tools and generates CLAUDE.md, subdirectory CLAUDE.md, `.claude/rules/`, and AGENTS.md.
+- **`/agent-context:verify`** — Use to confirm that context documents are in sync with the code. Run after refactoring, file moves, or dependency changes. Passing a stage number (1/2/3) as an argument runs only that stage.
+- **`/agent-context:audit`** — Use when CLAUDE.md has grown bloated or the hierarchy has become complex. Detects lack of conciseness, information duplication, and coverage gaps, and proposes improvements.
 
 ## Additional Resources
 
 ### Reference Files
 
-상세 가이드는 다음 참조 파일을 확인한다:
+For detailed guides, see the following reference files:
 
-- **`references/file-standards.md`** — CLAUDE.md, CONTEXT.md, AGENTS.md 작성 표준 및 템플릿
-- **`references/token-optimization.md`** — XML 태깅, 프롬프트 캐싱, 요약 전략 상세
-- **`references/verification-guide.md`** — 3단계 검증 절차 및 자동화 스크립트 가이드
+- **`references/file-standards.md`** — Authoring standards and templates for CLAUDE.md, CONTEXT.md, AGENTS.md.
+- **`references/token-optimization.md`** — Details on XML tagging, prompt caching, and summarization strategies.
+- **`references/verification-guide.md`** — The three-stage verification procedure and automation script guide.

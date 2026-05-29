@@ -1,16 +1,17 @@
 ---
 name: appstore-deploy
-description: "App Store 릴리스 자동화 — 전체 파이프라인을 한 번에 실행하거나 단계별로 제어합니다. 배포 중 오류를 자동 감지·수복하고, 스크립트/환경 문제를 자가 진단합니다. '배포', 'deploy', 'TestFlight', '앱스토어', 'App Store', '스크린샷', 'screenshots', '메타데이터', 'metadata', '베타', '출시', 'App Preview', '시연 영상' 요청 시 사용하세요. 전체 릴리스 파이프라인은 /release 스킬을 사용하세요. 이 스킬은 개별 배포 단계(스크린샷, 메타데이터, TestFlight, App Store)를 직접 실행할 때 사용합니다."
+description: "App Store release automation — run the full pipeline at once or control it step by step. Auto-detects and self-heals errors during deployment, and self-diagnoses script/environment issues. Use for '배포', 'deploy', 'TestFlight', '앱스토어', 'App Store', '스크린샷', 'screenshots', '메타데이터', 'metadata', '베타', '출시', 'App Preview', '시연 영상' requests. For the full release pipeline use the /release skill. Use this skill to directly run individual deployment steps (screenshots, metadata, TestFlight, App Store)."
 ---
 
-# App Store 릴리스 자동화
+# App Store Release Automation
 
-Apple 앱의 App Store 배포 파이프라인을 관리합니다.
-배포 중 발생하는 오류를 자동 감지하고, 가능한 범위에서 자가 수복합니다.
+Manages the App Store deployment pipeline for Apple apps. Auto-detects errors during deployment and self-heals where possible.
 
-## 핵심 원칙: 자가 수복 (Self-Healing)
+Respond to the user in Korean.
 
-이 스킬의 모든 단계는 **실행 → 검증 → 수복** 루프를 따릅니다:
+## Core Principle: Self-Healing
+
+Every step in this skill follows an **Execute → Verify → Repair** loop:
 
 ```
 실행 (Execute)
@@ -22,11 +23,11 @@ Apple 앱의 App Store 배포 파이프라인을 관리합니다.
 
 ---
 
-## Phase 0: 환경 사전 검증 (Pre-flight Check)
+## Phase 0: Pre-flight Check
 
-**모든 배포 워크플로우 시작 전에 반드시 실행합니다.**
+Run this before starting any deployment workflow — it catches environment problems early before they fail mid-pipeline.
 
-### 프로젝트 자동 탐지
+### Auto-detect the project
 
 ```bash
 # Xcode 프로젝트 탐지
@@ -44,7 +45,7 @@ test -f fastlane/Fastfile && echo "Fastfile: OK" || echo "Fastfile: MISSING"
 test -f fastlane/Appfile && echo "Appfile: OK" || echo "Appfile: MISSING"
 ```
 
-### 환경 검증
+### Verify the environment
 
 ```bash
 # 1. fastlane 설치 확인
@@ -66,33 +67,33 @@ xcrun simctl list devices available | grep -E "(iPhone|Apple Watch)" | head -5
 git status --porcelain
 ```
 
-### 자동 수복 매트릭스
+### Auto-repair matrix
 
-| 문제 | 자동 수복 | 방법 |
+| Problem | Auto-repair | Method |
 |------|----------|------|
-| fastlane 미설치 | ✅ | `gem install fastlane` 실행 |
-| API Key 없음 | ❌ | 사용자에게 경로 안내 |
-| 스크립트 실행 권한 없음 | ✅ | `chmod +x` 실행 |
-| 시뮬레이터 꺼짐 | ✅ | `xcrun simctl boot` 실행 |
-| uncommitted changes | ⚠️ | 사용자에게 커밋 여부 확인 |
+| fastlane not installed | ✅ | Run `gem install fastlane` |
+| API Key missing | ❌ | Point the user to the expected path |
+| Script not executable | ✅ | Run `chmod +x` |
+| Simulator off | ✅ | Run `xcrun simctl boot` |
+| uncommitted changes | ⚠️ | Confirm with the user whether to commit |
 
 ---
 
-## 워크플로우 선택
+## Workflow selection
 
-| 요청 | 워크플로우 |
+| Request | Workflow |
 |------|-----------|
-| 전체 배포 / 풀 릴리스 / 출시 | [전체 릴리스 파이프라인](#전체-릴리스-파이프라인) |
-| 릴리스 노트 / 업데이트 문구 | [1. 릴리스 노트](#1-릴리스-노트-생성) |
-| 버전 업데이트 / bump | [2. 버전 범프](#2-버전-범프) |
-| 스크린샷 / App Preview / 시연 영상 | [3. 스크린샷 & App Preview](#3-스크린샷--app-preview) |
-| 메타데이터 / 스토어 정보 | [4. 메타데이터 동기화](#4-메타데이터-동기화) |
-| TestFlight / 베타 | [5. TestFlight 배포](#5-testflight-배포) |
-| App Store 제출 | [6. App Store 배포](#6-app-store-배포) |
+| 전체 배포 / 풀 릴리스 / 출시 | [Full release pipeline](#full-release-pipeline) |
+| 릴리스 노트 / 업데이트 문구 | [1. Release notes](#1-release-notes-generation) |
+| 버전 업데이트 / bump | [2. Version bump](#2-version-bump) |
+| 스크린샷 / App Preview / 시연 영상 | [3. Screenshots & App Preview](#3-screenshots--app-preview) |
+| 메타데이터 / 스토어 정보 | [4. Metadata sync](#4-metadata-sync) |
+| TestFlight / 베타 | [5. TestFlight deployment](#5-testflight-deployment) |
+| App Store 제출 | [6. App Store deployment](#6-app-store-deployment) |
 
 ---
 
-## 전체 릴리스 파이프라인
+## Full release pipeline
 
 ```
 Phase 0: 환경 사전 검증 ─── 자동 수복
@@ -106,9 +107,9 @@ Step 6: TestFlight / App Store 배포 ─── 사용자 선택
 
 ---
 
-## 1. 릴리스 노트 생성
+## 1. Release notes generation
 
-### 실행
+### Execute
 
 ```bash
 git tag --sort=-creatordate | head -3
@@ -116,18 +117,18 @@ git log --merges --oneline <이전태그>..HEAD
 git log <이전태그>..HEAD --pretty=format:"%s" | grep -E "^(feat|fix|refactor)"
 ```
 
-### 작성 규칙
+### Writing rules
 
-- 사용자 관점 (기술 용어 → 사용자 언어)
-- 개발자 도구 변경 제외
+- User perspective (technical terms → user-facing language)
+- Exclude developer-tooling changes
 
-### 적용 (프로젝트 구조에 따라 탐지)
+### Apply (detect by project structure)
 
-1. `docs/appstore-metadata.md` 존재 → English/Korean `### What's New` 섹션 교체
-2. `fastlane/metadata/` 존재 → 로케일별 `release_notes.txt` 직접 업데이트
-3. 위 모두 없으면 → `fastlane/metadata/en-US/release_notes.txt` 생성
+1. `docs/appstore-metadata.md` exists → replace the English/Korean `### What's New` sections
+2. `fastlane/metadata/` exists → update per-locale `release_notes.txt` directly
+3. Neither exists → create `fastlane/metadata/en-US/release_notes.txt`
 
-### 검증 & 수복
+### Verify & repair
 
 ```
 검증: 파일 교체 후 Read하여 새 버전 번호가 포함되어 있는지 확인
@@ -136,17 +137,17 @@ git log <이전태그>..HEAD --pretty=format:"%s" | grep -E "^(feat|fix|refactor
 
 ---
 
-## 2. 버전 범프
+## 2. Version bump
 
-### 실행
+### Execute
 
 ```bash
 grep 'MARKETING_VERSION' "${XCODEPROJ}/project.pbxproj" | sort -u
 ```
 
-Edit replace_all로 MARKETING_VERSION 변경.
+Change MARKETING_VERSION with Edit replace_all.
 
-### 검증 & 수복
+### Verify & repair
 
 ```
 검증: 변경 후 grep으로 새 버전이 적용되었는지 확인
@@ -155,11 +156,11 @@ Edit replace_all로 MARKETING_VERSION 변경.
 
 ---
 
-## 3. 스크린샷 & App Preview
+## 3. Screenshots & App Preview
 
-### 3-1. 스크린샷
+### 3-1. Screenshots
 
-**실행 시도 순서 (자동 폴백):**
+**Attempt order (auto-fallback):**
 
 ```
 1차: fastlane ios screenshots (또는 프로젝트의 screenshot lane)
@@ -177,9 +178,9 @@ Edit replace_all로 MARKETING_VERSION 변경.
   "! fastlane ios screenshots" 제시
 ```
 
-### 3-2. App Preview 시연 영상
+### 3-2. App Preview demo video
 
-**제한**: simctl recordVideo는 Claude Code 샌드박스에서 백그라운드 유지 불가.
+**Limitation**: simctl recordVideo cannot stay alive in the background inside the Claude Code sandbox.
 
 ```
 1차: Scripts/에 녹화 스크립트가 있으면 Bash 도구로 시도
@@ -189,7 +190,7 @@ Edit replace_all로 MARKETING_VERSION 변경.
   "! bash Scripts/record_app_preview.sh" 제시
 ```
 
-### baepsae UI 자동화 주의사항 (baepsae MCP 사용 시)
+### baepsae UI automation notes (when using the baepsae MCP)
 
 ```
 - tap_tab: Liquid Glass 탭바는 tabCount 명시 필수
@@ -198,9 +199,9 @@ Edit replace_all로 MARKETING_VERSION 변경.
 
 ---
 
-## 4. 메타데이터 동기화
+## 4. Metadata sync
 
-### 실행 (프로젝트 구조에 따라)
+### Execute (by project structure)
 
 ```bash
 # prepare_app_store_assets.py가 있으면 실행
@@ -210,7 +211,7 @@ test -f Scripts/prepare_app_store_assets.py && python3 Scripts/prepare_app_store
 # fastlane deliver --skip_binary_upload --skip_screenshots
 ```
 
-### 검증 & 수복
+### Verify & repair
 
 ```
 검증: fastlane/metadata/ 디렉토리에 릴리스 노트가 반영되었는지 확인
@@ -221,18 +222,17 @@ test -f Scripts/prepare_app_store_assets.py && python3 Scripts/prepare_app_store
 
 ---
 
-## 5. TestFlight 배포
+## 5. TestFlight deployment
 
-### 실행
+### Execute
 
 ```bash
 fastlane ios beta
 ```
 
-시간이 걸리므로 `run_in_background: true` 시도.
-실패 시 `! fastlane ios beta` 안내.
+This takes a while, so try `run_in_background: true`. On failure, point the user to `! fastlane ios beta`.
 
-### 검증 & 수복
+### Verify & repair
 
 ```
 검증: fastlane 출력에서 "Successfully uploaded" 확인
@@ -245,7 +245,7 @@ fastlane ios beta
 
 ---
 
-## 6. App Store 배포
+## 6. App Store deployment
 
 ```bash
 # 바이너리만
@@ -258,28 +258,27 @@ fastlane ios store_assets
 fastlane ios release_full
 ```
 
-**반드시 사용자 확인 후 실행.**
+**Run only after explicit user confirmation** — this submits to the App Store and is externally visible.
 
 ---
 
-## 메타데이터 SOT
+## Metadata SOT
 
-`docs/appstore-metadata.md` (존재 시) → `fastlane/metadata/` 단방향 동기화.
-**절대 fastlane/metadata/ 직접 수정 금지.**
+`docs/appstore-metadata.md` (if present) → `fastlane/metadata/` one-way sync. **Never edit `fastlane/metadata/` directly** — it is a generated target and direct edits will be overwritten by the next sync.
 
 ---
 
-## 오류 자동 진단 매트릭스
+## Error auto-diagnosis matrix
 
-| 에러 메시지/상황 | 원인 | 자동 수복 |
+| Error message / situation | Cause | Auto-repair |
 |-----------------|------|----------|
-| `Unable to find a device matching` | 시뮬레이터 이름 불일치 | `xcrun simctl list devices` → 가용 기기 자동 선택 |
-| `No signing certificate` | 코드 서명 미설정 | Xcode Automatic Signing 안내 |
-| `App Store Connect API key not found` | API Key 경로 오류 | 일반적인 경로들 순차 탐색 |
-| `The bundle version must be higher` | 빌드 번호 충돌 | CURRENT_PROJECT_VERSION +1 자동 범프 |
-| `Tab bar has no children` | Liquid Glass 탭바 | `tabCount` 자동 추가 |
-| `No accessibility element matched` | 앱 화면 변경 | `analyze_ui` → 현재 UI 분석 → 좌표/label 재탐지 |
-| `Recording completed` + 빈 파일 | 샌드박스 제한 | `! bash Scripts/...` 터미널 실행 안내 |
-| `error: Provisioning profile` | 프로비저닝 만료 | Xcode Automatically manage signing 재활성화 안내 |
-| `ImportError` / Python 에러 | Python 의존성 | `python3 -m pip install` 또는 경로 확인 |
-| 스크립트 `Permission denied` | 실행 권한 없음 | `chmod +x` 실행 |
+| `Unable to find a device matching` | Simulator name mismatch | `xcrun simctl list devices` → auto-select an available device |
+| `No signing certificate` | Code signing not configured | Point to Xcode Automatic Signing |
+| `App Store Connect API key not found` | Wrong API Key path | Search the common paths in sequence |
+| `The bundle version must be higher` | Build number conflict | Auto-bump CURRENT_PROJECT_VERSION +1 |
+| `Tab bar has no children` | Liquid Glass tab bar | Auto-add `tabCount` |
+| `No accessibility element matched` | App screen changed | `analyze_ui` → analyze the current UI → re-detect coordinates/label |
+| `Recording completed` + empty file | Sandbox limitation | Point to running `! bash Scripts/...` in the terminal |
+| `error: Provisioning profile` | Provisioning expired | Point to re-enabling Xcode Automatically manage signing |
+| `ImportError` / Python error | Python dependency | `python3 -m pip install` or verify the path |
+| Script `Permission denied` | Not executable | Run `chmod +x` |

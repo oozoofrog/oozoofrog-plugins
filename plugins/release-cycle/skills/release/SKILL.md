@@ -1,25 +1,27 @@
 ---
 name: release
-description: "릴리스 실행 — 마일스톤 완료 검증, 버전 범프, 릴리스 노트 자동 생성, 태그, GitHub Release. '릴리스', 'release', '배포', '버전 출시', '릴리스 노트', 'release notes', '버전 업데이트', 'version bump' 요청 시 사용하세요."
+description: "Execute a release — verify milestone completion, bump version, auto-generate release notes, tag, and create a GitHub Release. Use for: '릴리스', 'release', '배포', '버전 출시', '릴리스 노트', 'release notes', '버전 업데이트', 'version bump'."
 ---
 
 # 릴리스 실행 (Release)
 
-릴리스 사이클의 마무리 단계.
-마일스톤 검증 → 버전 범프 → 릴리스 노트 → 태그 → GitHub Release.
+The final stage of the release cycle.
+Verify milestone → bump version → release notes → tag → GitHub Release.
 
-## 인자 (Arguments)
+Respond to the user in Korean.
 
-| 명령 | 동작 |
+## Arguments
+
+| Command | Action |
 |---|---|
-| `/release` | 정상 릴리스 — 마일스톤 기반 |
-| `/release hotfix` | 핫픽스 — 현재 버전에서 PATCH +1 |
+| `/release` | Normal release — milestone-based |
+| `/release hotfix` | Hotfix — PATCH +1 from the current version |
 
-## 사전 요구
+## Prerequisites
 
-`version.json`이 프로젝트 루트에 있어야 합니다 (`/plan-release`로 생성).
+`version.json` must exist at the project root (created by `/plan-release`).
 
-## 프로젝트 자동 탐지
+## Project auto-detection
 
 ```bash
 REPO=$(gh repo view --json nameWithOwner -q '.nameWithOwner')
@@ -28,16 +30,16 @@ DEFAULT_BRANCH=$(gh repo view --json defaultBranchRef -q '.defaultBranchRef.name
 
 ---
 
-## 정상 릴리스 흐름 — 6 Phases
+## Normal release flow — 6 Phases
 
-### Phase 0: 릴리스 준비 검증
+### Phase 0: Verify release readiness
 
 ```bash
 cat version.json
 ```
 
-- `milestone`이 null이면: "계획된 릴리스가 없습니다. /plan-release를 먼저 실행하세요." 출력 후 중단
-- 마일스톤 미완료 이슈 확인:
+- If `milestone` is null: print "계획된 릴리스가 없습니다. /plan-release를 먼저 실행하세요." and STOP. Do not proceed without a planned milestone.
+- Check for open issues on the milestone:
 
 ```bash
 # 열린 마일스톤에서 번호 조회
@@ -45,11 +47,11 @@ MILESTONE_NUM=$(gh api "repos/$REPO/milestones?state=open" --jq '.[] | select(.t
 gh api "repos/$REPO/issues?milestone=$MILESTONE_NUM&state=open" --jq '.[] | "#\(.number) \(.title)"'
 ```
 
-- 미완료 이슈가 있으면 사용자에게 선택 제시:
-  - **(A) Backlog으로 이동 후 계속**: 해당 이슈의 마일스톤 제거 후 릴리스 계속
-  - **(B) 중단**: 릴리스 취소
+- If open issues remain, present a choice to the user:
+  - **(A) Backlog으로 이동 후 계속**: remove the milestone from those issues, then continue the release
+  - **(B) 중단**: cancel the release
 
-- Git 상태 확인: 기본 브랜치여야 하고 uncommitted changes가 없어야 함
+- Check git state: must be on the default branch with no uncommitted changes.
 
 ```bash
 git branch --show-current
@@ -58,21 +60,21 @@ git status --porcelain
 
 ---
 
-### Phase 1: 버전 범프
+### Phase 1: Version bump
 
-프로젝트의 버전 관리 방식에 따라 범프합니다:
+Bump according to the project's version management style.
 
-**탐지 순서:**
+**Detection order:**
 
-1. `*.xcodeproj/project.pbxproj` 존재 → Xcode 프로젝트 버전 범프 (MARKETING_VERSION)
-2. `package.json` 존재 → npm version 범프
-3. `Cargo.toml` 존재 → Cargo version 범프
-4. `pyproject.toml` 존재 → Python version 범프
-5. 위 모두 없으면 → version.json만 업데이트
+1. `*.xcodeproj/project.pbxproj` exists → Xcode project version bump (MARKETING_VERSION)
+2. `package.json` exists → npm version bump
+3. `Cargo.toml` exists → Cargo version bump
+4. `pyproject.toml` exists → Python version bump
+5. None of the above → update version.json only
 
-**공통:**
-- version.json 업데이트: `current`=새 버전, `buildNumber`=1
-- 커밋:
+**Common:**
+- Update version.json: `current`=new version, `buildNumber`=1
+- Commit:
 
 ```bash
 git add -A && git commit -m "release: v{VERSION} 버전 범프"
@@ -80,34 +82,34 @@ git add -A && git commit -m "release: v{VERSION} 버전 범프"
 
 ---
 
-### Phase 2: 릴리스 노트 자동 생성
+### Phase 2: Auto-generate release notes
 
-마일스톤에 포함된 closed 이슈를 조회합니다:
+Query the closed issues on the milestone:
 
 ```bash
 gh api "repos/$REPO/issues?milestone=$MILESTONE_NUM&state=closed" --jq '.[] | "\(.number) \(.title) \([.labels[].name])"'
 ```
 
-**라벨별 분류:**
+**Classify by label:**
 
-| 라벨 | 섹션 |
+| Label | Section |
 |------|------|
-| `feat`, `enhancement` | 새 기능 |
-| `enhance` | 개선 |
-| `bug`, `fix` | 버그 수정 |
+| `feat`, `enhancement` | New features |
+| `enhance` | Improvements |
+| `bug`, `fix` | Bug fixes |
 
-- 기술 용어가 아닌 사용자 관점의 설명 작성
-- 사용자가 검토 후 확인
+- Write user-facing descriptions, not technical jargon.
+- Have the user review before confirming.
 
-**릴리스 노트 저장 (프로젝트에 따라):**
+**Save release notes (depending on project):**
 
-1. `fastlane/metadata/` 존재 → 로케일별 `release_notes.txt` 업데이트
-2. `CHANGELOG.md` 존재 → 새 버전 섹션 추가
-3. 위 모두 없으면 → GitHub Release 본문으로만 사용
+1. `fastlane/metadata/` exists → update per-locale `release_notes.txt`
+2. `CHANGELOG.md` exists → add a new version section
+3. None of the above → use only as the GitHub Release body
 
 ---
 
-### Phase 3: 태그 + GitHub Release
+### Phase 3: Tag + GitHub Release
 
 ```bash
 git tag v{VERSION}
@@ -121,14 +123,14 @@ gh release create v{VERSION} \
 
 ---
 
-### Phase 4: 마일스톤 정리
+### Phase 4: Close the milestone
 
 ```bash
 gh api -X PATCH "repos/$REPO/milestones/$MILESTONE_NUM" -f state=closed
 ```
 
-- version.json 업데이트: `milestone`=null
-- 커밋 + 푸시:
+- Update version.json: `milestone`=null
+- Commit + push:
 
 ```bash
 git add version.json
@@ -138,29 +140,29 @@ git push origin "$DEFAULT_BRANCH"
 
 ---
 
-### Phase 5: 다음 사이클 안내
+### Phase 5: Next cycle
 
 "v{VERSION} 릴리스가 완료되었습니다! /plan-release를 실행하여 다음 버전을 계획하세요."
 
 ---
 
-## 핫픽스 흐름 (`/release hotfix`)
+## Hotfix flow (`/release hotfix`)
 
-1. 현재 버전에서 PATCH +1 계산 (예: 2.1.0 → 2.1.1)
-2. GitHub에 핫픽스 마일스톤 생성
-3. version.json의 `milestone`을 핫픽스 버전으로 설정
-4. 포함할 이슈를 사용자에게 확인
-5. 이슈를 핫픽스 마일스톤에 할당
-6. Phase 1~5 정상 실행
+1. Compute PATCH +1 from the current version (e.g. 2.1.0 → 2.1.1)
+2. Create a hotfix milestone on GitHub
+3. Set version.json `milestone` to the hotfix version
+4. Confirm the issues to include with the user
+5. Assign the issues to the hotfix milestone
+6. Run Phases 1–5 normally
 
 ---
 
-## 에러 처리
+## Error handling
 
-| 상황 | 대응 |
+| Situation | Response |
 |---|---|
-| version.json 없음 | 스키마 안내 + /plan-release 가이드 |
-| milestone이 null | "/plan-release를 먼저 실행하세요." 안내 후 중단 |
-| 태그 이미 존재 | buildNumber만 올릴지 사용자에게 확인 |
-| GitHub Release 실패 | 에러 표시 + 수동 gh 명령 안내 |
-| push 실패 | `git pull --rebase` 시도 → 충돌 시 사용자에게 수동 해결 안내 |
+| version.json missing | Explain the schema + guide to /plan-release |
+| milestone is null | Print "/plan-release를 먼저 실행하세요." and stop |
+| Tag already exists | Ask the user whether to bump only buildNumber |
+| GitHub Release failed | Show the error + guide to the manual gh command |
+| push failed | Try `git pull --rebase` → on conflict, guide the user to resolve manually |

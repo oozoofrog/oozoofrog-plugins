@@ -1,21 +1,23 @@
 ---
 name: add-git-issue
-description: "Git 이슈를 구조화하여 생성하고 대응 브랜치를 만듭니다. 사용자가 '이슈 생성', '이슈 만들어', '깃 이슈', 'git issue', '버그 등록', '기능 요청', 'bug report', 'feature request' 등을 언급할 때 사용하세요. 버그, 기능, 디자인, 리팩터링 등 모든 유형의 이슈에 대응합니다. 코드베이스를 조사하여 관련 파일과 원인을 포함한 상세한 이슈를 생성합니다."
+description: "Turns a request into a structured GitHub issue and creates a matching branch. Handles all issue types — bug, feature, design, refactor — by investigating the codebase to include relevant files and root cause. 사용자가 '이슈 생성', '이슈 만들어', '깃 이슈', 'git issue', '버그 등록', '기능 요청', 'bug report', 'feature request' 등을 언급할 때 사용하세요."
 ---
 
-# Git 이슈 생성 + 브랜치
+# Git Issue Creation + Branch
 
-사용자의 요청을 구조화된 GitHub 이슈로 변환하고, 대응 브랜치를 생성합니다.
+Turn the user's request into a structured GitHub issue and create a matching branch.
 
-## 핵심 원칙
+Respond to the user in Korean.
 
-- 이슈 본문은 **다른 사람이 읽고 바로 작업할 수 있을 정도로** 상세해야 합니다
-- 코드베이스를 조사하여 **관련 파일과 라인 번호**를 포함합니다
-- 브랜치 이름은 이슈 유형과 번호를 반영합니다
+## Core Principles
 
-## 사전 탐지: 프로젝트 설정
+- Make the issue body detailed enough that someone else can read it and start working right away.
+- Investigate the codebase and include relevant files and line numbers.
+- Branch names reflect the issue type and number.
 
-스킬 실행 시 아래 값을 자동으로 탐지합니다. 하드코딩하지 않습니다.
+## Pre-detection: Project Settings
+
+Detect these values automatically at run time rather than hardcoding them.
 
 ```bash
 # 1. 리포지토리 식별
@@ -36,32 +38,32 @@ PROJECTS=$(gh api graphql -f query='{
 }' --jq '.data.repository.projectsV2.nodes[]? | "\(.number) \(.title) \(.id)"' 2>/dev/null)
 ```
 
-탐지된 Projects 정보가 있으면 이슈 생성 후 자동으로 보드 연동을 제안합니다.
+If Projects info is detected, offer to link the issue to the board after creation.
 
-## 실행 흐름
+## Execution Flow
 
-### 1. 이슈 유형 판별
+### 1. Determine Issue Type
 
-사용자 요청에서 유형을 판별합니다:
+Determine the type from the user's request:
 
-| 유형 | 접두사 | 브랜치 패턴 | 예시 |
+| Type | Prefix | Branch pattern | Example |
 |------|--------|------------|------|
-| 버그 | `bug:` | `fix/<번호>-<설명>` | `fix/248-indoor-badge` |
-| 기능 | `feat:` | `feat/<번호>-<설명>` | `feat/244-mission-board` |
-| 디자인 | `design:` | `design/<번호>-<설명>` | `design/237-running-timer` |
-| 리팩터링 | `refactor:` | `refactor/<번호>-<설명>` | `refactor/250-cleanup` |
-| 개선 | `enhance:` | `feat/<번호>-<설명>` | `feat/243-workout-view` |
+| Bug | `bug:` | `fix/<number>-<description>` | `fix/248-indoor-badge` |
+| Feature | `feat:` | `feat/<number>-<description>` | `feat/244-mission-board` |
+| Design | `design:` | `design/<number>-<description>` | `design/237-running-timer` |
+| Refactor | `refactor:` | `refactor/<number>-<description>` | `refactor/250-cleanup` |
+| Enhancement | `enhance:` | `feat/<number>-<description>` | `feat/243-workout-view` |
 
-### 2. 코드베이스 조사
+### 2. Investigate the Codebase
 
-이슈와 관련된 코드를 탐색합니다:
-- Grep/Glob으로 관련 파일 검색
-- 핵심 파일을 읽어서 현재 동작 파악
-- 버그라면 원인 추적, 기능이라면 변경 대상 파일 식별
+Explore the code related to the issue:
+- Search for relevant files with Grep/Glob.
+- Read the key files to understand current behavior.
+- For a bug, trace the cause; for a feature, identify the files to change.
 
-### 3. 이슈 본문 구성
+### 3. Build the Issue Body
 
-유형에 따라 적절한 섹션을 선택합니다:
+Pick the appropriate sections per type:
 
 #### 버그 이슈
 
@@ -108,30 +110,30 @@ PROJECTS=$(gh api graphql -f query='{
 [변경할 내용]
 ```
 
-### 4. 이슈 생성
+### 4. Create the Issue
 
 ```bash
 gh issue create --title "<접두사> <제목>" --body "<본문>" --repo "$REPO"
 ```
 
-### 5. 브랜치 생성
+### 5. Create the Branch
 
 ```bash
 git checkout "$DEFAULT_BRANCH" && git pull --rebase origin "$DEFAULT_BRANCH"
 git checkout -b <브랜치패턴>
 ```
 
-이슈 번호가 생성된 후 브랜치 이름에 포함합니다.
+Include the issue number in the branch name once the issue is created.
 
-### 6. 버전 연동 (선택)
+### 6. Version Linking (optional)
 
-`version.json`이 존재하고 `milestone` 필드가 설정되어 있으면 자동으로 연결을 제안합니다.
+If `version.json` exists and the `milestone` field is set, offer to link automatically.
 
 ```bash
 MILESTONE=$(jq -r '.milestone // empty' version.json 2>/dev/null)
 ```
 
-`milestone`이 비어 있지 않으면:
+If `milestone` is not empty:
 > "이 이슈를 **v{MILESTONE}**에 포함할까요? (Y/n)"
 
 **Y 선택 시:**
@@ -152,26 +154,26 @@ gh issue edit <NUMBER> --milestone "v{MILESTONE}" --repo "$REPO"
 
 **n 선택 시:** Backlog에 유지.
 
-## 라벨 규칙
+## Label Rules
 
-이슈 유형에 따라 자동으로 라벨을 추가합니다 (존재하는 라벨만):
+Add labels by issue type (only labels that already exist):
 
-| 유형 | 라벨 |
+| Type | Label |
 |------|------|
-| 버그 | `bug` |
-| 기능 | `enhancement` |
+| Bug | `bug` |
+| Feature | `enhancement` |
 
-추가로 코드 조사에서 파악된 플랫폼/모듈 관련 라벨이 있으면 추가합니다.
+Also add any platform/module labels identified during code investigation.
 
-## 다중 이슈
+## Multiple Issues
 
-사용자가 여러 이슈를 한번에 요청하면:
-1. 각 이슈를 독립적으로 생성
-2. 의존성이 있으면 본문에 명시
-3. 브랜치는 첫 번째(또는 지정된) 이슈에 대해서만 생성
+When the user requests several issues at once:
+1. Create each issue independently.
+2. Note dependencies in the body if any exist.
+3. Create a branch only for the first (or specified) issue.
 
-## 사용자에게 확인할 것
+## What to Confirm with the User
 
-- 이슈 유형이 모호하면 물어보기
-- 브랜치 생성 여부 (기본: 생성)
-- 라벨 추가 여부 (기본: 자동 판별)
+- Ask if the issue type is ambiguous.
+- Whether to create a branch (default: yes).
+- Whether to add labels (default: auto-determine).

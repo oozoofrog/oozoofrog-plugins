@@ -1,105 +1,105 @@
 ---
 name: session-viewer
-description: Claude Code 세션 로그를 TUI로 탐색합니다. "세션 로그 보기", "session viewer", "세션 뷰어", "claude code 로그 TUI", "이전 대화 보기", "내 세션 목록", "지난 세션 검토", "로그 인터랙티브 보기" 등의 요청 시 사용하세요. 모든 프로젝트 세션과 현재 작업 디렉토리에 매칭되는 세션을 토글로 전환할 수 있습니다.
-argument-hint: "[--rebuild: 바이너리 재빌드]"
+description: Browse Claude Code session logs in a TUI. Use on requests like "세션 로그 보기", "session viewer", "세션 뷰어", "claude code 로그 TUI", "이전 대화 보기", "내 세션 목록", "지난 세션 검토", "로그 인터랙티브 보기". Toggles between all-project sessions and sessions matching the current working directory.
+argument-hint: "[--rebuild: rebuild the binary]"
 allowed-tools:
   - Bash
 ---
 
 # Session Viewer
 
-Claude Code가 `~/.claude/projects/<encoded-cwd>/<session-uuid>.jsonl`에 기록하는 세션 로그를 ratatui 기반 인터랙티브 TUI로 탐색한다. 세션 목록 → 세션 상세(메시지 + tool 호출) 두 단계 뷰를 제공하며, 전체 프로젝트 세션과 현재 cwd 매칭 세션을 토글로 전환한다.
+Browse the session logs Claude Code writes to `~/.claude/projects/<encoded-cwd>/<session-uuid>.jsonl` in a ratatui-based interactive TUI. Provides a two-stage view (session list → session detail with messages + tool calls), and toggles between all-project sessions and sessions matching the current cwd.
 
-## 언제 사용하는가
+## When to use
 
-다음 요청을 받으면 이 스킬을 사용한다:
+Use this skill for requests like:
 
-- "내가 했던 세션들 좀 보여줘" / "이전 세션 열어줘"
-- "Claude Code 로그를 TUI로 보고 싶다"
-- "오늘 작업한 세션 다시 보고 싶다"
-- "tool 호출 흐름이 어땠는지 검토하고 싶다"
-- "이 프로젝트에서만 했던 대화들 골라서 보자"
+- "Show me the sessions I worked on" / "Open a previous session"
+- "I want to view Claude Code logs in a TUI"
+- "I want to revisit the sessions I worked on today"
+- "I want to review how the tool-call flow went"
+- "Let me pick out only the conversations from this project"
 
-## 빠른 시작
+## Quick start
 
-TUI는 alternate screen + raw mode를 사용하므로 **반드시 별도 터미널 앱(Terminal.app / iTerm2 / WezTerm 등)에서 직접 실행**해야 한다. Claude Code의 Bash 도구는 물론 `!` 프리픽스 셸 모드도 raw mode TTY를 제공하지 않아 `Error: Device not configured (os error 6)`로 종료된다.
+The TUI uses alternate screen + raw mode, so it must be run directly in a separate terminal app (Terminal.app / iTerm2 / WezTerm, etc.). Neither Claude Code's Bash tool nor the `!`-prefix shell mode provides a raw-mode TTY, so it exits with `Error: Device not configured (os error 6)`.
 
-다음 중 환경에 맞는 경로를 사용한다:
+Use the path that matches your environment:
 
 ```bash
-# 1. Claude Code 스킬 컨텍스트 (SKILL.md 안에서 변수 확장)
+# 1. Claude Code skill context (variable expanded inside SKILL.md)
 ${CLAUDE_PLUGIN_ROOT}/skills/session-viewer/bin/launch.sh
 
-# 2. 마켓플레이스 source (개발/테스트 시, plugin sync 전에도 사용 가능)
+# 2. Marketplace source (for dev/test; usable even before plugin sync)
 ~/.claude/plugins/marketplaces/oozoofrog-plugins/plugins/session-viewer/skills/session-viewer/bin/launch.sh
 
-# 3. 설치 후 cache 경로 (plugin enable + sync 이후)
+# 3. Installed cache path (after plugin enable + sync)
 ~/.claude/plugins/cache/oozoofrog-plugins/session-viewer/<version>/skills/session-viewer/bin/launch.sh
 ```
 
-`launch.sh`는 host의 OS/arch를 감지해 다음 순서로 동작한다:
+`launch.sh` detects the host OS/arch and works in this order:
 
-1. `bin/session-viewer-<os>-<arch>` 사전 빌드 바이너리가 있으면 그대로 실행
-2. 없으면 `src/`에서 `cargo build --release`로 즉석 빌드하고 캐시
-3. cargo가 없으면 종료 코드 127로 에러 출력
+1. Run the prebuilt `bin/session-viewer-<os>-<arch>` binary if present
+2. Otherwise build it on the fly from `src/` with `cargo build --release` and cache it
+3. If cargo is missing, print an error and exit with code 127
 
-현재 번들된 바이너리: `bin/session-viewer-darwin-arm64` (Mach-O 64-bit, ~1.8MB; clap + regex + tiny_http + 3 서브커맨드 + 맥락 우선 UI 렌더러).
+Currently bundled binary: `bin/session-viewer-darwin-arm64` (Mach-O 64-bit, ~1.8MB; clap + regex + tiny_http + 3 subcommands + context-first UI renderer).
 
-## 키 바인딩
+## Key bindings
 
-### List view (세션 목록)
+### List view (session list)
 
-| 키 | 동작 |
+| Key | Action |
 |---|---|
-| `↑` / `↓` (또는 `k` / `j`) | 한 줄 이동 |
-| `PgUp` / `PgDn` | 10줄 페이지 이동 |
-| `g` / `G` | 처음 / 끝으로 |
-| `Enter` | 선택 세션 상세 보기 |
-| `t` | **토글: ALL ↔ CWD** (현재 cwd 매칭 세션만 보기) |
-| `q` 또는 `Ctrl-C` | 종료 |
+| `↑` / `↓` (or `k` / `j`) | Move one line |
+| `PgUp` / `PgDn` | Page by 10 lines |
+| `g` / `G` | To start / end |
+| `Enter` | View detail of selected session |
+| `t` | **Toggle: ALL ↔ CWD** (show only sessions matching the current cwd) |
+| `q` or `Ctrl-C` | Quit |
 
-각 행 표시 형식:
+Each row format:
 
 ```
-[●] MM-DD HH:MM   <msg수>   <project label>   <첫 user prompt 미리보기>
+[●] MM-DD HH:MM   <msg count>   <project label>   <first user prompt preview>
 ```
 
-`●` 마크는 그 세션이 현재 cwd에서 시작된 세션임을 의미한다 (ALL 모드에서도 표시).
+The `●` mark means the session was started in the current cwd (also shown in ALL mode).
 
-### Detail view (세션 상세)
+### Detail view (session detail)
 
-| 키 | 동작 |
+| Key | Action |
 |---|---|
-| `↑` / `↓` (또는 `k` / `j`) | 한 줄 스크롤 |
-| `PgUp` / `PgDn` | 20줄 스크롤 |
-| `g` / `G` | 맨 위 / 맨 아래 |
-| `Esc` / `q` / `Backspace` | 목록으로 돌아가기 |
+| `↑` / `↓` (or `k` / `j`) | Scroll one line |
+| `PgUp` / `PgDn` | Scroll 20 lines |
+| `g` / `G` | To top / bottom |
+| `Esc` / `q` / `Backspace` | Return to the list |
 
-상세 뷰는 JSONL의 시간 순서대로 다음 이벤트들을 **도구별 맥락 형식**으로 렌더한다 (v0.4.0+):
+The detail view renders the following events in JSONL time order in a per-tool context format (v0.4.0+):
 
-- 🟢 **User** (녹색) — 사용자 프롬프트 (system-reminder 등 노이즈는 자동 필터)
-- ⚪ **Assistant** (흰색) — 어시스턴트 응답 텍스트
-- 🟣 **Tool use** (자홍) — 도구 이름별 전용 렌더링:
-  - `Bash` → `$ command` + description 주석
+- 🟢 **User** (green) — user prompt (noise such as system-reminders is auto-filtered)
+- ⚪ **Assistant** (white) — assistant response text
+- 🟣 **Tool use** (magenta) — dedicated rendering per tool name:
+  - `Bash` → `$ command` + description comment
   - `Read` → `📄 path L120-180` (line range)
   - `Edit`/`Write` → ± diff
-  - `Grep`/`Glob` → 패턴 + path/glob/type 키
-  - `TodoWrite` → ☐ ▣ ☑ 체크리스트
-  - `Agent`/`Task` → 🤖 subagent 이름 배지
+  - `Grep`/`Glob` → pattern + path/glob/type keys
+  - `TodoWrite` → ☐ ▣ ☑ checklist
+  - `Agent`/`Task` → 🤖 subagent name badge
   - `WebFetch` → 🌐 URL · `WebSearch` → 🔎 query
-  - `mcp__server__tool` → 🔌 server / tool 분리 표시
-  - 그 외 → generic key-value
-- ⚫ **Tool result** (어두운 회색) — 페어링된 tool 이름과 함께 표시:
-  - `Grep` 결과는 `path:line │ text`로 그룹화
-  - `Bash` 결과는 exit code 배지 (≠ 0 이면 빨강)
-  - 에러는 빨간 막대 + 배지
-- 🟡 **Thinking** (노랑) — `🧠 ~N tokens` 헤더, 긴 본문은 접힘
-- 🔵 **Hook** (파랑) — 한 줄 strip (이벤트 이름 배지 + 본문 미리보기)
-- 회색 **system** — `🔒 mode: ...` 라인 (가는 점선으로 구분)
+  - `mcp__server__tool` → 🔌 server / tool shown separately
+  - others → generic key-value
+- ⚫ **Tool result** (dark gray) — shown with the paired tool name:
+  - `Grep` results grouped as `path:line │ text`
+  - `Bash` results get an exit code badge (red if ≠ 0)
+  - errors get a red bar + badge
+- 🟡 **Thinking** (yellow) — `🧠 ~N tokens` header, long body collapsed
+- 🔵 **Hook** (blue) — single-line strip (event name badge + body preview)
+- gray **system** — `🔒 mode: ...` line (separated by a thin dotted rule)
 
-## 데이터 소스
+## Data source
 
-### 디렉토리 구조
+### Directory structure
 
 ```
 ~/.claude/projects/
@@ -110,51 +110,53 @@ ${CLAUDE_PLUGIN_ROOT}/skills/session-viewer/bin/launch.sh
     └── <session-uuid-3>.jsonl
 ```
 
-디렉토리 이름은 cwd의 `/`와 `.`을 모두 `-`로 치환한 것이다 (자세한 규칙은 `references/jsonl-schema.md` 참조).
+The directory name is the cwd with both `/` and `.` replaced by `-` (see `references/jsonl-schema.md` for the exact rules).
 
-### JSONL 라인 종류
+### JSONL line types
 
-각 줄은 단일 JSON 오브젝트이며 주요 `type`:
+Each line is a single JSON object; the main `type` values:
 
-- `user` — `message.content`가 string 또는 `[{type:"text"|"tool_result", ...}]`
-- `assistant` — `message.content`가 `[{type:"text"|"tool_use"|"thinking", ...}]`
-- `permission-mode` — `permissionMode` 값 변경
-- 그 외 hook 이벤트는 `attachment` 필드로 표시
+- `user` — `message.content` is a string or `[{type:"text"|"tool_result", ...}]`
+- `assistant` — `message.content` is `[{type:"text"|"tool_use"|"thinking", ...}]`
+- `permission-mode` — `permissionMode` value change
+- other hook events appear in the `attachment` field
 
-전체 스키마는 `references/jsonl-schema.md`에 정리되어 있다.
+The full schema is documented in `references/jsonl-schema.md`.
 
-## CWD 매칭 규칙
+## CWD matching rules
 
-`t`로 ALL/CWD 토글 시, 현재 작업 디렉토리를 다음 규칙으로 인코딩하여 디렉토리 이름과 비교한다:
+When toggling ALL/CWD with `t`, the current working directory is encoded with the following rule and compared against directory names:
 
 ```
 encode(p) = p.replace('/', '-').replace('.', '-')
 ```
 
-예: `/Users/oozoofrog` → `-Users-oozoofrog`. `/Users/foo/blog/site.io/.claude/x` → `-Users-foo-blog-site-io--claude-x` (경계의 `/.`이 `--`가 됨).
+Example: `/Users/oozoofrog` → `-Users-oozoofrog`. `/Users/foo/blog/site.io/.claude/x` → `-Users-foo-blog-site-io--claude-x` (the boundary `/.` becomes `--`).
 
-이 인코딩은 lossy하므로 (예: `kakao-talk` 디렉토리와 `kakao.talk` 디렉토리 구분 불가) edge case가 있을 수 있다. 일반적인 케이스는 정확히 매칭된다.
+This encoding is lossy (e.g. a `kakao-talk` directory and a `kakao.talk` directory are indistinguishable), so edge cases exist. Common cases match exactly.
 
-## 사용자 흐름
+## User flow
 
-1. 사용자가 "세션 로그 보고 싶다" 류 요청을 함
-2. Claude는 다음을 안내:
-   - **별도 터미널 앱**(Terminal.app / iTerm2 / WezTerm 등)을 열라고 명시
-   - 그 터미널에 붙여넣을 launcher의 절대 경로 제공 (예: `~/.claude/plugins/cache/oozoofrog-plugins/session-viewer/<version>/skills/session-viewer/bin/launch.sh`)
-3. 사용자가 별도 터미널에서 TUI 실행 → 탐색 → 종료
-4. 종료 후 사용자가 본 내용 바탕으로 Claude Code 세션에서 후속 작업 (예: "그 세션의 X 부분을 다시 분석해줘") 진행
+1. The user asks something like "I want to view session logs"
+2. Claude guides the user to:
+   - explicitly open a separate terminal app (Terminal.app / iTerm2 / WezTerm, etc.)
+   - provide the absolute path of the launcher to paste into that terminal (e.g. `~/.claude/plugins/cache/oozoofrog-plugins/session-viewer/<version>/skills/session-viewer/bin/launch.sh`)
+3. The user runs the TUI in the separate terminal → browses → exits
+4. After exiting, the user does follow-up work in the Claude Code session based on what they saw (e.g. "re-analyze the X part of that session")
 
-**왜 별도 터미널이어야 하는가**: TUI는 alternate screen + raw mode + non-blocking event loop를 사용한다. Claude Code 안에서는 Bash 도구도, `!` 프리픽스 셸 모드도 모두 stdout 캡처/파이프 모델이라 raw mode TTY를 제공하지 못하고 `enable_raw_mode()`가 즉시 ENXIO(`Error: Device not configured`, os error 6)로 실패한다. 이는 우회 가능한 제약이 아니라 Claude Code의 모든 셸 실행 경로의 공통 한계다.
+Respond to the user in Korean.
 
-## 재빌드가 필요한 경우
+**Why it must be a separate terminal**: the TUI uses alternate screen + raw mode + a non-blocking event loop. Inside Claude Code, both the Bash tool and the `!`-prefix shell mode use a stdout capture/pipe model that cannot provide a raw-mode TTY, so `enable_raw_mode()` fails immediately with ENXIO (`Error: Device not configured`, os error 6). This is not a workaround-able constraint but a shared limitation of all shell-execution paths in Claude Code.
 
-다음 상황에서 `src/`를 다시 빌드한다:
+## When a rebuild is needed
 
-- 사용자가 darwin-arm64가 아닌 환경 (Linux, Intel Mac)에서 사용
-- `src/main.rs`를 수정한 후
-- 사전 빌드 바이너리가 손상된 경우
+Rebuild from `src/` in these situations:
 
-수동 재빌드:
+- the user is on a non-darwin-arm64 environment (Linux, Intel Mac)
+- after editing `src/main.rs`
+- the prebuilt binary is corrupted
+
+Manual rebuild:
 
 ```bash
 cd ${CLAUDE_PLUGIN_ROOT}/skills/session-viewer/src
@@ -162,158 +164,158 @@ cargo build --release
 cp target/release/session-viewer ../bin/session-viewer-$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m)
 ```
 
-또는 `launch.sh`가 자동으로 빌드 후 캐시한다 (cargo만 PATH에 있으면 됨).
+Or `launch.sh` builds and caches automatically (just needs cargo on PATH).
 
-## 디렉토리 레이아웃
+## Directory layout
 
 ```
 session-viewer/
-├── SKILL.md                      # 이 파일 (lean: 트리거 + 사용법 + 키 바인딩)
+├── SKILL.md                      # this file (lean: triggers + usage + key bindings)
 ├── bin/
-│   ├── launch.sh                 # OS/arch 감지 + 자동 빌드 폴백
+│   ├── launch.sh                 # OS/arch detection + auto-build fallback
 │   └── session-viewer-darwin-arm64
 ├── references/
-│   └── jsonl-schema.md           # JSONL 라인 타입 상세 스키마
+│   └── jsonl-schema.md           # detailed schema of JSONL line types
 └── src/
     ├── Cargo.toml
     ├── Cargo.lock
     └── src/
         ├── main.rs               # clap dispatcher
-        ├── data.rs               # JSONL 파싱 + Session/Message 타입 (공통)
+        ├── data.rs               # JSONL parsing + Session/Message types (shared)
         ├── tui.rs                # ratatui + crossterm TUI
-        ├── query.rs              # 필터 + 텍스트/JSON/JSONL 출력
-        └── web.rs                # 단일 self-contained HTML export
+        ├── query.rs              # filter + text/JSON/JSONL output
+        └── web.rs                # single self-contained HTML export
 ```
 
-## 서브커맨드 (v0.2.0+)
+## Subcommands (v0.2.0+)
 
-`session-viewer`는 3개 서브커맨드를 가진 단일 바이너리다:
+`session-viewer` is a single binary with 3 subcommands:
 
-| 서브커맨드 | 용도 | TTY 필요? |
+| Subcommand | Purpose | TTY needed? |
 |---|---|---|
-| `tui` (default) | 인터랙티브 TUI 탐색 | 예 (별도 터미널) |
-| `query` | 필터 기반 CLI 조회 | 아니오 |
-| `web <id>` | 단일 세션을 self-contained HTML로 export | 아니오 |
+| `tui` (default) | Interactive TUI browsing | Yes (separate terminal) |
+| `query` | Filter-based CLI lookup | No |
+| `web <id>` | Export a single session to self-contained HTML | No |
 
-`query`와 `web`은 raw mode를 쓰지 않으므로 **Claude Code 안의 Bash 도구로도 실행 가능**하다. TUI만 별도 터미널이 필요.
+`query` and `web` do not use raw mode, so they can run via the Bash tool inside Claude Code. Only the TUI needs a separate terminal.
 
-### `query` — 필터 기반 조회
+### `query` — filter-based lookup
 
 ```bash
 session-viewer query [OPTIONS]
 
-# 필터
---since <WHEN>      # "2d", "1h", "1w", "2026-05-01" (RFC3339도 OK)
+# Filters
+--since <WHEN>      # "2d", "1h", "1w", "2026-05-01" (RFC3339 also OK)
 --until <WHEN>
---cwd               # 현재 작업 디렉토리에서 시작된 세션만
---project <PATTERN> # project label/encoded dir 이름 substring
---tool <REGEX>      # 호출된 도구 이름 정규식 (예: 'Bash|Read')
---text <STRING>     # user/assistant/tool_result 본문 substring
---regex <REGEX>     # 같은 본문에서 정규식 매칭
+--cwd               # only sessions started in the current working directory
+--project <PATTERN> # substring of project label / encoded dir name
+--tool <REGEX>      # regex on called tool names (e.g. 'Bash|Read')
+--text <STRING>     # substring in user/assistant/tool_result body
+--regex <REGEX>     # regex match in the same body
 
-# 출력 형식
---format summary    # 사람이 읽는 한 줄 요약 (default)
---format json       # 매칭된 세션 메타데이터 배열
---format jsonl      # 매칭된 raw JSONL 라인 (또는 메타데이터 한 줄/세션)
+# Output format
+--format summary    # human-readable one-line summary (default)
+--format json       # array of matched session metadata
+--format jsonl      # matched raw JSONL lines (or one metadata line per session)
 ```
 
-**예시:**
+**Examples:**
 
 ```bash
-# 최근 1일 동안, Bash나 Read를 호출한 세션의 raw 라인을 jq로 처리
+# Pipe raw lines of sessions that called Bash or Read in the last 1 day into jq
 session-viewer query --since 1d --tool 'Bash|Read' --format jsonl | jq .
 
-# 현재 프로젝트에서 "ratatui"가 언급된 세션만 요약
+# Summarize only sessions in the current project that mention "ratatui"
 session-viewer query --cwd --text ratatui
 
-# 6시간 이내 모든 세션을 JSON으로 → 스크립트에서 사용
+# All sessions within 6 hours as JSON → for use in scripts
 session-viewer query --since 6h --format json
 ```
 
-### `web` — Static HTML export 또는 라이브 HTTP 서버
+### `web` — static HTML export or live HTTP server
 
 ```bash
-# 모드 1: 단일 세션 static HTML export
+# Mode 1: static HTML export of a single session
 session-viewer web <SESSION_ID> [-o OUTPUT]
 
-# 모드 2: 모든 세션 라이브 탐색 (v0.3.0+)
+# Mode 2: live browsing of all sessions (v0.3.0+)
 session-viewer web --serve [--port 7878] [--host 127.0.0.1] [--no-open]
 ```
 
-**모드 1 — Static HTML export:**
+**Mode 1 — Static HTML export:**
 
-- `<SESSION_ID>`: 전체 UUID 또는 unique prefix (예: `0532f5f4`). 중복되면 후보 출력 후 종료.
-- `-o, --output <PATH>`: 출력 파일. 생략 시 stdout.
+- `<SESSION_ID>`: full UUID or a unique prefix (e.g. `0532f5f4`). If ambiguous, candidates are printed and it exits.
+- `-o, --output <PATH>`: output file. Defaults to stdout if omitted.
 
 ```bash
-# 세션을 single self-contained HTML로 export 후 브라우저로 열기
+# Export a session to a single self-contained HTML, then open it in the browser
 session-viewer web 0532f5f4 -o /tmp/session.html
 open /tmp/session.html
 ```
 
-**모드 2 — 로컬 HTTP 서버 (v0.3.0):**
+**Mode 2 — Local HTTP server (v0.3.0):**
 
-- `--serve`: tiny_http 기반 단일 스레드 서버 시작. 기본 `127.0.0.1:7878`.
-- `--port N`, `--host ADDR`: 바인드 변경
-- `--no-open`: 브라우저 자동 오픈 비활성화 (기본은 macOS `open` / Linux `xdg-open` 호출)
-- 종료: `Ctrl+C`
+- `--serve`: start a tiny_http-based single-threaded server. Default `127.0.0.1:7878`.
+- `--port N`, `--host ADDR`: change the bind
+- `--no-open`: disable auto-opening the browser (default calls macOS `open` / Linux `xdg-open`)
+- Exit: `Ctrl+C`
 
-라우트:
+Routes:
 
-| 경로 | 응답 |
+| Route | Response |
 |---|---|
-| `GET /` | 모든 세션 인덱스 페이지 (시간 역순, 클릭 시 detail로) |
-| `GET /session/<id>` | 단일 세션 채팅 뷰 (UUID 또는 prefix) — 상단 "← back to index" 링크 |
-| `GET /api/sessions.json` | 세션 메타데이터 JSON 배열 (id, project_label, modified, msg_count, first_user_text) |
-| `GET /api/session/<id>.json` | 단일 세션 전체 데이터 ({meta, messages}) |
-| 기타 | 404 plain text |
+| `GET /` | Index page of all sessions (reverse chronological, click to go to detail) |
+| `GET /session/<id>` | Single-session chat view (UUID or prefix) — "← back to index" link at top |
+| `GET /api/sessions.json` | JSON array of session metadata (id, project_label, modified, msg_count, first_user_text) |
+| `GET /api/session/<id>.json` | Full data of a single session ({meta, messages}) |
+| Other | 404 plain text |
 
 ```bash
-# 라이브 모드 — 모든 세션 탐색
+# Live mode — browse all sessions
 session-viewer web --serve
 # → listening on http://127.0.0.1:7878
-# → 브라우저 자동 오픈, 인덱스 → 세션 클릭 → 채팅 뷰
+# → browser auto-opens, index → click a session → chat view
 ```
 
-세션 목록은 매 요청마다 다시 스캔하므로 **새 세션이 생성되면 새로고침만으로 즉시 반영**된다 (Claude Code에서 작업 중 라이브 탐색 가능).
+The session list is rescanned on every request, so a newly created session shows up immediately on refresh (live browsing while working in Claude Code).
 
-**HTML 뷰어 기능 (양 모드 공통, v0.4.0+ 맥락 우선 UI):**
-- 채팅 모방 UI (user/assistant 말풍선)
-- **도구별 전용 렌더러**: Bash 셸 카드, Read 파일 링크, Edit diff, Grep file-grouped, TodoWrite 체크리스트, Agent 배지, MCP `server / tool` 분리 등
-- **tool_use ↔ tool_result 시각 페어링**: 같은 색 좌측 막대 + margin 축소
-- **에러 강조**: `is_error: true` 결과는 빨간 막대 + `error` 배지
-- `/` 키로 검색 포커스, **regex 토글 버튼**(`.*`) 지원
-- **역할 chip 필터** (All/User/Assistant/Tool/Result/Thinking/Hook)
-- **per-tool 동적 chip 필터**: 그 세션에서 호출된 도구만 사용 빈도순으로 자동 노출
-- 다크모드 자동 감지 (`prefers-color-scheme`)
-- 긴 tool 입력/결과/thinking은 접힘 (`▶ click to expand`)
-- raw JSON은 `<details>`로 접근 가능 (재구성/디버깅용)
-- 모바일 레이아웃 자연스러움
-- Static 모드: zero runtime, 인터넷 없이 동작, 이메일/Slack 공유 가능
-- Serve 모드: 모든 세션 탐색 + 라이브 새로고침 (서버 실행 중에만)
+**HTML viewer features (common to both modes, v0.4.0+ context-first UI):**
+- chat-style UI (user/assistant bubbles)
+- **per-tool dedicated renderers**: Bash shell card, Read file link, Edit diff, Grep file-grouped, TodoWrite checklist, Agent badge, MCP `server / tool` split, etc.
+- **tool_use ↔ tool_result visual pairing**: same-color left bar + reduced margin
+- **error highlight**: `is_error: true` results get a red bar + `error` badge
+- `/` key focuses search, with a **regex toggle button** (`.*`)
+- **role chip filter** (All/User/Assistant/Tool/Result/Thinking/Hook)
+- **per-tool dynamic chip filter**: only the tools called in that session, auto-shown ordered by usage frequency
+- auto dark-mode detection (`prefers-color-scheme`)
+- long tool input/result/thinking are collapsed (`▶ click to expand`)
+- raw JSON is accessible via `<details>` (for reconstruction/debugging)
+- clean mobile layout
+- Static mode: zero runtime, works offline, shareable via email/Slack
+- Serve mode: browse all sessions + live refresh (only while the server runs)
 
-### 빠른 시작 (TUI 외 명령)
+### Quick start (non-TUI commands)
 
 ```bash
-# query/web도 launch.sh로 실행 가능 (인자만 추가)
+# query/web can also be run via launch.sh (just append the arguments)
 ~/.claude/plugins/cache/oozoofrog-plugins/session-viewer/<version>/skills/session-viewer/bin/launch.sh query --since 1d
 ~/.claude/plugins/cache/oozoofrog-plugins/session-viewer/<version>/skills/session-viewer/bin/launch.sh web 0532f5f4 -o /tmp/x.html
 ```
 
-## 의존성
+## Dependencies
 
-- **Rust** ≥ 1.74 (재빌드 시) — `rustup`으로 설치
-- **macOS arm64** (사전 빌드 바이너리) — Apple Silicon
-- **터미널** — alternate screen + 256색 + UTF-8 지원 (Terminal.app, iTerm2, WezTerm 모두 OK)
+- **Rust** ≥ 1.74 (for rebuilds) — install via `rustup`
+- **macOS arm64** (prebuilt binary) — Apple Silicon
+- **Terminal** — alternate screen + 256 colors + UTF-8 support (Terminal.app, iTerm2, WezTerm all OK)
 
-런타임 의존성 없음 (정적 바이너리).
+No runtime dependencies (static binary).
 
-## 알려진 제약
+## Known limitations
 
-- 매우 큰 세션 파일(>100MB)은 첫 화면 로딩이 느릴 수 있다 — 첫 user prompt 추출을 위해 전체 파일을 한 번 스캔하기 때문
-- 매우 긴 단일 메시지는 detail view에서 렌더링 폭 안에서만 wrap되며 외부 스크롤이 적용된다 (`Wrap { trim: false }`)
-- CWD 매칭은 lossy 인코딩 기반이므로 dot이 포함된 경로에 false positive 가능 (실제로는 거의 안 일어남)
+- Very large session files (>100MB) may be slow on the first screen load — the whole file is scanned once to extract the first user prompt
+- A very long single message wraps only within the render width in the detail view, with outer scrolling applied (`Wrap { trim: false }`)
+- CWD matching is based on lossy encoding, so false positives are possible for paths containing a dot (rarely happens in practice)
 
-## 추가 자료
+## Further reading
 
-상세 JSONL 스키마와 이벤트 종류는 `references/jsonl-schema.md` 참조.
+See `references/jsonl-schema.md` for the detailed JSONL schema and event types.

@@ -1,35 +1,37 @@
 ---
 name: ctx-verify
-description: 계층적 컨텍스트 아키텍처의 3단계 검증을 실행합니다 — 참조 무결성, 코드 참조 유효성, 내용 정확성을 순차적으로 검사하여 리포트를 생성합니다.
-argument-hint: "[stage 번호: 1|2|3|all (기본: all)]"
+description: Runs 3-stage verification of a hierarchical context architecture — reference integrity, code reference validity, and content accuracy checked in sequence to produce a report. Triggers — 계층적 컨텍스트 검증, 참조 무결성, 코드 참조 검증, 내용 정확성, 컨텍스트 아키텍처 검증, ctx-verify.
+argument-hint: "[stage number: 1|2|3|all (default: all)]"
 ---
 
 # Context Architecture Verify
 
-계층적 컨텍스트 아키텍처의 3단계 검증을 수행한다. 상세 검증 절차는 `guide` 스킬의 `references/verification-guide.md`를 참조한다.
+Performs 3-stage verification of a hierarchical context architecture. For the detailed verification procedure, see `references/verification-guide.md` in the `guide` skill.
+
+Respond to the user in Korean.
 
 ## Execution Steps
 
-### Step 0: 컨텍스트 파일 수집
+### Step 0: Collect context files
 
-프로젝트 전체에서 다음 파일을 수집한다:
-- `CLAUDE.md` (프로젝트 루트)
-- `**/CLAUDE.md` (서브디렉토리 — Claude Code on-demand 자동 로딩)
-- `.claude/rules/*.md` (경로별 규칙)
-- `AGENTS.md` (프로젝트 루트 — Claude Code 자동 로딩 안 됨)
-- `**/CONTEXT.md` (전체 디렉토리 — Claude Code 자동 로딩 안 됨)
+Collect the following files across the project:
+- `CLAUDE.md` (project root)
+- `**/CLAUDE.md` (subdirectories — Claude Code on-demand auto-loading)
+- `.claude/rules/*.md` (path-scoped rules)
+- `AGENTS.md` (project root — not auto-loaded by Claude Code)
+- `**/CONTEXT.md` (all directories — not auto-loaded by Claude Code)
 
-파일이 하나도 없으면 "컨텍스트 아키텍처가 아직 초기화되지 않았습니다. `/agent-context:init`을 먼저 실행하세요."를 출력하고 종료한다.
+If no files exist, output "컨텍스트 아키텍처가 아직 초기화되지 않았습니다. `/agent-context:init`을 먼저 실행하세요." and exit.
 
-인자로 stage 번호가 지정된 경우 해당 단계만 실행한다. 기본값은 `all` (전체 실행).
+If a stage number is given as an argument, run only that stage. The default is `all` (run everything).
 
-### Stage 1: 참조 무결성 (Reference Integrity)
+### Stage 1: Reference Integrity
 
-1. 모든 컨텍스트 파일에서 마크다운 링크 `[텍스트](경로)` 및 `@path/to/file` import 추출
-2. 각 링크/import의 대상 파일 존재 여부 확인 (Glob 사용)
-3. 모든 컨텍스트 파일이 최소 하나의 상위 파일에서 참조되는지 확인
-4. 루트 CLAUDE.md 존재 여부 확인
-5. 결과를 마크다운 테이블로 출력:
+1. Extract markdown links `[텍스트](경로)` and `@path/to/file` imports from all context files.
+2. Check whether each link/import target file exists (use Glob).
+3. Check that every context file is referenced by at least one parent file.
+4. Check whether the root CLAUDE.md exists.
+5. Output the results as a markdown table:
 
 ```markdown
 ## Stage 1: 참조 무결성 ✅/❌
@@ -41,16 +43,16 @@ argument-hint: "[stage 번호: 1|2|3|all (기본: all)]"
 | ✅ | 전체 | 순환 참조 | 없음 |
 ```
 
-### Stage 2: 코드 참조 검증 (Code Reference Validation)
+### Stage 2: Code Reference Validation
 
-1. 모든 컨텍스트 파일(CLAUDE.md, 서브디렉토리 CLAUDE.md, .claude/rules/, CONTEXT.md)에서 코드 참조 추출:
-   - 백틱 내 파일 경로: `` `src/handler.ts` ``
-   - Key Files 리스트 항목
-   - 코드 블록 내 import/require 구문
-2. 각 참조가 실제 파일시스템에 존재하는지 Glob으로 확인
-3. 존재하지 않는 참조에 대해 유사 파일명 탐색 (이동 추정)
-4. CLAUDE.md의 빌드/테스트 명령이 유효한지 확인 (package.json scripts 등과 대조)
-5. 결과를 마크다운 테이블로 출력:
+1. Extract code references from all context files (CLAUDE.md, subdirectory CLAUDE.md, .claude/rules/, CONTEXT.md):
+   - File paths in backticks: `` `src/handler.ts` ``
+   - Key Files list items
+   - import/require statements inside code blocks
+2. Check whether each reference exists in the actual filesystem via Glob.
+3. For references that do not exist, search for similar filenames (infer moves).
+4. Check whether the build/test commands in CLAUDE.md are valid (cross-check against package.json scripts, etc.).
+5. Output the results as a markdown table:
 
 ```markdown
 ## Stage 2: 코드 참조 검증 ✅/❌
@@ -62,15 +64,15 @@ argument-hint: "[stage 번호: 1|2|3|all (기본: all)]"
 | ✅ | src/api/CONTEXT.md | `handler.ts` | 존재 확인 |
 ```
 
-### Stage 3: 내용 정확성 (Content Accuracy)
+### Stage 3: Content Accuracy
 
-1. 컨텍스트 문서에서 기술적 주장(claims) 추출:
-   - "X 라이브러리 사용" → package.json/Cargo.toml 등에서 검증
-   - "Y 패턴 준수" → 코드 구조에서 검증 시도
-   - "Z 명령으로 빌드" → 실제 실행 가능성 확인
-2. 자동 검증 가능한 항목만 검증 수행
-3. 수동 검증 필요 항목은 Info로 분류
-4. 결과를 마크다운 테이블로 출력:
+1. Extract technical claims from context documents:
+   - "uses library X" → verify against package.json/Cargo.toml, etc.
+   - "follows pattern Y" → attempt to verify from code structure
+   - "build with command Z" → check actual runnability
+2. Verify only the items that can be verified automatically.
+3. Classify items needing manual verification as Info.
+4. Output the results as a markdown table:
 
 ```markdown
 ## Stage 3: 내용 정확성 ✅/❌
@@ -82,21 +84,21 @@ argument-hint: "[stage 번호: 1|2|3|all (기본: all)]"
 | ℹ️ | src/api/CONTEXT.md | "P99 < 100ms" | 자동 검증 불가 |
 ```
 
-### Stage 3.5: Codex Second-Pass Validation (선택적)
+### Stage 3.5: Codex Second-Pass Validation (optional)
 
-Stage 2/3 findings 완료 후, Codex 스킬이 사용 가능하면 `/codex:review`를 second-pass validator로 투입합니다.
+After Stage 2/3 findings are complete, if the Codex skill is available, bring in `/codex:review` as a second-pass validator.
 
-1. `/codex:review --wait` 실행 — Stage 1~3에서 검증한 컨텍스트 파일을 대상으로 실행
-2. `/codex:result`로 structured findings 수집
-3. Codex findings 교차 대조:
-   - Stage 1~3에서 놓친 Critical/Warning 항목 → 종합 리포트에 `source: "codex-second-pass"` 추가
-   - 양쪽 모두 발견한 항목 → 기존 finding 유지 (중복 제거)
-   - Codex-only Info 항목 → 무시
+1. Run `/codex:review --wait` — target the context files verified in Stages 1–3.
+2. Collect structured findings with `/codex:result`.
+3. Cross-check the Codex findings:
+   - Critical/Warning items missed in Stages 1–3 → add to the consolidated report with `source: "codex-second-pass"`
+   - Items found by both → keep the existing finding (deduplicate)
+   - Codex-only Info items → ignore
 
-> **가드레일**: PASS/PARTIAL/FAIL 판정, 안티패턴 감점, CLEAN 기준은 기존 ctx-verify가 source of truth입니다. Codex는 coverage 보완 역할만 합니다.
-> Codex 스킬 미설치 시 이 단계를 건너뜁니다.
+> **Guardrail**: The PASS/PARTIAL/FAIL verdict, anti-pattern deductions, and CLEAN criteria are owned by ctx-verify as the source of truth. Codex only supplements coverage.
+> Skip this stage if the Codex skill is not installed.
 
-### Final: 종합 리포트
+### Final: Consolidated report
 
 ```markdown
 # 컨텍스트 아키텍처 검증 종합 리포트
@@ -116,15 +118,15 @@ Stage 2/3 findings 완료 후, Codex 스킬이 사용 가능하면 `/codex:revie
 3. [Warning] ...
 ```
 
-## 회의적 수정-재검증 루프 (Skeptical Re-verification)
+## Skeptical Re-verification Loop
 
-> 원칙: Generator-Evaluator **역할 분리** + **회의적 평가** (Anthropic Harness Design 블로그)
+> Principle: Generator-Evaluator **role separation** + **skeptical evaluation** (Anthropic Harness Design blog)
 > "tuning a standalone evaluator to be skeptical turns out to be far more tractable
 > than making a generator critical of its own work"
 
-### Step 1: Sprint Contract 정의
+### Step 1: Define the Sprint Contract
 
-자동 수정을 시작하기 **전에** 완료 기준을 합의한다:
+**Before** starting automated fixes, agree on the completion criteria:
 
 ```markdown
 ## Sprint Contract
@@ -134,62 +136,62 @@ Stage 2/3 findings 완료 후, Codex 스킬이 사용 가능하면 `/codex:revie
 - 수정이 아닌 것: findings 삭제, 심각도 하향, 검증 기준 완화
 ```
 
-### Step 2: 자동 수정 가능 항목
+### Step 2: Auto-fixable items
 
-| 유형 | Stage | 수정 방식 |
+| Type | Stage | Fix method |
 |------|-------|----------|
-| 깨진 링크 (대상 파일 이동됨) | 1 | 유사 파일명으로 경로 갱신 |
-| 코드 참조 경로 불일치 | 2 | Glob으로 현재 위치 탐색 → 경로 갱신 |
-| 빌드/테스트 명령 불일치 | 2 | package.json/Makefile에서 정확한 명령 추출 → 갱신 |
-| 라이브러리 기술 불일치 | 3 | 의존성 파일에서 실제 목록 추출 → 갱신 |
+| Broken link (target file moved) | 1 | Update path to the similar filename |
+| Code reference path mismatch | 2 | Locate current position via Glob → update path |
+| Build/test command mismatch | 2 | Extract the exact command from package.json/Makefile → update |
+| Library description mismatch | 3 | Extract the actual list from the dependency file → update |
 
-수동 수정 필요 항목은 리포트에만 표시한다.
+Items requiring manual fixes are shown in the report only.
 
-### Step 3: 회의적 재검증
+### Step 3: Skeptical re-verification
 
-수정 후, **별도의 회의적 평가자 역할**로 전환하여 재검증한다.
+After fixing, switch to a **separate skeptical evaluator role** and re-verify.
 
-**회의적 평가 관점** (자기평가 함정 회피):
-1. 수정된 경로/명령이 실제로 존재하는가? — Glob/Read로 재확인
-2. 수정이 다른 컨텍스트 파일의 참조를 깨뜨리지 않았는가? — 영향 범위 추적
-3. 수정 전후 파일을 비교하여 의도하지 않은 내용 변경이 없는가?
-4. **의심스러우면 불통과** — 점수 경계값(6-7)에서는 불통과로 판정
-5. **자기칭찬 금지** — "수정이 잘 되었다"는 판단 전에 반드시 파일을 다시 Read
+**Skeptical evaluation perspective** (avoiding the self-evaluation trap):
+1. Do the fixed paths/commands actually exist? — re-confirm with Glob/Read.
+2. Did the fix break references in other context files? — trace the impact scope.
+3. Compare before/after files to check for unintended content changes.
+4. **If in doubt, fail** — at boundary scores (6-7), rule fail.
+5. **Do not self-praise** — re-read the file before judging that "the fix was done well".
 
-**3축 다차원 평가:**
+**3-axis multidimensional evaluation:**
 
-| 축 | 가중치 | 설명 |
+| Axis | Weight | Description |
 |----|--------|------|
-| 참조 무결성 (Reference Integrity) | 40% | 링크/import 대상 존재, 고립 파일 없음 |
-| 코드 동기화 (Code Sync) | 35% | 코드 참조 경로 유효, 빌드/테스트 명령 유효 |
-| 내용 정확성 (Content Accuracy) | 25% | 기술적 주장이 실제와 일치 |
+| Reference Integrity | 40% | Link/import targets exist, no orphaned files |
+| Code Sync | 35% | Code reference paths valid, build/test commands valid |
+| Content Accuracy | 25% | Technical claims match reality |
 
-점수 캘리브레이션:
+Score calibration:
 
-| 구간 | 참조 무결성 | 코드 동기화 | 내용 정확성 |
+| Range | Reference Integrity | Code Sync | Content Accuracy |
 |------|-----------|-----------|-----------|
-| 9-10 | 링크 100% 유효 + 고립 0 | 모든 경로/명령 유효 | 기술 주장 100% 검증 |
-| 7-8 | 링크 유효, 고립 1개 | 경로 1-2개 미비 | 대부분 정확 |
-| 5-6 | 깨진 링크 1-2개 | 빌드 명령 불일치 | 주요 라이브러리 불일치 |
-| 3-4 | 깨진 링크 다수 | 핵심 경로 부재 | 주요 기술 주장 부정확 |
-| 1-2 | 루트 CLAUDE.md 부재 | 코드 참조 대부분 무효 | 실제와 무관한 내용 |
+| 9-10 | Links 100% valid + 0 orphans | All paths/commands valid | Technical claims 100% verified |
+| 7-8 | Links valid, 1 orphan | 1-2 paths incomplete | Mostly accurate |
+| 5-6 | 1-2 broken links | Build command mismatch | Major library mismatch |
+| 3-4 | Many broken links | Core paths missing | Major technical claims inaccurate |
+| 1-2 | Root CLAUDE.md missing | Most code references invalid | Content unrelated to reality |
 
-판정: 가중 평균 ≥7 PASS / 4-6 PARTIAL / <4 FAIL
+Verdict: weighted average ≥7 PASS / 4-6 PARTIAL / <4 FAIL
 
-**ctx-verify 도메인 안티패턴 (자동 감점):**
+**ctx-verify domain anti-patterns (automatic deductions):**
 
-| 안티패턴 | 축 | 감점 |
+| Anti-pattern | Axis | Deduction |
 |----------|-----|------|
-| 순환 참조 | 참조 무결성 | -3 |
-| 존재하지 않는 파일 링크 | 참조 무결성 | -2 |
-| 삭제된 라이브러리 기술 | 내용 정확성 | -2 |
-| 고립된 컨텍스트 파일 | 참조 무결성 | -1 |
-| 이동된 파일의 참조 미갱신 | 코드 동기화 | -1 |
-| 실행 불가능한 빌드 명령 | 코드 동기화 | -1 |
+| Circular reference | Reference Integrity | -3 |
+| Link to a nonexistent file | Reference Integrity | -2 |
+| Description of a removed library | Content Accuracy | -2 |
+| Orphaned context file | Reference Integrity | -1 |
+| Reference to a moved file not updated | Code Sync | -1 |
+| Non-runnable build command | Code Sync | -1 |
 
-**산출물 생성 (2라운드 이상 시 필수):**
+**Artifact generation (required for 2+ rounds):**
 
-각 라운드 종료 시 `.claude/ctx-verify/` 디렉토리에 기록한다:
+At the end of each round, record into the `.claude/ctx-verify/` directory:
 
 ```markdown
 # Verify Round {N} — Context Architecture
@@ -210,7 +212,7 @@ Stage 2/3 findings 완료 후, Codex 스킬이 사용 가능하면 `/codex:revie
 1. {파일}:{위치} — {구체적 수정 방법}
 ```
 
-### 루프 제어
+### Loop control
 
 ```
 Round 1: Sprint Contract 정의 → Stage 1~3 검증 → 자동 수정 (사용자 승인)
@@ -222,12 +224,12 @@ Round 3: 회의적 재검증 (최종)
   → 잔여 → "수동 조치 필요" 리포트 출력 후 종료
 ```
 
-**종료 조건 (하나라도 충족 시):**
-1. Sprint Contract의 CLEAN 기준 충족 → **CLEAN**
-2. 이번 라운드 findings ≥ 이전 라운드 → **CONVERGED** (수정이 새 문제 유발)
-3. 라운드 3 완료 → **MAX_ROUNDS**
+**Termination conditions (any one met):**
+1. The Sprint Contract's CLEAN criteria are met → **CLEAN**
+2. This round's findings ≥ the previous round's → **CONVERGED** (the fix introduced new problems)
+3. Round 3 complete → **MAX_ROUNDS**
 
-**최종 리포트에 루프 이력 추가:**
+**Add the loop history to the final report:**
 ```markdown
 ## 검증 루프 이력
 | 라운드 | Sprint Contract | findings | 수정 | 잔여 | 가중평균 | 판정 |

@@ -1,7 +1,7 @@
 ---
 name: wiki-lint
-description: "위키 건강 상태를 점검합니다 — 모순 탐지, 고립 페이지, 누락 교차 참조, 오래된 콘텐츠 식별, 새 페이지/소스 제안. \"위키 점검\", \"wiki lint\", \"위키 검증\", \"wiki check\", \"위키 건강\", \"wiki health\", \"위키 정리\", \"wiki cleanup\", \"위키 진단\", \"wiki validate\", \"위키 상태\" 등의 요청에 사용하세요."
-argument-hint: "[--fix: 자동 수정 모드] [--report: 리포트만 출력]"
+description: "Check wiki health — detect contradictions, orphan pages, missing cross-references, stale content, and propose new pages/sources. \"위키 점검\", \"wiki lint\", \"위키 검증\", \"wiki check\", \"위키 건강\", \"wiki health\", \"위키 정리\", \"wiki cleanup\", \"위키 진단\", \"wiki validate\", \"위키 상태\" 등의 요청에 사용하세요."
+argument-hint: "[--fix: auto-fix mode] [--report: report-only output]"
 ---
 
 <example>
@@ -31,107 +31,109 @@ assistant: "위키의 전체 건강 상태를 진단하겠습니다."
 
 # Wiki Lint
 
-위키의 구조적 건전성, 교차참조 무결성, 콘텐츠 품질을 점검한다.
+Check the wiki's structural health, cross-reference integrity, and content quality.
 
-> **핵심 원칙**: 위키는 사용할수록 성장하지만, 유지보수 없이는 부패한다. Lint는 위키의 건강을 주기적으로 점검하여 교차참조 무결성, 콘텐츠 신선도, 구조적 일관성을 보장한다.
+> **Core principle**: A wiki grows as it is used, but it decays without maintenance. Lint periodically checks wiki health to keep cross-reference integrity, content freshness, and structural consistency.
 
-## 인자 해석
+Respond to the user in Korean.
 
-- `--fix` → 구조적 문제 자동 수정 (콘텐츠 수정은 항상 사용자 확인)
-- `--report` → 리포트만 출력, 수정 제안 없음
-- 기본 (인자 없음) → 점검 + 수정 제안 (사용자 확인 후 수정)
+## Argument handling
+
+- `--fix` → auto-fix structural issues (content fixes always require user confirmation)
+- `--report` → report only, no fix suggestions
+- default (no args) → check + fix suggestions (fix after user confirmation)
 
 ## Execution Steps
 
-### Phase 0: 위키 존재 확인
+### Phase 0: Confirm the wiki exists
 
-1. `.wiki/` 디렉토리 존재 확인
-   - 없으면: "위키가 초기화되지 않았습니다." 안내 후 중단
-2. `.wiki/schema.md` 읽기
-3. `.wiki/index.md` 읽기
-4. `.wiki/pages/` 내 모든 페이지 목록 확보 (`Glob`으로 `.wiki/pages/*.md`)
+1. Check that the `.wiki/` directory exists.
+   - If missing: print "위키가 초기화되지 않았습니다." and stop.
+2. Read `.wiki/schema.md`.
+3. Read `.wiki/index.md`.
+4. List all pages under `.wiki/pages/` (`Glob` for `.wiki/pages/*.md`).
 
-### Phase 1: 구조 검증 (Structural Health)
+### Phase 1: Structural Health
 
-1. **인덱스 ↔ 페이지 정합**:
-   - `index.md`에 등록되었지만 `pages/`에 파일이 없는 항목 → **Critical: 유령 인덱스 항목**
-   - `pages/`에 존재하지만 `index.md`에 없는 파일 → **Warning: 미등록 페이지**
+1. **Index ↔ page consistency**:
+   - Listed in `index.md` but no file in `pages/` → **Critical: 유령 인덱스 항목**
+   - Exists in `pages/` but absent from `index.md` → **Warning: 미등록 페이지**
 
-2. **Frontmatter 유효성**:
-   - 모든 페이지의 YAML frontmatter 파싱 검증
-   - 필수 필드 (`title`, `type`, `created`, `updated`) 존재 확인
-   - `type`이 schema.md에 정의된 유효 타입인지 확인
-   - `updated` 날짜가 `created`보다 이후인지 확인
+2. **Frontmatter validity**:
+   - Parse and validate the YAML frontmatter of every page.
+   - Confirm required fields (`title`, `type`, `created`, `updated`) are present.
+   - Confirm `type` is a valid type defined in schema.md.
+   - Confirm `updated` is later than `created`.
 
-3. **파일명 규칙**:
-   - kebab-case 준수 여부
-   - 64자 이하 여부
-   - 허용 문자 (소문자, 숫자, 하이픈) 준수 여부
+3. **Filename rules**:
+   - kebab-case compliance
+   - 64 characters or fewer
+   - allowed characters only (lowercase, digits, hyphen)
 
-4. **소스/참조 검증**:
-   - `sources` 필드: 각 항목이 `sources/` 디렉토리에 실제 존재하는지 확인
-   - `references` 필드: 각 항목이 `pages/` 디렉토리에 실제 존재하는지 확인 (항목명 + `.md`)
-   - **analysis 타입 예외**: analysis 페이지는 `sources`가 없고 `references`만 있어도 정상 (wiki-query --save로 생성된 페이지이므로)
+4. **Source/reference validation**:
+   - `sources` field: each entry actually exists in the `sources/` directory.
+   - `references` field: each entry actually exists in the `pages/` directory (entry name + `.md`).
+   - **analysis type exception**: an analysis page with no `sources` and only `references` is valid (it was created via wiki-query --save).
 
-### Phase 2: 교차참조 무결성 (Link Integrity)
+### Phase 2: Link Integrity
 
-모든 페이지를 읽어 `[[wikilinks]]`를 추출한다:
+Read every page and extract `[[wikilinks]]`:
 
-1. **깨진 링크**:
-   - `[[target]]`의 target이 `pages/target.md`로 존재하지 않음 → **Warning: 깨진 링크**
-   - 이는 의도적 "빨간 링크"(아직 없는 페이지)일 수 있으므로 Warning
+1. **Broken links**:
+   - The target of `[[target]]` does not exist as `pages/target.md` → **Warning: 깨진 링크**
+   - This may be an intentional "red link" (a page that does not exist yet), so it is a Warning.
 
-2. **고아 페이지** (Orphan):
-   - 어떤 페이지에서도 `[[wikilink]]`로 참조되지 않는 페이지 → **Warning: 고아 페이지**
-   - `overview.md`와 `glossary-*.md`는 예외 (자체 진입점)
+2. **Orphan pages**:
+   - A page not referenced by any `[[wikilink]]` from any other page → **Warning: 고아 페이지**
+   - `overview.md` and `glossary-*.md` are exceptions (entry points by design).
 
-3. **단방향 참조**:
-   - A가 `[[B]]`를 참조하지만 B의 관련 항목에 `[[A]]`가 없음 → **Info: 단방향 참조**
+3. **One-way references**:
+   - A references `[[B]]`, but B's related entries do not contain `[[A]]` → **Info: 단방향 참조**
 
-4. **교차참조 밀도**:
-   - 교차참조가 하나도 없는 페이지 → **Info: 고립 페이지**
-   - 평균 교차참조 수 대비 극단적으로 적은 페이지 탐지
+4. **Cross-reference density**:
+   - A page with no cross-references at all → **Info: 고립 페이지**
+   - Detect pages with extremely few cross-references relative to the average.
 
-### Phase 3: 콘텐츠 품질 (Content Quality)
+### Phase 3: Content Quality
 
-1. **오래된 콘텐츠**:
-   - `updated` 날짜가 30일 이상 경과한 페이지 → **Info: 갱신 필요 가능성**
-   - 소스 파일이 수정된 후 위키 페이지가 갱신되지 않은 경우 → **Warning: 소스 변경 후 미갱신**
-   - **api-learn stale detection**: `source_kind: api-learn`이고 `authority_path`가 있는 페이지에 대해:
-     - `authority_path`의 파일이 존재하는지 확인 (삭제되었으면 → **Warning: 권위 원본 삭제됨**)
-     - 원본 레퍼런스의 frontmatter `collected` 날짜가 위키 페이지의 `updated`보다 최신이면 → **Warning: API 레퍼런스가 갱신됨, 위키 재동기화 필요**
-     - 원본 레퍼런스의 `version`이 위키 페이지 태그의 버전과 다르면 → **Warning: 라이브러리 버전 불일치**
+1. **Stale content**:
+   - A page whose `updated` date is more than 30 days old → **Info: 갱신 필요 가능성**
+   - A wiki page not updated after its source file changed → **Warning: 소스 변경 후 미갱신**
+   - **api-learn stale detection**: for pages where `source_kind: api-learn` and `authority_path` is present:
+     - Check that the file at `authority_path` exists (if deleted → **Warning: 권위 원본 삭제됨**)
+     - If the source reference's frontmatter `collected` date is newer than the wiki page's `updated` → **Warning: API 레퍼런스가 갱신됨, 위키 재동기화 필요**
+     - If the source reference's `version` differs from the version in the wiki page's tags → **Warning: 라이브러리 버전 불일치**
 
-2. **스텁 페이지**:
-   - 본문이 100자 미만인 페이지 → **Info: 스텁 페이지 (내용 보강 필요)**
+2. **Stub pages**:
+   - A page with body content under 100 characters → **Info: 스텁 페이지 (내용 보강 필요)**
 
-3. **모순 표시 확인**:
-   - `> ⚠️ 모순` 블록이 있는 페이지 목록화 → **Info: 미해결 모순**
+3. **Contradiction markers**:
+   - List pages containing a `> ⚠️ 모순` block → **Info: 미해결 모순**
 
-4. **중복 페이지**:
-   - 제목이나 별칭이 겹치는 페이지 → **Warning: 중복 가능성**
-   - 태그가 동일하고 내용이 유사한 페이지 탐지
+4. **Duplicate pages**:
+   - Pages with overlapping titles or aliases → **Warning: 중복 가능성**
+   - Detect pages with identical tags and similar content.
 
-### Phase 4: 제안 (Suggestions)
+### Phase 4: Suggestions
 
-위키 성장을 위한 제안을 생성한다:
+Generate suggestions for wiki growth:
 
-1. **새 페이지 제안**:
-   - 깨진 링크 대상 (빨간 링크) → 해당 페이지 생성 제안
-   - 여러 페이지에서 언급되지만 자체 페이지가 없는 개념 → 페이지 생성 제안
+1. **New page suggestions**:
+   - Broken link targets (red links) → suggest creating those pages.
+   - Concepts mentioned across multiple pages but lacking their own page → suggest creating a page.
 
-2. **새 소스 제안**:
-   - 위키의 커버리지가 부족한 영역 식별
-   - 관련 소스 탐색 제안
+2. **New source suggestions**:
+   - Identify areas with poor wiki coverage.
+   - Suggest exploring related sources.
 
-3. **구조 개선 제안**:
-   - 내용이 과도하게 긴 페이지 → 분리 제안
-   - 중복 페이지 → 병합 제안
-   - 카테고리 재분류 제안
+3. **Structure improvement suggestions**:
+   - Excessively long pages → suggest splitting.
+   - Duplicate pages → suggest merging.
+   - Suggest category re-classification.
 
-### Phase 5: 리포트 & 수정
+### Phase 5: Report & Fix
 
-#### 리포트 출력
+#### Report output
 
 ```markdown
 # Wiki Lint Report
@@ -174,30 +176,30 @@ assistant: "위키의 전체 건강 상태를 진단하겠습니다."
 2. {제안 내용}
 ```
 
-#### 자동 수정 (`--fix` 또는 사용자 승인)
+#### Auto-fix (`--fix` or user approval)
 
-**자동 수정 가능 (구조적 문제)**:
-- 미등록 페이지를 index.md에 추가
-- 유령 인덱스 항목 제거
-- 누락된 frontmatter 필수 필드 보충
-- 단방향 참조의 역참조 추가
-- index.md의 page_count/source_count 갱신
+**Auto-fixable (structural issues)**:
+- Add unregistered pages to index.md
+- Remove ghost index entries
+- Fill in missing required frontmatter fields
+- Add the back-reference for one-way references
+- Update page_count/source_count in index.md
 
-**사용자 확인 필요 (콘텐츠 문제)**:
-- 스텁 페이지 보강
-- 중복 페이지 병합
-- 모순 해결
-- 오래된 콘텐츠 갱신
+**Requires user confirmation (content issues)**:
+- Augmenting stub pages
+- Merging duplicate pages
+- Resolving contradictions
+- Updating stale content
 
-수정 후 log.md에 lint 기록 추가:
+After fixing, append a lint record to log.md:
 ```
 | {YYYY-MM-DD} | lint | — | {N}개 | {수정 요약} |
 ```
 
-## 규칙
+## Rules
 
-- Critical 발견 시 반드시 사용자에게 알림
-- `--fix`에서도 콘텐츠 수정은 사용자 확인 필수
-- `--report`에서는 어떤 파일도 수정하지 않음
-- 위키 페이지 삭제는 하지 않음 (사용자가 직접 삭제)
-- 언어: 한국어로 출력
+- Always notify the user when a Critical issue is found.
+- Even with `--fix`, content fixes require user confirmation — content changes are not safely reversible without the user's intent.
+- With `--report`, do not modify any file.
+- Do not delete wiki pages; the user deletes them directly.
+- Language: respond in Korean.

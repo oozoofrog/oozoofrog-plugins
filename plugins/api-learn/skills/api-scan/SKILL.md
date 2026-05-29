@@ -1,6 +1,6 @@
 ---
 name: api-scan
-description: 프로젝트 의존성을 스캔하여 미내재화 라이브러리를 식별하고 내재화를 제안합니다. "의존성 스캔", "api scan", "라이브러리 현황", "내재화 현황", "API 스캔", "어떤 라이브러리 쓰고 있는지", "레퍼런스 현황", "미내재화 목록", "api-scan", "프로젝트 의존성", "dependency scan" 등의 요청에 사용하세요.
+description: Scan project dependencies to identify libraries not yet internalized and propose internalization. Trigger keywords "의존성 스캔", "api scan", "라이브러리 현황", "내재화 현황", "API 스캔", "어떤 라이브러리 쓰고 있는지", "레퍼런스 현황", "미내재화 목록", "api-scan", "프로젝트 의존성", "dependency scan".
 ---
 
 <example>
@@ -20,48 +20,50 @@ assistant: "프로젝트 의존성을 스캔하고 .claude/references/와 대조
 
 # api-scan
 
-프로젝트 의존성 파일을 스캔하여 내재화 현황을 분석하고, 미내재화 라이브러리의 문서 수집을 제안합니다.
+Scan project dependency files to analyze internalization status, and propose documentation collection for libraries not yet internalized.
+
+Respond to the user in Korean.
 
 ## Workflow
 
-### Phase 1 — 의존성 파일 감지
+### Phase 1 — Detect dependency files
 
-프로젝트 루트에서 다음 파일들을 `Glob`으로 탐지합니다:
+Use `Glob` to detect these files in the project root:
 
-| 파일 | 생태계 | 의존성 추출 방법 |
-|------|--------|-----------------|
-| `package.json` | npm/yarn/pnpm | `dependencies` + `devDependencies` 키의 패키지명과 버전 |
-| `requirements.txt` | pip | 각 줄의 패키지명 (`==` 이전) |
-| `pyproject.toml` | Poetry/PDM | `[tool.poetry.dependencies]` 또는 `[project.dependencies]` |
-| `Podfile` | CocoaPods | `pod '{name}'` 패턴 |
-| `Package.swift` | SPM | `.package(url:` 또는 `.package(name:` 패턴 |
-| `Cargo.toml` | Rust | `[dependencies]` 섹션 |
-| `go.mod` | Go | `require` 블록의 모듈명 |
-| `build.gradle` / `build.gradle.kts` | Gradle | `implementation`, `api`, `compileOnly` 등의 의존성 |
-| `pom.xml` | Maven | `<dependency>` 태그의 `<artifactId>` |
-| `Gemfile` | Ruby | `gem '{name}'` 패턴 |
-| `pubspec.yaml` | Flutter/Dart | `dependencies` 키 |
+| File | Ecosystem | Dependency extraction method |
+|------|-----------|-----------------|
+| `package.json` | npm/yarn/pnpm | Package names and versions under the `dependencies` + `devDependencies` keys |
+| `requirements.txt` | pip | Package name on each line (before `==`) |
+| `pyproject.toml` | Poetry/PDM | `[tool.poetry.dependencies]` or `[project.dependencies]` |
+| `Podfile` | CocoaPods | `pod '{name}'` pattern |
+| `Package.swift` | SPM | `.package(url:` or `.package(name:` pattern |
+| `Cargo.toml` | Rust | `[dependencies]` section |
+| `go.mod` | Go | Module names in the `require` block |
+| `build.gradle` / `build.gradle.kts` | Gradle | Dependencies under `implementation`, `api`, `compileOnly`, etc. |
+| `pom.xml` | Maven | `<artifactId>` of `<dependency>` tags |
+| `Gemfile` | Ruby | `gem '{name}'` pattern |
+| `pubspec.yaml` | Flutter/Dart | `dependencies` key |
 
-**Apple 플랫폼 감지:** `Package.swift`, `Podfile`, `*.xcodeproj`, `*.xcworkspace` 중 하나라도 발견되면 Apple 플랫폼 프로젝트로 표시합니다. 리포트에 `🍎 Apple 플랫폼` 태그를 추가합니다.
+**Apple platform detection:** If any of `Package.swift`, `Podfile`, `*.xcodeproj`, `*.xcworkspace` is found, mark the project as an Apple platform project and add a `🍎 Apple 플랫폼` tag to the report.
 
-**복수 파일 발견 시:** 모든 파일을 처리합니다 (예: Node + Python 혼합 프로젝트).
+**Multiple files found:** Process all of them (e.g. a mixed Node + Python project).
 
-**의존성 파일 미발견 시:** 사용자에게 "프로젝트 루트에서 의존성 파일을 찾지 못했습니다. 의존성 파일 경로를 지정하거나, /api-learn으로 직접 라이브러리를 지정해 주세요."라고 안내.
+**No dependency file found:** Tell the user "프로젝트 루트에서 의존성 파일을 찾지 못했습니다. 의존성 파일 경로를 지정하거나, /api-learn으로 직접 라이브러리를 지정해 주세요."
 
-### Phase 2 — 비교·분류
+### Phase 2 — Compare and classify
 
-1. 추출된 의존성 목록 확보
-2. `.claude/references/_index.md` 읽기 (없으면 전부 미내재화)
-3. 각 의존성을 3가지로 분류:
-   - **내재화 완료** — `_index.md`에 존재하고 메이저 버전 일치
-   - **갱신 필요** — `_index.md`에 존재하지만 메이저 버전 불일치
-   - **미내재화** — `_index.md`에 없음
+1. Obtain the extracted dependency list.
+2. Read `.claude/references/_index.md` (if absent, treat everything as not internalized).
+3. Classify each dependency into one of three buckets:
+   - **내재화 완료** — present in `_index.md` and major version matches
+   - **갱신 필요** — present in `_index.md` but major version mismatches
+   - **미내재화** — not in `_index.md`
 
-**제외 대상:** 표준 라이브러리, 내부 패키지 (스코프가 `@company/`인 것), 유틸리티성 소형 패키지(예: `is-odd`)는 제안에서 제외합니다. 판단이 어려우면 포함하되 목록 하단에 배치합니다.
+**Exclusions:** Exclude standard libraries, internal packages (scoped as `@company/`), and small utility packages (e.g. `is-odd`) from the proposal. When unsure, include them but place them at the bottom of the list.
 
-### Phase 3 — 사용자에게 제안
+### Phase 3 — Propose to the user
 
-결과를 아래 포맷으로 보고합니다:
+Report the result in this format:
 
 ```
 📋 API 내재화 현황 ({총 의존성}개 의존성, {파일명} 기준)
@@ -87,16 +89,16 @@ assistant: "프로젝트 의존성을 스캔하고 .claude/references/와 대조
    공식 문서를 직접 조회하여 더 정확한 수집이 가능합니다.
 ```
 
-### Phase 4 — 위임
+### Phase 4 — Delegate
 
-사용자 선택에 따라 실행:
+Execute based on the user's choice:
 
-- **(1) 또는 (2):** 선택된 라이브러리 목록을 순회하며 각각에 대해 `/api-learn`의 Phase 1~3과 동일한 수집·저장·등록 로직을 실행합니다. 가능한 경우 병렬 에이전트(Agent 도구)를 활용하여 여러 라이브러리를 동시 수집합니다.
-- **(3):** 사용자에게 라이브러리 이름을 입력받은 뒤 동일하게 실행합니다.
+- **(1) or (2):** Iterate over the selected library list and run the same collect/save/register logic as `/api-learn` Phase 1–3 for each. Where possible, use parallel agents (the Agent tool) to collect multiple libraries concurrently.
+- **(3):** Ask the user for library names, then run the same flow.
 
-각 라이브러리 수집 완료 시 진행 상황을 보고합니다:
+Report progress as each library finishes collecting:
 ```
 [2/8] zod 수집 완료 (890줄, context7+web)
 ```
 
-모든 수집 완료 후 최종 요약을 출력합니다.
+After all collection finishes, print a final summary.
